@@ -1,11 +1,15 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import Home from "./pages/Home";
 
-function App() {
-  return (
-    <>
-      <h1 className="text-3xl font-bold text-primary">Hello Tailwind!</h1>
-    </>
-  );
-}
+const App = () => {
+  const [currentPage, setCurrentPage] = useState("home");
+
+  const handleNavigate = (page) => {
+    console.log("Navigation vers:", page);
+    setCurrentPage(page);
+  };
+
+  return <Home onNavigate={handleNavigate} currentPage={currentPage} />;
+};
 
 export default App;
