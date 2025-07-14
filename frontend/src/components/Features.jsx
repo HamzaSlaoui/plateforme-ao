@@ -1,5 +1,6 @@
 import React from "react";
 import { Search, FileText, Bot, BarChart, Clock, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Features() {
   const features = [
@@ -88,9 +89,12 @@ function Features() {
               Rejoignez des centaines d'entreprises qui ont déjà automatisé
               leurs processus.
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+            <Link
+              to="/signup"
+              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
               Commencer maintenant
-            </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -1,7 +1,8 @@
 import React from "react";
 import { ArrowRight, Bot, FileText, TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
 
-function Hero({ onNavigate }) {
+function Hero() {
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 min-h-screen flex items-center">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -23,19 +24,20 @@ function Hero({ onNavigate }) {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => onNavigate("signup")}
+              <Link
+                to="/signup"
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 shadow-lg"
               >
-                <span>Commencer gratuitement</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
+                Commencer gratuitement
+              </Link>
+              <ArrowRight className="w-5 h-5" />
+
+              {/* <button
                 onClick={() => onNavigate("features")}
                 className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Découvrir les fonctionnalités
-              </button>
+              </button> */}
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-gray-600 dark:text-gray-400">
