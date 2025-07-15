@@ -1,23 +1,15 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, FileText } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { authState, logout } = useAuth();
 
   const navItems = [
     { name: "Accueil", path: "/" },
     { name: "Fonctionnalités", path: "/features" },
   ];
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-700">
@@ -49,37 +41,18 @@ function Navbar() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {authState.isAuthenticated ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
-                >
-                  Déconnexion
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                >
-                  S'inscrire
-                </Link>
-              </>
-            )}
+            <Link
+              to="/login"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
+            >
+              Se connecter
+            </Link>
+            <Link
+              to="/signup"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              S'inscrire
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,43 +90,20 @@ function Navbar() {
               </Link>
             ))}
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              {authState.isAuthenticated ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-3 py-2 mt-1 text-base font-medium bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                  >
-                    Déconnexion
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors"
-                  >
-                    Se connecter
-                  </Link>
-                  <Link
-                    to="/signup"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block w-full text-left px-3 py-2 mt-1 text-base font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    S'inscrire
-                  </Link>
-                </>
-              )}
+              <Link
+                to="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 rounded-md transition-colors"
+              >
+                Se connecter
+              </Link>
+              <Link
+                to="/signup"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-left px-3 py-2 mt-1 text-base font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                S'inscrire
+              </Link>
             </div>
           </div>
         </div>

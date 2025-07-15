@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { validateEmail, validateRequired } from "../utils/validation";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -11,6 +11,7 @@ function LoginForm() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   // Mise à jour du handleSubmit dans LoginForm
   const handleSubmit = async (e) => {
@@ -39,12 +40,11 @@ function LoginForm() {
 
     try {
       const result = await login(email, password);
-
       if (result.success) {
         if (result.isVerified) {
-          onNavigate("dashboard");
+          navigate("/dashboard");
         } else {
-          onNavigate("verify-email-prompt");
+          navigate("/verify-email-prompt");
         }
       } else {
         setErrors({

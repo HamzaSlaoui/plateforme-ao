@@ -110,7 +110,6 @@ class DocumentResponse(DocumentBase):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    expires_in: int
 
 
 class TokenData(BaseModel):

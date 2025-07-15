@@ -75,8 +75,6 @@ export const AuthProvider = ({ children }) => {
       return {
         success: true,
         needsVerification: true,
-        message:
-          "Inscription réussie! Vérifiez votre email pour activer votre compte.",
       };
     } catch (error) {
       console.error("Signup error:", error.response || error.message);

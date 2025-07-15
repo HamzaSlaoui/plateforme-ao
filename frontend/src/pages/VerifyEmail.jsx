@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useNavigate, Link } from "react-router-dom";
 
-const VerifyEmail = ({ onNavigate }) => {
+function VerifyEmail() {
   const { verifyEmail, authState } = useAuth();
   const [status, setStatus] = useState({
     loading: true,
     success: false,
     error: null,
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -28,9 +30,9 @@ const VerifyEmail = ({ onNavigate }) => {
         // Rediriger après 3 secondes
         setTimeout(() => {
           if (authState.isAuthenticated) {
-            onNavigate("dashboard");
+            navigate("/dashboard");
           } else {
-            onNavigate("login");
+            navigate("/login");
           }
         }, 3000);
       } else {
@@ -39,7 +41,7 @@ const VerifyEmail = ({ onNavigate }) => {
     };
 
     verify();
-  }, [verifyEmail, authState.isAuthenticated, onNavigate]);
+  }, [verifyEmail, authState.isAuthenticated]);
 
   if (status.loading) {
     return (
@@ -80,17 +82,17 @@ const VerifyEmail = ({ onNavigate }) => {
             <p className="text-gray-600 dark:text-gray-300 mb-6">
               {status.error}
             </p>
-            <button
-              onClick={() => onNavigate("login")}
+            <Link
+              to="/login"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Retour à la connexion
-            </button>
+            </Link>
           </>
         )}
       </div>
     </div>
   );
-};
+}
 
 export default VerifyEmail;

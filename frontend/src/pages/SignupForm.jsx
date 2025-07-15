@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   validateEmail,
   validatePassword,
@@ -19,8 +19,8 @@ function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,8 +77,8 @@ function SignupForm() {
       );
 
       if (result.success) {
-        // ici on a result.message
-        setMessage(result.message);
+        sessionStorage.setItem("pendingVerificationEmail", formData.email);
+        navigate("/verify-email-prompt");
       } else {
         setErrors({ general: result.error });
       }
@@ -101,13 +101,6 @@ function SignupForm() {
           </p>
         </div>
 
-        {message && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-            <p className="text-sm text-green-600 dark:text-green-400">
-              {message}
-            </p>
-          </div>
-        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             {/* Prénom */}

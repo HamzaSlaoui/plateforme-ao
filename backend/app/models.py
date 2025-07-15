@@ -13,8 +13,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class TenderStatus(str, Enum):
     EN_COURS = "en_cours"
-    TERMINE = "termine"
-    ANNULE = "annule"
+    SOUMIS = "soumis"
+    GAGNE = "gagne"
+    PERDU = "perdu"
 
 
 class Organisation(Base):

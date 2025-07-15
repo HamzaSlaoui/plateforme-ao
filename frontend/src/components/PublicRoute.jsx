@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 
 const PublicRoute = ({ children }) => {
   const { authState, isUserVerified } = useAuth();
-
   if (authState.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

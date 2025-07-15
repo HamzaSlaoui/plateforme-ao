@@ -14,10 +14,10 @@ const PrivateRoute = ({ children, requireVerified = true }) => {
     );
   }
 
-  // Si non authentifié, rediriger vers login
-  if (!authState.isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+  // // Si non authentifié, rediriger vers login
+  // if (!authState.isAuthenticated) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   // Si authentifié mais non vérifié et que la route nécessite vérification
   if (requireVerified && !isUserVerified()) {
