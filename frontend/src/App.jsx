@@ -11,7 +11,7 @@ import PublicRoute from "./components/PublicRoute";
 import Home from "./pages/Home";
 import Login from "./pages/LoginForm";
 import Signup from "./pages/SignupForm";
-import Dashboard from "./components/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import VerifyEmailPrompt from "./pages/VerifyEmailPrompt";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 

@@ -29,15 +29,15 @@ function Hero() {
                 className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 shadow-lg"
               >
                 Commencer gratuitement
+                <ArrowRight className="w-5 h-5" />
               </Link>
-              <ArrowRight className="w-5 h-5" />
 
-              {/* <button
-                onClick={() => onNavigate("features")}
+              <button
+                onClick
                 className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 Découvrir les fonctionnalités
-              </button> */}
+              </button>
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-gray-600 dark:text-gray-400">

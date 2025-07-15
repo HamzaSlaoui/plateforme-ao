@@ -85,6 +85,7 @@ function LoginForm() {
                   id="email"
                   type="email"
                   value={email}
+                  autoComplete="username"
                   onChange={(e) => setEmail(e.target.value)}
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.email
@@ -116,6 +117,7 @@ function LoginForm() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${

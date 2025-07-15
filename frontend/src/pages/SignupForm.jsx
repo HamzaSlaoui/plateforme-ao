@@ -187,6 +187,7 @@ function SignupForm() {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
+                  autoComplete="username"
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.email
                       ? "border-red-300 dark:border-red-600"
@@ -219,6 +220,7 @@ function SignupForm() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
+                  autoComplete="new-password"
                   onChange={handleChange}
                   className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.password
@@ -264,6 +266,7 @@ function SignupForm() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  autoComplete="new-password"
                   className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.confirmPassword
                       ? "border-red-300 dark:border-red-600"

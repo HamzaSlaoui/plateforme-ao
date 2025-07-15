@@ -9,7 +9,7 @@ import {
   AlertCircle,
   FolderOpen,
 } from "lucide-react";
-import Sidebar from "./Sidebar";
+import Sidebar from "../components/Sidebar";
 
 function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
