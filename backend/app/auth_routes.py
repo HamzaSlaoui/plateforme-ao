@@ -62,10 +62,10 @@ async def login(
     if not user or not verify_password(form_data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+            detail="Email ou Mot de passe incorrect"
         )
     
-        # Bloquer l'accès si l'email n'a pas été vérifié
+    # Bloquer l'accès si l'email n'a pas été vérifié
     if not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
