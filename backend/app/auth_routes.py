@@ -93,7 +93,7 @@ async def verify_email(
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired token"
+            detail="Jeton invalide ou expiré"
         )
     
     # Mettre à jour l'utilisateur
@@ -111,7 +111,7 @@ async def verify_email(
     user.is_verified = True
     await db.commit()
     
-    return {"message": "Email verified successfully"}
+    return {"message": "Email verifié avec succès"}
 
 
 @router.get("/me", response_model=UserResponse)

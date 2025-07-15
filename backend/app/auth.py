@@ -53,29 +53,6 @@ def create_verification_token(user_id: str) -> str:
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# def verify_token(token: str, expected_type: str) -> Optional[dict]:
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         if payload.get("type") != expected_type:
-#             return None
-#         return payload
-#     except JWTError:
-#         return None
-
-
-from typing import Optional
-from jose import JWTError, jwt
-
-# Constants à définir dans votre utils
-SECRET_KEY = "votre_clé_secrète"
-ALGORITHM = "HS256"
-
-from typing import Optional
-from jose import JWTError, jwt
-
-SECRET_KEY = "votre_clé_secrète"
-ALGORITHM = "HS256"
-
 def verify_token(token: str, expected_type: Optional[str] = None) -> Optional[dict]:
     """
     Decode un JWT et, si expected_type est précisé,
@@ -136,6 +113,6 @@ async def get_current_verified_user(
     if not current_user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Email not verified"
+            detail="Email non verifié"
         )
     return current_user
