@@ -1,6 +1,4 @@
-# auth_routes.py
 from datetime import timedelta
-from email import utils
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

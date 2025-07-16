@@ -14,6 +14,9 @@ import Signup from "./pages/SignupForm";
 import Dashboard from "./pages/Dashboard";
 import VerifyEmailPrompt from "./pages/VerifyEmailPrompt";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
+import OrganisationChoice from "./pages/OrganisationChoice.jsx";
+import CreateOrganisation from "./pages/CreateOrganisation";
+// import JoinOrganisation from "./pages/JoinOrganisation";
 
 function App() {
   return (
@@ -57,27 +60,57 @@ function App() {
             }
           />
 
-          {/* Routes protégées nécessitant authentification ET vérification */}
+          {/* Routes pour la gestion des organisations */}
+          <Route
+            path="/organisation-choice"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={false}>
+                <OrganisationChoice />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/create-organisation"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={false}>
+                <CreateOrganisation />
+              </PrivateRoute>
+            }
+          />
+
+          {/* <Route
+            path="/join-organisation"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={false}>
+                <JoinOrganisation />
+              </PrivateRoute>
+            }
+          /> */}
+
+          {/* Routes protégées nécessitant authentification, vérification ET organisation */}
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute requireVerified={true}>
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
                 <Dashboard />
               </PrivateRoute>
             }
           />
+
           {/* <Route
             path="/tender-folders"
             element={
-              <PrivateRoute requireVerified={true}>
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
                 <TenderFolders />
               </PrivateRoute>
             }
           />
+          
           <Route
             path="/profile"
             element={
-              <PrivateRoute requireVerified={true}>
+              <PrivateRoute requireVerified={true} requireOrganisation={false}>
                 <Profile />
               </PrivateRoute>
             }

@@ -13,7 +13,6 @@ function LoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  // Mise à jour du handleSubmit dans LoginForm
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -41,10 +40,14 @@ function LoginForm() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        if (result.isVerified) {
-          navigate("/dashboard");
-        } else {
+        if (!result.isVerified) {
           navigate("/verify-email-prompt");
+        } else if (!result.hasOrganisation) {
+          // Nouveau : si pas d'organisation, aller au choix
+          navigate("/organisation-choice");
+        } else {
+          // Si vérifié et a une organisation, aller au dashboard
+          navigate("/dashboard");
         }
       } else {
         setErrors({

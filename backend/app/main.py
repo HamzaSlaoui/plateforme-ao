@@ -6,6 +6,7 @@ import uvicorn
 
 from app.database import create_tables
 from app.auth_routes import router as auth_router
+from app.organisations_routes import router as organisations_routes
 
 
 @asynccontextmanager
@@ -37,6 +38,8 @@ app.add_middleware(
 
 # Routes
 app.include_router(auth_router)
+app.include_router(organisations_routes)
+
 
 @app.get("/")
 async def root():
