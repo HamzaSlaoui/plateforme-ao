@@ -46,7 +46,6 @@ class UserResponse(UserBase):
 # --- Schémas Organisation ---
 class OrganisationBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
-    code: str = Field(..., min_length=3, max_length=100)
 
 
 class OrganisationCreate(OrganisationBase):
@@ -56,6 +55,7 @@ class OrganisationCreate(OrganisationBase):
 class OrganisationResponse(OrganisationBase):
     id: UUID
     created_at: datetime
+    member_count: int
     
     model_config = ConfigDict(from_attributes=True)
 

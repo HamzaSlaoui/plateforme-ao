@@ -39,22 +39,27 @@ export const AuthProvider = ({ children }) => {
       const token = `${token_type} ${access_token}`;
 
       localStorage.setItem("token", token);
-      api.defaults.headers.common["Authorization"] = token;
 
-      const userResp = await api.get("/auth/me");
-      const user = userResp.data;
+      api.defaults.headers.common["Authorization"] = token;
+      // Récupérer les infos utilisateur
+      const userResponse = await api.get("/auth/me");
+      const user = userResponse.data;
+
       localStorage.setItem("user", JSON.stringify(user));
 
-      setAuthState({ user, token, isAuthenticated: true, isLoading: false });
+      setAuthState({
+        user,
+        token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
 
-      // Retourner un objet avec plus d'infos
       return {
         success: true,
         isVerified: user.is_verified,
-        user,
+        hasOrganisation: user.organisation_id !== null,
       };
     } catch (error) {
-      console.error("Login error:", error.response || error.message);
       return {
         success: false,
         error: error.response?.data?.detail || "Erreur de connexion",
@@ -123,6 +128,28 @@ export const AuthProvider = ({ children }) => {
     return authState.user?.is_verified || false;
   };
 
+  const hasOrganisation = () => {
+    return authState.user?.organisation_id !== null;
+  };
+
+  const refreshUser = async () => {
+    try {
+      const response = await api.get("/auth/me");
+      const user = response.data;
+
+      localStorage.setItem("user", JSON.stringify(user));
+      setAuthState((prev) => ({
+        ...prev,
+        user,
+      }));
+
+      return { success: true, user };
+    } catch (error) {
+      console.error("Erreur lors du rafraîchissement:", error);
+      return { success: false, error: error.message };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -132,6 +159,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         verifyEmail,
         isUserVerified,
+        hasOrganisation,
+        refreshUser,
         api, // Exposer l'instance axios configurée
       }}
     >
