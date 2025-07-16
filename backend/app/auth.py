@@ -1,18 +1,18 @@
 # auth.py
-from datetime import datetime, timedelta, timezone
-from typing import Optional
-from jose import JWTError, jwt
+from datetime import datetime, timedelta, timezone # type: ignore
+from typing import Optional # type: ignore
+from jose import JWTError, jwt # type: ignore
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from fastapi import Depends, HTTPException, status # type: ignore
+from fastapi.security import OAuth2PasswordBearer # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
+from sqlalchemy import select # type: ignore
 import secrets
 import os
 from uuid import UUID
 
-from app.database import get_db
-from app.models import User
+from database import get_db
+from models import User
 
 # Configuration
 SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
@@ -90,7 +90,7 @@ async def get_current_user(
     
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id: str = payload.get("sub") # type: ignore
         if user_id is None:
             raise credentials_exception
     except JWTError:

@@ -1,6 +1,6 @@
 from typing import Optional
 import os
-import aiosmtplib
+import aiosmtplib # type: ignore
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -10,7 +10,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "slaouihza2@gmail.com")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "tjkt xblv tiyd tgce")
 FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USERNAME)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 
 async def send_email(

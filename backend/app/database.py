@@ -1,14 +1,14 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker # type: ignore
+from sqlalchemy.pool import NullPool # type: ignore
 from typing import AsyncGenerator
 import os
 
-from app.models import Base
+from models import Base
 
 # Configuration de la base de données
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:hamza@localhost:5432/dbtest"
+    "postgresql+asyncpg://postgres:password@db:5433/ma_db"
 )
 
 # Création du moteur async
