@@ -2,10 +2,10 @@
 from datetime import datetime
 from uuid import uuid4
 from enum import Enum
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declarative_base, relationship
-from passlib.context import CryptContext
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text # type: ignore
+from sqlalchemy.dialects.postgresql import UUID # type: ignore
+from sqlalchemy.orm import declarative_base, relationship # type: ignore
+from passlib.context import CryptContext # type: ignore
 
 Base = declarative_base()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

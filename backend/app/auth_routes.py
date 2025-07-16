@@ -1,16 +1,17 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
+from sqlalchemy import select # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from uuid import UUID
 
-from app.auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_token
-from app.database import get_db
-from app.email_service import send_verification_email
-from app.models import User
-from app.schemas import EmailVerification, Token, UserCreate, UserLogin, UserResponse
+from auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_token
+from database import get_db
+from email_service import send_verification_email
+from models import User
+from schemas import EmailVerification, Token, UserCreate, UserLogin, UserResponse
 
-from app.auth import oauth2_scheme 
+from auth import oauth2_scheme 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
