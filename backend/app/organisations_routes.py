@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.schemas import OrganisationCreate, OrganisationResponse
-from app.auth import get_current_user
-from app.models import Organisation, User
+from database import get_db
+from schemas import OrganisationCreate, OrganisationResponse
+from auth import get_current_user
+from models import Organisation, User
 
 
 router = APIRouter(prefix="/organisations", tags=["organisations"])
