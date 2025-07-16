@@ -19,58 +19,52 @@ async def register(
     user_data: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
-    # Vérifier si l'email existe
-    result = await db.execute(
-        select(User).where(User.email == user_data.email)
-    )
-    
-    result_user = result.scalar_one_or_none()
+    # 1) Rechercher l'utilisateur par email
+    result = await db.execute(select(User).where(User.email == user_data.email))
+    user = result.scalar_one_or_none()
 
-    if result_user:
-        if not result_user.is_verified:
-            # Supprimer l'ancien utilisateur non vérifié
-            await db.delete(result_user)
-            await db.commit()
-            
-            # Créer le nouvel utilisateur
-            user = User(
-                email=user_data.email,
-                firstname=user_data.firstname,
-                lastname=user_data.lastname,
-                password_hash=get_password_hash(user_data.password)
-            )
-            db.add(user)
+    if user:
+        # 2) Si non vérifié, on autorise la mise à jour
+        if not user.is_verified:
+            # Mettre à jour les champs modifiables
+            user.firstname     = user_data.firstname
+            user.lastname      = user_data.lastname
+            user.password_hash = get_password_hash(user_data.password)
+
+            # (Optionnel) mettre à jour une date de dernière mise à jour
+            # user.updated_at = datetime.utcnow()
+
             await db.commit()
             await db.refresh(user)
-            
-            # Envoyer email de vérification
-            verification_token = create_verification_token(str(user.id))
-            await send_verification_email(user.email, verification_token)
-            
+
+            # (Ré)envoi du mail de vérification
+            token = create_verification_token(str(user.id))
+            await send_verification_email(user.email, token)
+
             return user
-        else:
-            # L'utilisateur existe et est vérifié
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Un compte vérifié existe déjà avec cet email"
-            )
-    
-    # L'email n'existe pas, créer l'utilisateur
+
+        # 3) Si déjà vérifié, on bloque la réinscription
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Un compte vérifié existe déjà avec cet email."
+        )
+
+    # 4) Email inconnu → création du nouvel utilisateur
     user = User(
-        email=user_data.email,
-        firstname=user_data.firstname,
-        lastname=user_data.lastname,
-        password_hash=get_password_hash(user_data.password)
+        email         = user_data.email,
+        firstname     = user_data.firstname,
+        lastname      = user_data.lastname,
+        password_hash = get_password_hash(user_data.password)
     )
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    
-    # Envoyer email de vérification
-    verification_token = create_verification_token(str(user.id))
-    await send_verification_email(user.email, verification_token)
-    
+
+    # Envoi du mail de vérification
+    token = create_verification_token(str(user.id))
+    await send_verification_email(user.email, token)
     return user
+
 
 @router.post("/login", response_model=Token)
 async def login(
@@ -156,7 +150,7 @@ async def resend_verification(
     if current_user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Votre email est déjà vérifié"
+            detail="Votre email est déjà vérifié, reconnectez vous"
         )
     
     # Créer un nouveau token

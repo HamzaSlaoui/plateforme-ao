@@ -20,15 +20,15 @@ const PrivateRoute = ({
     );
   }
 
-  // Si non authentifié, rediriger vers login
-  if (!authState.isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
   // Si authentifié mais non vérifié et que la route nécessite vérification
   if (requireVerified && !isUserVerified()) {
     return <Navigate to="/verify-email-prompt" replace />;
   }
+
+  // Si non authentifié, rediriger vers login
+  // if (!authState.isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
   // Vérification pour l'organisation
   if (requireOrganisation && !hasOrganisation()) {
