@@ -1,4 +1,3 @@
-# schemas.py
 from pydantic import BaseModel, EmailStr, Field, ConfigDict # type: ignore
 from datetime import datetime
 from uuid import UUID

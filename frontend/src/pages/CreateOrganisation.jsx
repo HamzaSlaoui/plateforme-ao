@@ -1,4 +1,3 @@
-// src/pages/CreateOrganisation.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
