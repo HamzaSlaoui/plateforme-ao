@@ -137,6 +137,10 @@ function Dashboard() {
             </div>
             <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
               <Plus className="w-5 h-5" />
+              <span>Inviter membre</span>
+            </button>
+            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+              <Plus className="w-5 h-5" />
               <span>Nouveau dossier</span>
             </button>
           </div>

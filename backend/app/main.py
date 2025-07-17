@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from contextlib import asynccontextmanager # type: ignore

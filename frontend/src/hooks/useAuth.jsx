@@ -76,6 +76,8 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
+      const loginResult = await login(email, password);
+
       // Retourner success avec indication de vérification nécessaire
       return {
         success: true,

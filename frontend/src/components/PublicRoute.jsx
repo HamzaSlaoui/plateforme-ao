@@ -3,7 +3,8 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const PublicRoute = ({ children }) => {
-  const { authState, isUserVerified } = useAuth();
+  const { authState, isUserVerified, hasOrganisation } = useAuth();
+
   if (authState.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -12,12 +13,17 @@ const PublicRoute = ({ children }) => {
     );
   }
 
-  // Si authentifié et vérifié, rediriger vers dashboard
-  if (authState.isAuthenticated && isUserVerified()) {
+  // Si authentifié et vérifié avec organisation, aller au dashboard
+  if (authState.isAuthenticated && isUserVerified() && hasOrganisation()) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Si authentifié mais non vérifié, rediriger vers prompt de vérification
+  // Si authentifié et vérifié sans organisation, aller au choix
+  if (authState.isAuthenticated && isUserVerified() && !hasOrganisation()) {
+    return <Navigate to="/organisation-choice" replace />;
+  }
+
+  // Si authentifié mais non vérifié, aller au prompt de vérification
   if (authState.isAuthenticated && !isUserVerified()) {
     return <Navigate to="/verify-email-prompt" replace />;
   }
