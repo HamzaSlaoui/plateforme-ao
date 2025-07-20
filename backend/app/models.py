@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 from enum import Enum
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text # type: ignore
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text, Integer # type: ignore
 from sqlalchemy.dialects.postgresql import UUID # type: ignore
 from sqlalchemy.orm import declarative_base, relationship # type: ignore
 from passlib.context import CryptContext # type: ignore
@@ -74,17 +74,30 @@ class TenderFolder(Base):
     documents = relationship("Document", back_populates="tender_folder", cascade="all, delete-orphan", lazy="selectin")
 
 
+
 class Document(Base):
     __tablename__ = "documents"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     filename = Column(String(255), nullable=False)
-    filepath = Column(String(500), nullable=False)
     document_type = Column(String(50), nullable=True)
-    tender_folder_id = Column(UUID(as_uuid=True), ForeignKey("tender_folders.id"), nullable=False)
+    tender_folder_id = Column(UUID(as_uuid=True), ForeignKey("tender_folders.id", ondelete="CASCADE"), nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relations
+    created_at = Column(DateTime, nullable=True)
+
     tender_folder = relationship("TenderFolder", back_populates="documents", lazy="selectin")
     uploader = relationship("User", foreign_keys=[uploaded_by], back_populates="uploaded_documents", lazy="selectin")
+    chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan", lazy="selectin")
+
+
+class DocumentChunk(Base):
+    __tablename__ = "document_chunks"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    document_id = Column(UUID(as_uuid=True), ForeignKey("documents.id", ondelete="CASCADE"), nullable=False)
+    chunk_text = Column(Text, nullable=False)
+    chunk_order = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    document = relationship("Document", back_populates="chunks", lazy="selectin")
+    

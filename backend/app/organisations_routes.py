@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
+from sqlalchemy import func, select # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 
 from database import get_db
 from schemas import OrganisationCreate, OrganisationResponse

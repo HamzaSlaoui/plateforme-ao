@@ -7,6 +7,9 @@ from enum import Enum
 
 class TenderStatusEnum(str, Enum):
     EN_COURS = "en_cours"
+    SOUMIS = "soumis"
+    GAGNE = "gagne"
+    PERDU = "perdu"
     TERMINE = "termine"
     ANNULE = "annule"
 
