@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException, status # type: ignore
 from fastapi.security import OAuth2PasswordBearer # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy import select # type: ignore
+from sqlalchemy.orm import selectinload
 import secrets
 import os
 from uuid import UUID
@@ -80,30 +81,30 @@ def verify_token(token: str, expected_type: Optional[str] = None) -> Optional[di
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-):
+    db: AsyncSession = Depends(get_db),
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub") # type: ignore
+        user_id: str = payload.get("sub")  # type: ignore
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    
+
     result = await db.execute(
-        select(User).where(User.id == UUID(user_id))
+        # on precharge la relation organisation
+        select(User)
+        .options(selectinload(User.organisation))
+        .where(User.id == UUID(user_id))
     )
     user = result.scalar_one_or_none()
-    
     if user is None:
         raise credentials_exception
-    
     return user
 
 

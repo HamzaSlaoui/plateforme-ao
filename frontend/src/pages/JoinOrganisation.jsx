@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Building2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
-const CreateOrganisation = () => {
+const JoinOrganisation = () => {
   const navigate = useNavigate();
   const { api, refreshUser } = useAuth();
 
   const [formData, setFormData] = useState({
-    name: "",
+    code: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -17,12 +17,10 @@ const CreateOrganisation = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Le nom de l'organisation est requis";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Le nom doit contenir au moins 2 caractères";
-    } else if (formData.name.length > 255) {
-      newErrors.name = "Le nom ne peut pas dépasser 255 caractères";
+    if (!formData.code.trim()) {
+      newErrors.code = "Le code est requis";
+    } else if (formData.code.trim().length !== 8) {
+      newErrors.code = "Le code doit contenir 8 caractères";
     }
 
     return newErrors;
@@ -31,7 +29,6 @@ const CreateOrganisation = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -42,30 +39,29 @@ const CreateOrganisation = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/organisations/create", {
-        name: formData.name.trim(),
+      await api.post("/organisations/join", {
+        code: formData.code.trim().toUpperCase(),
       });
 
-      // Succès
       setSuccess(true);
 
-      // Rafraîchir les données utilisateur après 2 secondes
       setTimeout(async () => {
         await refreshUser();
-        navigate("/dashboard");
+        navigate("/home");
       }, 3000);
     } catch (error) {
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
       } else {
-        setErrors({ general: "Une erreur s'est produite lors de la création" });
+        setErrors({
+          general: "Une erreur s'est produite lors de l'envoi de la demande",
+        });
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Affichage du succès
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
@@ -75,11 +71,11 @@ const CreateOrganisation = () => {
           </div>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Organisation créée avec succès !
+            Demande envoyée !
           </h2>
 
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Redirection vers le tableau de bord...
+            Redirection vers la page d'accueil...
           </p>
         </div>
       </div>
@@ -106,14 +102,13 @@ const CreateOrganisation = () => {
               <Building2 className="h-10 w-10 text-blue-600 dark:text-blue-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Créer une organisation
+              Rejoindre une organisation
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Donnez un nom à votre organisation
+              Entrez le code unique de l'organisation
             </p>
           </div>
 
-          {/* Message d'erreur général */}
           {errors.general && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <div className="flex items-start">
@@ -128,29 +123,29 @@ const CreateOrganisation = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="name"
+                htmlFor="code"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Nom de l'organisation
+                Code de l'organisation
               </label>
               <input
-                id="name"
+                id="code"
                 type="text"
-                value={formData.name}
+                value={formData.code}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, code: e.target.value })
                 }
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${
-                  errors.name
+                  errors.code
                     ? "border-red-300 dark:border-red-600"
                     : "border-gray-300 dark:border-gray-600"
                 }`}
-                placeholder="Ex: Mon Entreprise"
+                placeholder="Ex: A1B2C3D4"
                 disabled={isLoading}
               />
-              {errors.name && (
+              {errors.code && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.name}
+                  {errors.code}
                 </p>
               )}
             </div>
@@ -177,24 +172,18 @@ const CreateOrganisation = () => {
                 {isLoading ? (
                   <span className="flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Création...
+                    Envoi...
                   </span>
                 ) : (
-                  "Créer"
+                  "Rejoindre"
                 )}
               </button>
             </div>
           </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Un code unique sera généré pour inviter des membres
-            </p>
-          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CreateOrganisation;
+export default JoinOrganisation;
