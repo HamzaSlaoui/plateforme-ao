@@ -6,6 +6,7 @@ import uvicorn # type: ignore
 from database import create_tables
 from auth_routes import router as auth_router
 from organisations_routes import router as organisations_routes
+from organisations_routes import router as organisations_routes
 
 
 @asynccontextmanager

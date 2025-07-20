@@ -16,7 +16,9 @@ import VerifyEmailPrompt from "./pages/VerifyEmailPrompt";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import OrganisationChoice from "./pages/OrganisationChoice.jsx";
 import CreateOrganisation from "./pages/CreateOrganisation";
-// import JoinOrganisation from "./pages/JoinOrganisation";
+import JoinOrganisation from "./pages/JoinOrganisation";
+import MembersPage from "./pages/MembersPage";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 function App() {
   return (
@@ -79,14 +81,14 @@ function App() {
             }
           />
 
-          {/* <Route
+          <Route
             path="/join-organisation"
             element={
               <PrivateRoute requireVerified={true} requireOrganisation={false}>
                 <JoinOrganisation />
               </PrivateRoute>
             }
-          /> */}
+          />
 
           {/* Routes protégées nécessitant authentification, vérification ET organisation */}
           <Route
@@ -94,6 +96,24 @@ function App() {
             element={
               <PrivateRoute requireVerified={true} requireOrganisation={true}>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <SettingsPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/members"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <MembersPage />
               </PrivateRoute>
             }
           />

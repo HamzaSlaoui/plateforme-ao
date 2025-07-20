@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, FolderOpen, Settings, LogOut, User } from "lucide-react";
+import { Home, FolderOpen, Settings, LogOut, User, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const Sidebar = () => {
@@ -10,9 +10,13 @@ const Sidebar = () => {
   } = useAuth();
   const navigate = useNavigate();
 
+  // On insère conditionnellement "Membres" si l'utilisateur est owner
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Dossiers", path: "/folders" },
+    ...(user?.is_owner
+      ? [{ icon: Users, label: "Membres", path: "/members" }]
+      : []),
     { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
 
