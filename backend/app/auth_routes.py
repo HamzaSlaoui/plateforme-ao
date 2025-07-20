@@ -32,8 +32,6 @@ async def register(
             user.lastname      = user_data.lastname
             user.password_hash = get_password_hash(user_data.password)
 
-            # (Optionnel) mettre à jour une date de dernière mise à jour
-            # user.updated_at = datetime.utcnow()
 
             await db.commit()
             await db.refresh(user)
@@ -84,13 +82,6 @@ async def login(
             detail="Email ou Mot de passe incorrect"
         )
     
-    # # Bloquer l'accès si l'email n'a pas été vérifié
-    # if not user.is_verified:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail="Veuillez vérifier votre adresse email avant de vous connecter."
-    #     )
-    
     # Créer le token
     access_token = create_access_token(
         data={"sub": str(user.id)},
@@ -123,7 +114,7 @@ async def verify_email(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="Utilisateur introuvable"
         )
     
     user.is_verified = True

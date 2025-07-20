@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import uuid4
 from enum import Enum
 from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text, Integer # type: ignore
+import uuid
 from sqlalchemy.dialects.postgresql import UUID # type: ignore
 from sqlalchemy.orm import declarative_base, relationship # type: ignore
 from passlib.context import CryptContext # type: ignore
@@ -21,7 +22,8 @@ class Organisation(Base):
     __tablename__ = "organisations"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    name = Column(String(255), nullable=False)
+    name = Column(String(50), nullable=False)
+    code = Column(String(50), nullable=False, unique=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relations
@@ -87,6 +89,7 @@ class Document(Base):
 
     tender_folder = relationship("TenderFolder", back_populates="documents", lazy="selectin")
     uploader = relationship("User", foreign_keys=[uploaded_by], back_populates="uploaded_documents", lazy="selectin")
+
     chunks = relationship("DocumentChunk", back_populates="document", cascade="all, delete-orphan", lazy="selectin")
 
 
@@ -101,3 +104,13 @@ class DocumentChunk(Base):
 
     document = relationship("Document", back_populates="chunks", lazy="selectin")
     
+
+
+class OrganisationJoinRequest(Base):
+    __tablename__ = "organisation_join_requests"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id"), nullable=False)
+    status = Column(String, default="en attaente")  
+    created_at = Column(DateTime, default=datetime.utcnow)
+

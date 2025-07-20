@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 
 function VerifyEmail() {
-  const { verifyEmail, authState } = useAuth();
+  const { verifyEmail, authState, hasOrganisation } = useAuth();
   const [status, setStatus] = useState({
     loading: true,
     success: false,
@@ -30,7 +30,11 @@ function VerifyEmail() {
         // Rediriger après 3 secondes
         setTimeout(() => {
           if (authState.isAuthenticated) {
-            navigate("/dashboard");
+            if (hasOrganisation) {
+              navigate("/organisation-choice");
+            } else {
+              navigate("/dashboard");
+            }
           } else {
             navigate("/login");
           }

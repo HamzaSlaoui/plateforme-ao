@@ -8,6 +8,8 @@ from auth_routes import router as auth_router
 from organisations_routes import router as organisations_routes
 from tender_folders_routes import router as tender_folders_routes
 
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup

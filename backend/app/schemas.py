@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, ConfigDict # type: ignore
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, constr 
 from datetime import datetime
 from uuid import UUID
 from typing import Optional
@@ -12,6 +12,45 @@ class TenderStatusEnum(str, Enum):
     PERDU = "perdu"
     TERMINE = "termine"
     ANNULE = "annule"
+
+
+
+    # --- Schémas Organisation ---
+
+class OrganisationInfo(BaseModel):
+    id: UUID
+    name: str
+    code: str
+
+    
+class OrganisationBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+
+
+class OrganisationCreate(OrganisationBase):
+    pass
+
+
+class OrganisationResponse(OrganisationBase):
+    id: UUID
+    created_at: datetime
+    code: str
+    member_count: int
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class JoinOrgRequest(BaseModel):
+    code: constr(strip_whitespace=True, min_length=8, max_length=8) # type: ignore
+
+
+class JoinRequestResponse(BaseModel):
+    id: UUID
+    firstname: str
+    lastname: str
+    email: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Schémas User ---
@@ -35,31 +74,20 @@ class UserUpdate(BaseModel):
     lastname: Optional[str] = Field(None, min_length=1, max_length=100)
 
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: UUID
+    firstname: str
+    lastname: str
+    email: str
     is_verified: bool
     is_owner: bool
-    organisation_id: Optional[UUID]
+    organisation: Optional[OrganisationInfo]
     created_at: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
 
 
-# --- Schémas Organisation ---
-class OrganisationBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
 
-
-class OrganisationCreate(OrganisationBase):
-    pass
-
-
-class OrganisationResponse(OrganisationBase):
-    id: UUID
-    created_at: datetime
-    member_count: int
-    
-    model_config = ConfigDict(from_attributes=True)
 
 
 # --- Schémas TenderFolder ---
