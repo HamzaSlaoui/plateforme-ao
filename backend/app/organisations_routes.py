@@ -1,9 +1,10 @@
+from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
+from sqlalchemy import func, select # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from typing import List
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+
 
 from database import get_db
 from schemas import JoinOrgRequest, JoinRequestResponse, OrganisationCreate, OrganisationResponse

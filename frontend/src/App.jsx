@@ -16,9 +16,11 @@ import VerifyEmailPrompt from "./pages/VerifyEmailPrompt";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import OrganisationChoice from "./pages/OrganisationChoice.jsx";
 import CreateOrganisation from "./pages/CreateOrganisation";
+import TenderFolderForm from "./pages/TenderFolderForm";
 import JoinOrganisation from "./pages/JoinOrganisation";
 import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
+
 
 function App() {
   return (
@@ -100,6 +102,14 @@ function App() {
             }
           />
 
+          <Route
+            path="/tender-folder-form"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <TenderFolderForm />
+              </PrivateRoute>      
+            }
+          />
           <Route
             path="/settings"
             element={
