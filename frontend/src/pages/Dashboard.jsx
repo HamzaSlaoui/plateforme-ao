@@ -10,10 +10,12 @@ import {
   FolderOpen,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const navigate = useNavigate();
 
   // Sample data
   const dossiers = [
@@ -125,6 +127,23 @@ function Dashboard() {
 
       <div className="flex-1 overflow-auto">
         <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Dashboard
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
+                Gérez vos dossiers d'appels d'offres
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/tender-folder-form")}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Nouveau dossier</span>
+            </button>
+          </div>
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
