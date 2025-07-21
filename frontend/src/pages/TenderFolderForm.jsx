@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import AlertToast from "../components/AlertToast";
 
 const TenderFolderForm = () => {
   const { api, authState } = useAuth();
@@ -28,6 +29,7 @@ const TenderFolderForm = () => {
 
   const [documents, setDocuments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +141,6 @@ const TenderFolderForm = () => {
         formData.submission_deadline
       );
     }
-    // ← ici la propriété correcte
     formDataToSend.append("organisation_id", orgId);
 
     documents
@@ -152,7 +153,18 @@ const TenderFolderForm = () => {
         formDataToSend,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      // …
+      setSuccessMessage("Dossier créé avec succès !");
+      setFormData({
+        name: "",
+        description: "",
+        submission_deadline: "",
+        client_name: "",
+        status: "en_cours",
+      });
+      setDocuments([]);
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
     } catch (error) {
       console.error(error.response?.data || error);
       // inspectez error.response.data.detail pour voir quels champs cassent
@@ -411,6 +423,7 @@ const TenderFolderForm = () => {
           {/* Boutons d'action */}
           <div className="flex justify-end space-x-4">
             <button
+              type="button"
               onClick={() => navigate("/dashboard")}
               className="px-6 py-3 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
@@ -436,6 +449,13 @@ const TenderFolderForm = () => {
             </button>
           </div>
         </form>
+        {/* Affichage du toast de succès en bas à droite */}
+        {successMessage && (
+          <AlertToast
+            message={successMessage}
+            onClose={() => setSuccessMessage("")}
+          />
+        )}
       </div>
     </div>
   );
