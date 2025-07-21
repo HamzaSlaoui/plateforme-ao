@@ -91,10 +91,12 @@ async def create_tender_folder(
                     chunk_order=idx
                 ))
 
-        # On commit tous les chunks d’un coup
+        # On commit tous les chunks d'un coup
         await db.commit()
-        
-
+    
+    # 3) Ajouter le document_count avant de retourner
+    setattr(tender_folder, "document_count", len(files) if files else 0)
+    
     return tender_folder
 
 

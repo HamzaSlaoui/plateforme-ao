@@ -259,10 +259,10 @@ const TenderFolderForm = () => {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 >
-                  <option value="en_cours">en cours</option>
-                  <option value="soumis">soumis</option>
-                  <option value="gagne">gagne</option>
-                  <option value="perdu">perdu</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="soumis">Soumis</option>
+                  <option value="gagne">Gagne</option>
+                  <option value="perdu">Perdu</option>
                 </select>
               </div>
             </div>
