@@ -50,51 +50,45 @@ function Dashboard() {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "draft":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
-      case "submitted":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400";
-      case "won":
-        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
-      case "lost":
-        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
-
   const getStatusLabel = (status) => {
     switch (status) {
-      case "draft":
-        return "Brouillon";
-      case "in-progress":
+      case "en_cours":
         return "En cours";
-      case "submitted":
+      case "soumis":
         return "Soumis";
-      case "won":
+      case "gagne":
         return "Gagné";
-      case "lost":
+      case "perdu":
         return "Perdu";
       default:
         return status;
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "en_cours":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+      case "soumis":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400";
+      case "gagne":
+        return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+      case "perdu":
+        return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
-      case "draft":
+      case "en_cours":
         return <Clock className="w-4 h-4" />;
-      case "in-progress":
-        return <AlertCircle className="w-4 h-4" />;
-      case "submitted":
+      case "soumis":
         return <Calendar className="w-4 h-4" />;
-      case "won":
+      case "gagne":
         return <CheckCircle className="w-4 h-4" />;
-      case "lost":
+      case "perdu":
         return <AlertCircle className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
