@@ -116,7 +116,10 @@ class TenderFolderResponse(TenderFolderBase):
     organisation_id: UUID
     created_by: UUID
     created_at: datetime
-    
+
+    # Nombre de documents (pour le badge "Pièces jointes")
+    document_count: int
+
     model_config = ConfigDict(from_attributes=True)
 
 

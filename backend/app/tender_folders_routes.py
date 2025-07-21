@@ -2,9 +2,12 @@ from uuid import UUID, uuid4
 from datetime import datetime
 from typing import List, Optional
 
+from sqlalchemy import select
+
 import PyPDF2 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile # type: ignore
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
+from sqlalchemy.orm import selectinload
 
 from database import get_db
 from auth import get_current_user
@@ -92,3 +95,36 @@ async def create_tender_folder(
         db.commit()
 
     return tender_folder
+
+
+@router.get(
+    "/",
+    response_model=List[TenderFolderResponse],
+    status_code=status.HTTP_200_OK,
+)
+async def list_tender_folders(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # 1️⃣ Vérifier que l'utilisateur appartient bien à une organisation
+    if current_user.organisation_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Vous n'appartenez à aucune organisation",
+        )
+
+    # 2️⃣ Charger les dossiers + leurs documents en un seul appel
+    stmt = (
+        select(TenderFolder)
+        .options(selectinload(TenderFolder.documents))
+        .where(TenderFolder.organisation_id == current_user.organisation_id)
+    )
+    result = await db.execute(stmt)
+    folders: List[TenderFolder] = result.scalars().all()
+
+    # 3️⃣ Injecter le nombre de documents (pour votre response_model)
+    for f in folders:
+        # On ajoute dynamiquement l'attribut attendu par Pydantic
+        setattr(f, "document_count", len(f.documents))
+
+    return folders
