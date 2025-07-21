@@ -92,7 +92,8 @@ async def create_tender_folder(
                 ))
 
         # On commit tous les chunks d’un coup
-        db.commit()
+        await db.commit()
+        
 
     return tender_folder
 
