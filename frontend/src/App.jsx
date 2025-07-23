@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import PrivateRoute from "./components/PrivateRoute";
-// import PublicRoute from "./components/PublicRoute";
+import ChatbotPage from "./components/ChatbotPage.jsx";
 // import Home from "./pages/Home";
 import Login from "./pages/LoginForm";
 import Signup from "./pages/SignupForm";
@@ -106,6 +106,27 @@ function App() {
                 requireOwner={true}
               >
                 <MembersPage />
+              </PrivateRoute>
+            }
+          />
+
+          {/* 1) Page de détail « Voir » */}
+          <Route
+            path="/tender-folders/:dossierId"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <ChatbotPage />{" "}
+                {/* A changer apres la creation de l'interface tender-folder-view */}
+              </PrivateRoute>
+            }
+          />
+
+          {/* 2) Chat IA */}
+          <Route
+            path="/chat/:dossierId"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <ChatbotPage />
               </PrivateRoute>
             }
           />

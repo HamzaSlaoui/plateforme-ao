@@ -8,6 +8,8 @@ import {
   Clock,
   AlertCircle,
   FolderOpen,
+  MessageCircle,
+  Eye,
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -96,6 +98,20 @@ function Dashboard() {
     }
   };
 
+  const handleCardClick = (dossierId) => {
+    navigate(`/tender-folders/${dossierId}`);
+  };
+
+  const handleChatClick = (e, dossierId) => {
+    e.stopPropagation(); // Empêcher la navigation vers le dossier
+    navigate(`/chat/${dossierId}`);
+  };
+
+  const handleViewClick = (e, dossierId) => {
+    e.stopPropagation(); // Empêcher la navigation vers le dossier
+    navigate(`/tender-folders/${dossierId}`);
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -175,16 +191,16 @@ function Dashboard() {
             {filteredDossiers.map((dossier) => (
               <div
                 key={dossier.id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => navigate(`/tender-folders/${dossier.id}`)}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
+                onClick={() => handleCardClick(dossier.id)}
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 pr-2">
                       {dossier.name}
                     </h3>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 ${getStatusColor(
+                      className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-1 whitespace-nowrap ${getStatusColor(
                         dossier.status
                       )}`}
                     >
@@ -197,7 +213,7 @@ function Dashboard() {
                     {dossier.description}
                   </p>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 mb-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500 dark:text-gray-400">
                         Échéance:
@@ -218,6 +234,25 @@ function Dashboard() {
                         {dossier.document_count}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <button
+                      onClick={(e) => handleViewClick(e, dossier.id)}
+                      className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Voir</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleChatClick(e, dossier.id)}
+                      className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 text-sm"
+                      title="Chat avec l'IA sur ce dossier"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Chat IA</span>
+                    </button>
                   </div>
                 </div>
               </div>
