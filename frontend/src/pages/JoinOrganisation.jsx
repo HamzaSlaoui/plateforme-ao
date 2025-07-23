@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Users, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const JoinOrganisation = () => {
@@ -47,8 +47,8 @@ const JoinOrganisation = () => {
 
       setTimeout(async () => {
         await refreshUser();
-        navigate("/home");
-      }, 3000);
+        navigate("/");
+      }, 2000);
     } catch (error) {
       if (error.response?.data?.detail) {
         setErrors({ general: error.response.data.detail });
@@ -75,7 +75,7 @@ const JoinOrganisation = () => {
           </h2>
 
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Redirection vers la page d'accueil...
+            Redirection vers la page d'authentification...
           </p>
         </div>
       </div>
@@ -98,8 +98,8 @@ const JoinOrganisation = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <div className="bg-blue-100 dark:bg-blue-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-              <Building2 className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+            <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <Users className="h-10 w-10 text-green-600 dark:text-green-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Rejoindre une organisation

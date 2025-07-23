@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
+from fastapi import APIRouter, Depends, HTTPException, Response, status # type: ignore
 from sqlalchemy import func, select # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from typing import List
@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 
 from database import get_db
-from schemas import JoinOrgRequest, JoinRequestResponse, OrganisationCreate, OrganisationResponse
+from schemas import JoinOrgRequest, JoinRequestResponse, OrganisationCreate, OrganisationResponse, UserResponse
 from auth import get_current_user
 from models import Organisation, OrganisationJoinRequest, User
 
@@ -30,7 +30,7 @@ async def generate_unique_code(session: AsyncSession, length: int = 8) -> str:
             return candidate
 
 @router.post("/create", response_model=OrganisationResponse)
-async def register(
+async def create_organisation(
     org_data: OrganisationCreate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -258,3 +258,61 @@ async def reject_join_request(
     join_req.status = "refuse"
     await db.commit()
     return {"message": "Demande rejetée"}
+
+
+@router.get("/members",response_model=List[UserResponse])
+async def list_members(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # Seul le propriétaire peut accéder
+    if not current_user.is_owner or not current_user.organisation_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès refusé",
+        )
+
+    # Récupère tous les users de son organisation
+    stmt = (
+        select(User)
+        .where(User.organisation_id == current_user.organisation_id)
+    )
+    result = await db.execute(stmt)
+    members = result.scalars().all()  # <-- important ! .scalars().all() retourne la liste des User
+
+    return members
+
+
+@router.delete(
+    "/members/{member_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def remove_member(
+    member_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    # Vérifier que c'est bien l'owner
+    if not current_user.is_owner or not current_user.organisation_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès refusé",
+        )
+
+    # Vérifier que le membre appartient à la même org
+    stmt = select(User).where(
+        User.id == member_id,
+        User.organisation_id == current_user.organisation_id,
+    )
+    result = await db.execute(stmt)
+    member = result.scalar_one_or_none()
+    if not member:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Membre non trouvé",
+        )
+
+    # Dissocier
+    member.organisation_id = None
+    await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import PrivateRoute from "./components/PrivateRoute";
-import PublicRoute from "./components/PublicRoute";
+// import PublicRoute from "./components/PublicRoute";
 // import Home from "./pages/Home";
 import Login from "./pages/LoginForm";
 import Signup from "./pages/SignupForm";
@@ -20,37 +20,16 @@ import TenderFolderForm from "./pages/TenderFolderForm";
 import JoinOrganisation from "./pages/JoinOrganisation";
 import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Routes publiques - redirigent vers dashboard si connecté */}
-          {/* <Route
-            path="/"
-            element={
-              <PublicRoute>
-                <Home />
-              </PublicRoute>
-            }
-          /> */}
-          <Route
-            path="/"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <Signup />
-              </PublicRoute>
-            }
-          />
+          {/* <Route path="/" element={<Home />} /> */}
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Route pour utilisateurs connectés mais non vérifiés */}
@@ -121,7 +100,11 @@ function App() {
           <Route
             path="/members"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute
+                requireVerified={true}
+                requireOrganisation={true}
+                requireOwner={true}
+              >
                 <MembersPage />
               </PrivateRoute>
             }
@@ -146,7 +129,7 @@ function App() {
           /> */}
 
           {/* Route 404 */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
     </AuthProvider>

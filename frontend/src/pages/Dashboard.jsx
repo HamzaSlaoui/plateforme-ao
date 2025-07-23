@@ -12,6 +12,7 @@ import {
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
+import TenderCard from "../components/TenderCard";
 
 function Dashboard() {
   const { api } = useAuth();
@@ -160,11 +161,10 @@ function Dashboard() {
                   className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 >
                   <option value="all">Tous les statuts</option>
-                  <option value="draft">Brouillon</option>
-                  <option value="in-progress">En cours</option>
-                  <option value="submitted">Soumis</option>
-                  <option value="won">Gagné</option>
-                  <option value="lost">Perdu</option>
+                  <option value="en_cours">En cours</option>
+                  <option value="soumis">Soumis</option>
+                  <option value="gagne">Gagné</option>
+                  <option value="perdu">Perdu</option>
                 </select>
               </div>
             </div>
