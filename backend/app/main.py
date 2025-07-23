@@ -7,6 +7,7 @@ from database import create_tables
 from auth_routes import router as auth_router
 from organisations_routes import router as organisations_routes
 from tender_folders_routes import router as tender_folders_routes
+from chatbot_routes import router as chatbot_routes
 
 
 
@@ -37,10 +38,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routes
+# Routess
 app.include_router(auth_router)
 app.include_router(organisations_routes)
 app.include_router(tender_folders_routes)
+app.include_router(chatbot_routes)
 
 
 @app.get("/")

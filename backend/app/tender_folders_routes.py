@@ -9,6 +9,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.orm import selectinload
 
+from vector_database import qdrant_client, qdrant_collection, embed_text
+
 from database import get_db
 from auth import get_current_user
 from models import (
@@ -71,28 +73,75 @@ async def create_tender_folder(
             await db.refresh(document)
 
             # Extraction du texte PDF
-            reader = PyPDF2.PdfReader(upload.file)
-            full_text = ""
-            for page in reader.pages:
-                text = page.extract_text()
-                if text:
-                    full_text += text + "\n"
+            try:
+                reader = PyPDF2.PdfReader(upload.file)
+                full_text = ""
+                for page in reader.pages:
+                    text = page.extract_text()
+                    if text:
+                        full_text += text + "\n"
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Erreur lors de l'extraction du texte du PDF {upload.filename}: {str(e)}"
+                )
 
             # Découpage en chunks de 1000 caractères
-            CHUNK_SIZE = 1000
-            chunks = [
-                full_text[i : i + CHUNK_SIZE]
-                for i in range(0, len(full_text), CHUNK_SIZE)
-            ]
-            for idx, chunk_text in enumerate(chunks):
-                db.add(DocumentChunk(
-                    document_id=document.id,
-                    chunk_text=chunk_text,
-                    chunk_order=idx
-                ))
+            if full_text.strip():  # Vérifier qu'il y a du texte à traiter
+                CHUNK_SIZE = 1000
+                chunks = [
+                    full_text[i : i + CHUNK_SIZE]
+                    for i in range(0, len(full_text), CHUNK_SIZE)
+                ]
+                
+                # Traitement des chunks avec gestion d'erreur
+                for idx, chunk_text in enumerate(chunks):
+                    if chunk_text.strip():  # Ignorer les chunks vides
+                        try:
+                            # Sauvegarde en base de données
+                            db.add(DocumentChunk(
+                                document_id=document.id,
+                                chunk_text=chunk_text,
+                                chunk_order=idx
+                            ))
+                            
+                            # Vectorisation et insertion dans Qdrant
+                            vector = embed_text(chunk_text)
+                            
+                            # Préparation du point Qdrant
+                            point_data = {
+                                "id": str(uuid4()),  # UUID valide pour Qdrant
+                                "vector": vector,
+                                "payload": {
+                                    "document_id": str(document.id),
+                                    "chunk_order": idx,
+                                    "text": chunk_text,
+                                    "tender_folder_id": str(tender_folder.id),
+                                    "filename": upload.filename,  # Ajout du nom de fichier pour de meilleures sources
+                                }
+                            }
+                            
+                            # Insertion dans Qdrant avec gestion d'erreur
+                            qdrant_client.upsert(
+                                collection_name=qdrant_collection,
+                                points=[point_data]
+                            )
+                            
+                        except Exception as e:
+                            # Log l'erreur mais continue le traitement
+                            print(f"Erreur lors du traitement du chunk {idx} du document {upload.filename}: {str(e)}")
+                            # Vous pourriez vouloir utiliser un logger ici
+                            continue
 
         # On commit tous les chunks d'un coup
-        await db.commit()
+        try:
+            await db.commit()
+        except Exception as e:
+            await db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Erreur lors de la sauvegarde des chunks: {str(e)}"
+            )
     
     # 3) Ajouter le document_count avant de retourner
     setattr(tender_folder, "document_count", len(files) if files else 0)
@@ -131,3 +180,30 @@ async def list_tender_folders(
         setattr(f, "document_count", len(f.documents))
 
     return folders
+
+
+@router.get(
+    "/{folder_id}",
+    response_model=TenderFolderResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_tender_folder(
+    folder_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    stmt = (
+        select(TenderFolder)
+        .options(selectinload(TenderFolder.documents))  # charger les docs
+        .where(
+            TenderFolder.id == folder_id,
+            TenderFolder.organisation_id == current_user.organisation_id,
+        )
+    )
+    result = await db.execute(stmt)
+    folder = result.scalar_one_or_none()
+    if not folder:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier non trouvé")
+    # Injecter le nombre de documents pour Pydantic
+    setattr(folder, "document_count", len(folder.documents))
+    return folder
