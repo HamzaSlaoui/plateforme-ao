@@ -6,9 +6,9 @@ const PrivateRoute = ({
   children,
   requireVerified = true,
   requireOrganisation = false,
+  requireOwner = false,
 }) => {
-  const { authState, isUserVerified, hasOrganisation } = useAuth();
-
+  const { authState, isUserVerified, hasOrganisation, isOwner } = useAuth();
   // Afficher un loader pendant la vérification de l'auth
   if (authState.isLoading) {
     return (
@@ -20,7 +20,7 @@ const PrivateRoute = ({
 
   // Si non authentifié, rediriger vers login
   if (!authState.isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Si authentifié mais non vérifié et que la route nécessite vérification
@@ -28,9 +28,19 @@ const PrivateRoute = ({
     return <Navigate to="/verify-email-prompt" replace />;
   }
 
-  // Vérification pour l'organisation
+  // Si la route est /organisation-choice (requireOrganisation=false)
+  // et que l'utilisateur a déjà une organisation, rediriger vers dashboard
+  if (!requireOrganisation && hasOrganisation()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Si la route nécessite une org et que l'utilisateur n'en a pas
   if (requireOrganisation && !hasOrganisation()) {
     return <Navigate to="/organisation-choice" replace />;
+  }
+
+  if (requireOwner && !isOwner()) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

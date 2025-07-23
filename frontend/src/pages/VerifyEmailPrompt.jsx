@@ -31,7 +31,7 @@ function VerifyEmailPrompt() {
         sessionStorage.removeItem("pendingVerificationEmail");
       }
     };
-  }, [authState.user, isVerified, navigate]);
+  }, [authState.user, navigate]);
 
   // Chargement du cooldown depuis localStorage
   useEffect(() => {
@@ -145,10 +145,18 @@ function VerifyEmailPrompt() {
         </div>
 
         {isVerified ? (
-          <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-700 dark:text-green-300 text-center">
-            <CheckCircle className="inline w-5 h-5 mr-2" />
-            Votre email est déjà vérifié!
-          </div>
+          <>
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-700 dark:text-green-300 text-center">
+              <CheckCircle className="inline w-5 h-5 mr-2" />
+              Votre email est déjà vérifié!
+            </div>
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-full py-2 px-4 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+            >
+              Accéder à votre compte
+            </button>
+          </>
         ) : (
           <>
             {resendStatus.sent && !resendStatus.loading && (

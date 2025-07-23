@@ -8,7 +8,6 @@ function VerifyEmail() {
   const [status, setStatus] = useState({
     loading: true,
     success: false,
-    error: null,
   });
   const navigate = useNavigate();
 
@@ -17,7 +16,7 @@ function VerifyEmail() {
     const token = urlParams.get("token");
 
     if (!token) {
-      setStatus({ loading: false, success: false, error: "Token manquant" });
+      setStatus({ loading: false, success: false });
       return;
     }
 
@@ -25,7 +24,7 @@ function VerifyEmail() {
       const result = await verifyEmail(token);
 
       if (result.success) {
-        setStatus({ loading: false, success: true, error: null });
+        setStatus({ loading: false, success: true });
 
         // Rediriger après 3 secondes
         setTimeout(() => {
@@ -40,7 +39,7 @@ function VerifyEmail() {
           }
         }, 3000);
       } else {
-        setStatus({ loading: false, success: false, error: result.error });
+        setStatus({ loading: false, success: false });
       }
     };
 
@@ -83,9 +82,6 @@ function VerifyEmail() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Échec de la vérification
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {status.error}
-            </p>
             <Link
               to="/login"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

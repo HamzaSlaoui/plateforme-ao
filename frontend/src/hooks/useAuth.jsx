@@ -76,7 +76,10 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const loginResult = await login(email, password);
+      setAuthState((prev) => ({
+        ...prev,
+        isAuthenticated: true,
+      }));
 
       // Retourner success avec indication de vérification nécessaire
       return {
@@ -127,11 +130,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isUserVerified = () => {
-    return authState.user?.is_verified || false;
+    return Boolean(authState.user?.is_verified);
   };
 
   const hasOrganisation = () => {
-    return authState.user?.organisation_id !== null;
+    return Boolean(authState.user?.organisation?.id);
+  };
+
+  const isOwner = () => {
+    return Boolean(authState.user?.is_owner);
   };
 
   const refreshUser = async () => {
@@ -162,6 +169,7 @@ export const AuthProvider = ({ children }) => {
         verifyEmail,
         isUserVerified,
         hasOrganisation,
+        isOwner,
         refreshUser,
         api, // Exposer l'instance axios configurée
       }}
