@@ -14,13 +14,13 @@ import {
 import Sidebar from "../components/Sidebar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import TenderCard from "../components/TenderCard";
 
 function Dashboard() {
   const { api } = useAuth();
   const navigate = useNavigate();
 
   const [dossiers, setDossiers] = useState([]);
+  const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -31,7 +31,9 @@ function Dashboard() {
     const fetchDossiers = async () => {
       try {
         const res = await api.get("/tender-folders");
-        setDossiers(res.data);
+        console.log(res.data);
+        setStats(res.data.stats);
+        setDossiers(res.data.folders);
       } catch (err) {
         console.error(err);
         setError("Impossible de charger les dossiers.");
@@ -98,17 +100,18 @@ function Dashboard() {
     }
   };
 
-  const handleCardClick = (dossierId) => {
+  const handleCardClick = (e, dossierId) => {
+    e.stopPropagation();
     navigate(`/tender-folders/${dossierId}`);
   };
 
   const handleChatClick = (e, dossierId) => {
-    e.stopPropagation(); // Empêcher la navigation vers le dossier
+    e.stopPropagation();
     navigate(`/chat/${dossierId}`);
   };
 
   const handleViewClick = (e, dossierId) => {
-    e.stopPropagation(); // Empêcher la navigation vers le dossier
+    e.stopPropagation();
     navigate(`/tender-folders/${dossierId}`);
   };
 
@@ -153,7 +156,66 @@ function Dashboard() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* ... vos cards ici ... */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Total des dossiers
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {dossiers.length}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <Search className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    En cours
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.en_cours}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <Filter className="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Gagné
+                  </p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {stats.gagne}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                  <Filter className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Soumis
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats.soumis}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Filters */}
@@ -192,7 +254,7 @@ function Dashboard() {
               <div
                 key={dossier.id}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
-                onClick={() => handleCardClick(dossier.id)}
+                onClick={(e) => handleCardClick(e, dossier.id)}
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">

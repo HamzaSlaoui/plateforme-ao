@@ -1,8 +1,9 @@
+from ast import Dict
 from uuid import UUID, uuid4
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 import PyPDF2 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status # type: ignore
@@ -20,7 +21,7 @@ from models import (
     TenderStatus,
     User
 )
-from schemas import TenderFolderResponse  # votre Pydantic response_model
+from schemas import FolderListResponse, TenderDetailResponse, TenderFolderResponse  # votre Pydantic response_model
 
 router = APIRouter(prefix="/tender-folders", tags=["tender-folders"])
 
@@ -149,37 +150,84 @@ async def create_tender_folder(
     return tender_folder
 
 
-@router.get(
-    "/",
-    response_model=List[TenderFolderResponse],
-    status_code=status.HTTP_200_OK,
-)
+# @router.get(
+#     "/",
+#     response_model=List[TenderFolderResponse],
+#     status_code=status.HTTP_200_OK,
+# )
+# async def list_tender_folders(
+#     current_user: User = Depends(get_current_user),
+#     db: AsyncSession = Depends(get_db),
+# ):
+#     # 1️⃣ Vérifier que l'utilisateur appartient bien à une organisation
+#     if current_user.organisation_id is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_403_FORBIDDEN,
+#             detail="Vous n'appartenez à aucune organisation",
+#         )
+
+#     # 2️⃣ Charger les dossiers + leurs documents en un seul appel
+#     stmt = (
+#         select(TenderFolder)
+#         .options(selectinload(TenderFolder.documents))
+#         .where(TenderFolder.organisation_id == current_user.organisation_id)
+#     )
+#     result = await db.execute(stmt)
+#     folders: List[TenderFolder] = result.scalars().all()
+
+#     # 3️⃣ Injecter le nombre de documents (pour votre response_model)
+#     for f in folders:
+#         # On ajoute dynamiquement l'attribut attendu par Pydantic
+#         setattr(f, "document_count", len(f.documents))
+
+#     return folders
+
+
+
+@router.get("/", response_model=FolderListResponse, status_code=status.HTTP_200_OK)
 async def list_tender_folders(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # 1️⃣ Vérifier que l'utilisateur appartient bien à une organisation
+    # 1️⃣ Vérif organisation
     if current_user.organisation_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Vous n'appartenez à aucune organisation",
         )
 
-    # 2️⃣ Charger les dossiers + leurs documents en un seul appel
+    org_id = current_user.organisation_id
+
+    # 2️⃣ Récupérer tous les dossiers + documents
     stmt = (
         select(TenderFolder)
         .options(selectinload(TenderFolder.documents))
-        .where(TenderFolder.organisation_id == current_user.organisation_id)
+        .where(TenderFolder.organisation_id == org_id)
     )
     result = await db.execute(stmt)
-    folders: List[TenderFolder] = result.scalars().all()
+    folders = result.scalars().all()
 
-    # 3️⃣ Injecter le nombre de documents (pour votre response_model)
+    # Injecter document_count
     for f in folders:
-        # On ajoute dynamiquement l'attribut attendu par Pydantic
         setattr(f, "document_count", len(f.documents))
 
-    return folders
+    # 3️⃣ Calculer les stats par status
+    count_stmt = (
+        select(TenderFolder.status, func.count())
+        .where(TenderFolder.organisation_id == org_id)
+        .group_by(TenderFolder.status)
+    )
+    count_res = await db.execute(count_stmt)
+    raw_stats = dict(count_res.all())  # ex. {"draft": 3, "in-progress": 5, ...}
+
+    # Assurer que chaque statut figure dans le dict (optionnel)
+    all_statuses = ["en_cours", "soumis", "gagne", "perdu"]
+    stats: Dict[str,int] = { status: raw_stats.get(status, 0) for status in all_statuses }
+
+    return FolderListResponse(
+        folders=folders,
+        stats=stats
+    )
 
 
 @router.get(
@@ -207,3 +255,46 @@ async def get_tender_folder(
     # Injecter le nombre de documents pour Pydantic
     setattr(folder, "document_count", len(folder.documents))
     return folder
+
+
+
+
+
+# @router.get(
+#     "/{folder_id}",
+#     response_model=TenderDetailResponse,
+#     status_code=status.HTTP_200_OK,
+# )
+# async def get_tender_folder(
+#     folder_id: UUID,
+#     current_user=Depends(get_current_user),
+#     db: AsyncSession = Depends(get_db),
+# ):
+#     # On vérifie que le dossier appartient à l'organisation de l'utilisateur
+#     stmt = (
+#         select(TenderFolder)
+#         .options(selectinload(TenderFolder.documents))
+#         .where(
+#             TenderFolder.id == folder_id,
+#             TenderFolder.organisation_id == current_user.organisation_id,
+#         )
+#     )
+#     result = await db.execute(stmt)
+#     folder = result.scalar_one_or_none()
+#     if not folder:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND, detail="Dossier non trouvé"
+#         )
+
+#     # Liste des noms de fichiers
+#     attachments = [doc.filename for doc in folder.documents]
+
+#     return TenderDetailResponse(
+#         id=folder.id,
+#         title=folder.name,
+#         description=folder.description,
+#         deadline=folder.submission_deadline,
+#         status=folder.status,
+#         attachments=attachments,
+#         createdAt=folder.created_at,
+#     )
