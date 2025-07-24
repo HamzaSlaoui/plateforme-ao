@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, constr 
 from datetime import datetime
 from uuid import UUID
-from typing import Optional
+from typing import List, Optional, Dict
 from enum import Enum
 
 
@@ -120,6 +120,23 @@ class TenderFolderResponse(TenderFolderBase):
     # Nombre de documents (pour le badge "Pièces jointes")
     document_count: int
 
+    model_config = ConfigDict(from_attributes=True)
+
+class FolderListResponse(BaseModel):
+    folders: List[TenderFolderResponse]
+    stats: Dict[str, int]
+
+    
+class TenderDetailResponse(BaseModel):
+    id: UUID
+    title: str
+    description: Optional[str]
+    deadline: Optional[datetime]
+    status: str
+    attachments: List[str]
+    createdAt: datetime
+
+    # alias Pydantic
     model_config = ConfigDict(from_attributes=True)
 
 
