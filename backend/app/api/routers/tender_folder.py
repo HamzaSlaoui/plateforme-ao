@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.orm import selectinload
 
-from services.vectore_database import qdrant_client, qdrant_collection, embed_text
+from services.vector_database import qdrant_client, qdrant_collection, embed_text
 
 from db.session import get_db
 from core.security import get_current_user
