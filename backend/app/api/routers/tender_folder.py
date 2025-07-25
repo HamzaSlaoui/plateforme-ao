@@ -2,7 +2,7 @@ from ast import Dict
 from uuid import UUID, uuid4
 from datetime import datetime
 from typing import List, Optional
-
+import re
 from sqlalchemy import func, select
 
 import PyPDF2 
@@ -97,6 +97,7 @@ async def create_tender_folder(
                 
                 # Traitement des chunks avec gestion d'erreur
                 for idx, chunk_text in enumerate(chunks):
+                    chunk_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', chunk_text)
                     if chunk_text.strip():  # Ignorer les chunks vides
                         try:
                             # Sauvegarde en base de données
