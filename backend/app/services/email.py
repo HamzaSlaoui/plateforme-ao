@@ -3,14 +3,15 @@ import os
 import aiosmtplib # type: ignore
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from core.config import Config
 
 # Configuration email
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USERNAME = os.getenv("SMTP_USERNAME", "slaouihza2@gmail.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "tjkt xblv tiyd tgce")
-FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USERNAME)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+# SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+# SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+# SMTP_USERNAME = os.getenv("SMTP_USERNAME", "slaouihza2@gmail.com")
+# SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "tjkt xblv tiyd tgce")
+# FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USERNAME)
+# FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 
 async def send_email(
@@ -21,7 +22,7 @@ async def send_email(
 ):
     """Envoie un email de manière asynchrone"""
     message = MIMEMultipart()
-    message["From"] = FROM_EMAIL
+    message["From"] = Config.FROM_EMAIL
     message["To"] = to_email
     message["Subject"] = subject
     
@@ -30,11 +31,11 @@ async def send_email(
     try:
         await aiosmtplib.send(
             message,
-            hostname=SMTP_HOST,
-            port=SMTP_PORT,
+            hostname=Config.SMTP_HOST,
+            port=Config.SMTP_PORT,
             start_tls=True,
-            username=SMTP_USERNAME,
-            password=SMTP_PASSWORD,
+            username=Config.SMTP_USERNAME,
+            password=Config.SMTP_PASSWORD,
         )
         return True
     except Exception as e:
@@ -44,7 +45,7 @@ async def send_email(
 
 async def send_verification_email(email: str, verification_token: str):
     """Envoie l'email de vérification"""
-    verification_link = f"{FRONTEND_URL}/verify-email?token={verification_token}"
+    verification_link = f"{Config.FRONTEND_URL}/verify-email?token={verification_token}"
     
     html_body = f"""
     <html>
@@ -69,7 +70,7 @@ async def send_verification_email(email: str, verification_token: str):
 
 async def send_password_reset_email(email: str, reset_token: str):
     """Envoie l'email de réinitialisation du mot de passe"""
-    reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+    reset_link = f"{Config.FRONTEND_URL}/reset-password?token={reset_token}"
     
     html_body = f"""
     <html>

@@ -5,7 +5,7 @@ const AuthContext = createContext(null);
 
 // Configure API client
 const API_URL = "http://localhost:8000";
-const api = axios.create({ baseURL: API_URL });
+const api = axios.create({ baseURL: API_URL, withCredentials: true });
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
@@ -15,10 +15,42 @@ export const AuthProvider = ({ children }) => {
     isLoading: true,
   });
 
+  // Set up interceptor for token refresh on 401
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalReq = error.config;
+        if (
+          error.response?.status === 401 &&
+          !originalReq._retry &&
+          !originalReq.url.endsWith("/auth/refresh")
+        ) {
+          originalReq._retry = true;
+          try {
+            const { data } = await api.post("/auth/refresh");
+            const bearer = `Bearer ${data.access_token}`;
+            // Update localStorage & axios header
+            localStorage.setItem("token", bearer);
+            api.defaults.headers.common["Authorization"] = bearer;
+            originalReq.headers["Authorization"] = bearer;
+            return api(originalReq);
+          } catch (e) {
+            logout();
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, []);
+
+  // Initialize auth state from localStorage
   useEffect(() => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
-
     if (token && user) {
       api.defaults.headers.common["Authorization"] = token;
       setAuthState({
@@ -36,20 +68,17 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post("/auth/login", { email, password });
       const { access_token, token_type } = response.data;
-      const token = `${token_type} ${access_token}`;
+      const bearer = `${token_type} ${access_token}`;
+      localStorage.setItem("token", bearer);
+      api.defaults.headers.common["Authorization"] = bearer;
 
-      localStorage.setItem("token", token);
-
-      api.defaults.headers.common["Authorization"] = token;
-      // Récupérer les infos utilisateur
-      const userResponse = await api.get("/auth/me");
-      const user = userResponse.data;
-
+      const userResp = await api.get("/auth/me");
+      const user = userResp.data;
       localStorage.setItem("user", JSON.stringify(user));
 
       setAuthState({
         user,
-        token,
+        token: bearer,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -57,7 +86,7 @@ export const AuthProvider = ({ children }) => {
       return {
         success: true,
         isVerified: user.is_verified,
-        hasOrganisation: user.organisation_id !== null,
+        hasOrganisation: Boolean(user.organisation_id),
       };
     } catch (error) {
       return {
@@ -69,25 +98,15 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (firstname, lastname, email, password) => {
     try {
-      const response = await api.post("/auth/register", {
+      await api.post("/auth/register", {
         firstname,
         lastname,
         email,
         password,
       });
-
-      setAuthState((prev) => ({
-        ...prev,
-        isAuthenticated: true,
-      }));
-
-      // Retourner success avec indication de vérification nécessaire
-      return {
-        success: true,
-        needsVerification: true,
-      };
+      setAuthState((prev) => ({ ...prev, isAuthenticated: true }));
+      return { success: true, needsVerification: true };
     } catch (error) {
-      console.error("Signup error:", error.response || error.message);
       return {
         success: false,
         error: error.response?.data?.detail || "Erreur lors de l'inscription",
@@ -97,19 +116,15 @@ export const AuthProvider = ({ children }) => {
 
   const verifyEmail = async (token) => {
     try {
-      const response = await api.post("/auth/verify-email", { token });
-
-      // Recharger les infos utilisateur si connecté
+      await api.post("/auth/verify-email", { token });
       if (authState.isAuthenticated) {
         const userResp = await api.get("/auth/me");
         const user = userResp.data;
         localStorage.setItem("user", JSON.stringify(user));
         setAuthState((prev) => ({ ...prev, user }));
       }
-
       return { success: true };
     } catch (error) {
-      console.error("Verify email error:", error.response || error.message);
       return {
         success: false,
         error: error.response?.data?.detail || "Token invalide ou expiré",
@@ -129,32 +144,18 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  const isUserVerified = () => {
-    return Boolean(authState.user?.is_verified);
-  };
-
-  const hasOrganisation = () => {
-    return Boolean(authState.user?.organisation?.id);
-  };
-
-  const isOwner = () => {
-    return Boolean(authState.user?.is_owner);
-  };
+  const isUserVerified = () => Boolean(authState.user?.is_verified);
+  const hasOrganisation = () => Boolean(authState.user?.organisation.id);
+  const isOwner = () => Boolean(authState.user?.is_owner);
 
   const refreshUser = async () => {
     try {
-      const response = await api.get("/auth/me");
-      const user = response.data;
-
+      const userResp = await api.get("/auth/me");
+      const user = userResp.data;
       localStorage.setItem("user", JSON.stringify(user));
-      setAuthState((prev) => ({
-        ...prev,
-        user,
-      }));
-
+      setAuthState((prev) => ({ ...prev, user }));
       return { success: true, user };
     } catch (error) {
-      console.error("Erreur lors du rafraîchissement:", error);
       return { success: false, error: error.message };
     }
   };
@@ -171,7 +172,7 @@ export const AuthProvider = ({ children }) => {
         hasOrganisation,
         isOwner,
         refreshUser,
-        api, // Exposer l'instance axios configurée
+        api,
       }}
     >
       {children}

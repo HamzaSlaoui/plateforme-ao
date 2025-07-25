@@ -10,18 +10,15 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.orm import selectinload
 
-from vector_database import qdrant_client, qdrant_collection, embed_text
+from services.vectore_database import qdrant_client, qdrant_collection, embed_text
 
-from database import get_db
-from auth import get_current_user
-from models import (
-    TenderFolder,
-    Document,
-    DocumentChunk,
-    TenderStatus,
-    User
-)
-from schemas import FolderListResponse, TenderDetailResponse, TenderFolderResponse  # votre Pydantic response_model
+from db.session import get_db
+from core.security import get_current_user
+from models.tender_folder import TenderFolder, TenderStatus
+from models.document import Document
+from models.document_chunk import DocumentChunk
+from models.user import User
+from schemas.tender_folder import FolderListResponse, TenderFolderResponse  # votre Pydantic response_model
 
 router = APIRouter(prefix="/tender-folders", tags=["tender-folders"])
 

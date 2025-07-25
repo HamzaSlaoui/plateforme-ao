@@ -2,21 +2,19 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
 from sentence_transformers import SentenceTransformer
 import logging
+from core.config import Config
 
 # Logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuration
-VECTOR_SIZE = 384
-QDRANT_URL = "https://eaae1316-8bf6-493d-b87e-ac84a6a804dc.europe-west3-0.gcp.cloud.qdrant.io:6333"
-QDRANT_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.k-4ZhgJhFgdtieb7zCPGDTP1qj8Zyr_Ng1ZmzxbWLI0"
+
 qdrant_collection = "document_chunks"
 
 # Client
 qdrant_client = QdrantClient(
-    url=QDRANT_URL,
-    api_key=QDRANT_API_KEY,
+    url=Config.QDRANT_URL,
+    api_key=Config.QDRANT_API_KEY,
 )
 
 
@@ -29,7 +27,7 @@ def create_collection():
     try:
         qdrant_client.create_collection(
             collection_name=qdrant_collection,
-            vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
+            vectors_config=VectorParams(size=Config.VECTOR_SIZE, distance=Distance.COSINE),
         )
         logger.info(f"Collection '{qdrant_collection}' créée avec succès.")
     except Exception as e:

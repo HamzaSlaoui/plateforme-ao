@@ -3,7 +3,7 @@ from sqlalchemy.pool import NullPool # type: ignore
 from typing import AsyncGenerator
 import os
 
-from models import Base
+from db.base import Base
 
 # Configuration de la base de données
 DATABASE_URL = os.getenv(
