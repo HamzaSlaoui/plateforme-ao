@@ -4,15 +4,17 @@ from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from typing import List
 from uuid import UUID
 from sqlalchemy.exc import IntegrityError
-
-
-from database import get_db
-from schemas import JoinOrgRequest, JoinRequestResponse, OrganisationCreate, OrganisationResponse, UserResponse
-from auth import get_current_user
-from models import Organisation, OrganisationJoinRequest, User
-
 import secrets, string
 
+from core.security import get_current_user
+
+from db.session import get_db
+from schemas.user import UserResponse
+from schemas.organisation import OrganisationCreate, OrganisationResponse
+from schemas.organisation_join_request import JoinOrgRequest, JoinRequestResponse
+from models.organisation import Organisation
+from models.organisation_join_request import OrganisationJoinRequest
+from models.user import User
 
 
 router = APIRouter(prefix="/organisations", tags=["organisations"])

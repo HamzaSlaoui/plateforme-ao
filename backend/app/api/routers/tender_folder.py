@@ -10,21 +10,19 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.orm import selectinload
 
-from vector_database import qdrant_client, qdrant_collection, embed_text
+from services.vectore_database import qdrant_client, qdrant_collection, embed_text
 
-from database import get_db
-from auth import get_current_user
-from models import (
-    TenderFolder,
-    Document,
-    DocumentChunk,
-    TenderStatus,
-    User
-)
-from schemas import FolderListResponse, TenderDetailResponse, TenderFolderResponse  # votre Pydantic response_model
+from db.session import get_db
+from core.security import get_current_user
+from models.tender_folder import TenderFolder, TenderStatus
+from models.document import Document
+from models.document_chunk import DocumentChunk
+from models.user import User
+from schemas.tender_folder import FolderListResponse, TenderFolderResponse  # votre Pydantic response_model
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 router = APIRouter(prefix="/tender-folders", tags=["tender-folders"])
-
 
 @router.post("/create", response_model=TenderFolderResponse)
 async def create_tender_folder(
@@ -88,12 +86,14 @@ async def create_tender_folder(
                 )
 
             # Découpage en chunks de 1000 caractères
-            if full_text.strip():  # Vérifier qu'il y a du texte à traiter
-                CHUNK_SIZE = 1000
-                chunks = [
-                    full_text[i : i + CHUNK_SIZE]
-                    for i in range(0, len(full_text), CHUNK_SIZE)
-                ]
+            if full_text.strip():
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=1000,
+                    chunk_overlap=200,
+                    separators=["\n\n", "\n", ".", "!", "?", " "]
+                )
+                chunks = text_splitter.split_text(full_text)
+
                 
                 # Traitement des chunks avec gestion d'erreur
                 for idx, chunk_text in enumerate(chunks):

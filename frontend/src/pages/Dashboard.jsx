@@ -177,23 +177,8 @@ function Dashboard() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     En cours
                   </p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {stats.en_cours}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                  <Filter className="w-6 h-6 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Gagné
-                  </p>
                   <p className="text-2xl font-bold text-yellow-600">
-                    {stats.gagne}
+                    {stats.en_cours}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
@@ -213,6 +198,21 @@ function Dashboard() {
                 </div>
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                   <Filter className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Gagné
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.gagne}
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <Filter className="w-6 h-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </div>

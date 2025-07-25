@@ -1,17 +1,15 @@
 from datetime import timedelta
-
-from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
-from sqlalchemy import select # type: ignore
-from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
+from fastapi import APIRouter, Cookie, Depends, HTTPException, status, Response
+from sqlalchemy import select 
+from sqlalchemy.ext.asyncio import AsyncSession 
 from uuid import UUID
-
-from auth import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_token
-from database import get_db
-from email_service import send_verification_email
-from models import User
-from schemas import EmailVerification, Token, UserCreate, UserLogin, UserResponse
-
-from auth import oauth2_scheme 
+from core.security import create_access_token, create_refresh_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_token
+from services.email import send_verification_email
+from db.session import get_db
+from models.user import User
+from schemas.user import UserCreate, UserLogin, UserResponse
+from schemas.auth import EmailVerification, Token 
+from core.config import Config
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -67,6 +65,7 @@ async def register(
 
 @router.post("/login", response_model=Token)
 async def login(
+    response: Response,
     form_data: UserLogin,
     db: AsyncSession = Depends(get_db)
 ):
@@ -83,15 +82,50 @@ async def login(
         )
     
     # Créer le token
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(str(user.id))
+
+    refresh_token = create_refresh_token(str(user.id))
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=not Config.DEBUG,
+        samesite="lax",
+        max_age=Config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        path="/"
     )
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
     }
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_access_token(
+    response: Response,
+    refresh_token: str = Cookie(None),
+):
+    if not refresh_token:
+        raise HTTPException(401, "refresh token manquant")
+
+    payload = verify_token(refresh_token, expected_type="refresh")
+    if not payload:
+        raise HTTPException(401, "refresh token invalide ou expiré")
+
+    user_id = payload["sub"]
+    # (Optionnel) vérifier en base que ce refresh n’a pas été révoqué
+
+    new_access = create_access_token(str(user_id))
+    return {"access_token": new_access, "token_type": "bearer"}
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie("refresh_token", path="/")
+    return {"msg": "Déconnexion réussie"}
+
+
 
 @router.post("/verify-email")
 async def verify_email(
