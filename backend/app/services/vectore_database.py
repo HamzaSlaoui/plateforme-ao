@@ -1,9 +1,5 @@
-from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance
-from sentence_transformers import SentenceTransformer
 import logging
 from core.config import Config
-
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, FilterSelector, Filter, PayloadSchemaType
 from sentence_transformers import SentenceTransformer
