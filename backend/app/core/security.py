@@ -8,18 +8,13 @@ from fastapi.security import OAuth2PasswordBearer # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy import select # type: ignore
 from sqlalchemy.orm import selectinload
-import secrets
-import os
 from uuid import UUID
 
-from database import get_db
-from models import User
+from api.deps import get_db
+from models.user import User
 
-# Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", secrets.token_urlsafe(32))
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-VERIFICATION_TOKEN_EXPIRE_HOURS = 24
+from core.config import Config
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -33,25 +28,60 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+# def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+#     to_encode = data.copy()
+#     if expires_delta:
+#         expire = datetime.now(timezone.utc) + expires_delta
+#     else:
+#         expire = datetime.now(timezone.utc) + timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+#     to_encode["exp"] = expire
+#     encoded_jwt = jwt.encode(to_encode, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
+#     return encoded_jwt
+
+def create_access_token(
+    user_id: str,
+    expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Génère un JWT de type 'access' avec :
+      - sub: user_id
+      - exp: expiration (par défaut Config.ACCESS_TOKEN_EXPIRE_MINUTES)
+    """
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    payload = {
+        "sub": user_id,
+        "exp": expire
+        # Optionnel : ajouter "type": "access" si tu veux marquer explicitement
+    }
+    return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
+
+
+def create_refresh_token(
+    user_id: str,
+    expires_delta: Optional[timedelta] = None
+) -> str:
+    expire = datetime.now(timezone.utc) + (
+        expires_delta or timedelta(days=Config.REFRESH_TOKEN_EXPIRE_DAYS)
+    )
+    payload = {
+        "sub": user_id,
+        "type": "refresh",
+        "exp": expire
+    }
+    return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
+
 
 
 def create_verification_token(user_id: str) -> str:
     data = {
         "user_id": user_id,
         "type": "email_verification",
-        "exp": datetime.now(timezone.utc) + timedelta(hours=VERIFICATION_TOKEN_EXPIRE_HOURS)
+        "exp": datetime.now(timezone.utc) + timedelta(hours=Config.VERIFICATION_TOKEN_EXPIRE_HOURS)
     }
-    return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(data, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
 
 
 def verify_token(token: str, expected_type: Optional[str] = None) -> Optional[dict]:
@@ -61,7 +91,7 @@ def verify_token(token: str, expected_type: Optional[str] = None) -> Optional[di
     Mappe aussi payload["sub"] → payload["user_id"] pour l'accès utilisateur.
     """
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
 
         # Vérification du type de token (si demandé)
         if expected_type and payload.get("type") != expected_type:
@@ -89,7 +119,7 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
         user_id: str = payload.get("sub")  # type: ignore
         if user_id is None:
             raise credentials_exception

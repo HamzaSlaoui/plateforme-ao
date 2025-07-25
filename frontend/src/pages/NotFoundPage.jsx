@@ -17,11 +17,11 @@ const NotFoundPage = () => {
             Oups ! La page que vous recherchez n'existe pas.
           </p>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate(-1)}
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Retour à la page de connexion
+            Retour
           </button>
         </div>
       </main>

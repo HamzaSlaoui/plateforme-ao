@@ -1,28 +1,26 @@
 from uuid import UUID
 from typing import List
-import httpx
+import httpx 
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
-from database import get_db
-from auth import get_current_user
-from models import User, TenderFolder, DocumentChunk
-from vector_database import qdrant_client, qdrant_collection, embed_text
+from db.session import get_db
+from core.security import get_current_user
+from models.user import User
+from models.tender_folder import TenderFolder
+from services.vectore_database import qdrant_client, qdrant_collection, embed_text
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
-
 
 class ChatRequest(BaseModel):
     message: str
     folder_id: UUID
 
-
 class ChatResponse(BaseModel):
     response: str
     sources: List[str] = []
-
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_folder(
