@@ -9,6 +9,7 @@ import PyPDF2
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy.orm import selectinload
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from vector_database import qdrant_client, qdrant_collection, embed_text
 
@@ -88,12 +89,14 @@ async def create_tender_folder(
                 )
 
             # Découpage en chunks de 1000 caractères
-            if full_text.strip():  # Vérifier qu'il y a du texte à traiter
-                CHUNK_SIZE = 1000
-                chunks = [
-                    full_text[i : i + CHUNK_SIZE]
-                    for i in range(0, len(full_text), CHUNK_SIZE)
-                ]
+            if full_text.strip():
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=1000,
+                    chunk_overlap=200,
+                    separators=["\n\n", "\n", ".", "!", "?", " "]
+                )
+                chunks = text_splitter.split_text(full_text)
+
                 
                 # Traitement des chunks avec gestion d'erreur
                 for idx, chunk_text in enumerate(chunks):
