@@ -14,7 +14,7 @@ qdrant_collection = "document_chunks"
 
 # Client
 qdrant_client = QdrantClient(
-    url=Config.QDRANT_URL,
+    url=Config.QDRANT_URL, 
     api_key=Config.QDRANT_API_KEY,
 )
 
