@@ -14,13 +14,17 @@ from services.vectore_database import qdrant_client, qdrant_collection, embed_te
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
+
+
 class ChatRequest(BaseModel):
     message: str
     folder_id: UUID
 
+
 class ChatResponse(BaseModel):
     response: str
     sources: List[str] = []
+
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_folder(
@@ -68,7 +72,7 @@ async def chat_with_folder(
                     {"key": "tender_folder_id", "match": {"value": str(request.folder_id)}}
                 ]
             },
-            limit=5,
+            limit=10,
             score_threshold=0.3
         )
     except Exception as filter_error:
@@ -103,15 +107,20 @@ async def chat_with_folder(
     # 4. Construire le contexte à partir des chunks trouvés
     context_chunks = []
     sources = []
-    
+    unique_filenames = set()
+
     for result in search_results:
         chunk_text = result.payload.get("text", "")
         if chunk_text:
             context_chunks.append(chunk_text)
-            # Ajouter la source (nom du document)
-            document_id = result.payload.get("document_id")
-            if document_id and document_id not in sources:
-                sources.append(f"Document ID: {document_id}")
+            
+            filename = result.payload.get("filename")
+            if filename:
+                unique_filenames.add(filename)
+
+    sources = list(unique_filenames)
+
+
     
     if not context_chunks:
         return ChatResponse(
@@ -147,28 +156,32 @@ INSTRUCTIONS:
 Réponse:"""
 
     # 6. Appeler l'API OpenRouter
+    # ... tout ton code avant ...
+
+    # 6. Appeler l'API OpenRouter (modèle gratuit Nous Hermes 2 Pro Llama-3-8B)
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
-                headers={"Authorization": "Bearer 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"},
+                headers={
+                    "Authorization": "Bearer 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",
+                    "Content-Type": "application/json",
+                },
                 json={
-                    "model": "openai/gpt-4o-mini",
+                    "model": "nousresearch/hermes-2-pro-llama-3-8b",
                     "messages": [{"role": "user", "content": context}],
-                    "temperature": 0.3,  
+                    "temperature": 0.3,
                     "max_tokens": 1000
                 }
             )
             response.raise_for_status()
-            
             ai_response = response.json()
             generated_text = ai_response["choices"][0]["message"]["content"].strip()
-            
+
             return ChatResponse(
                 response=generated_text,
                 sources=sources
             )
-            
     except httpx.HTTPError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
