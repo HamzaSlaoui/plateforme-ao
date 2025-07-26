@@ -1,11 +1,10 @@
 from uuid import UUID
 from typing import List
-import httpx 
+import requests
 from sqlalchemy import select
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
-
 from db.session import get_db
 from core.security import get_current_user
 from models.user import User
@@ -14,17 +13,13 @@ from services.vector_database import qdrant_client, qdrant_collection, embed_tex
 
 router = APIRouter(prefix="/chatbot", tags=["chatbot"])
 
-
-
 class ChatRequest(BaseModel):
     message: str
     folder_id: UUID
 
-
 class ChatResponse(BaseModel):
     response: str
     sources: List[str] = []
-
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_folder(
@@ -36,7 +31,6 @@ async def chat_with_folder(
     Chatbot RAG pour un dossier spécifique.
     Recherche dans les documents vectorisés du dossier et génère une réponse.
     """
-    
     # 1. Vérifier que le dossier existe et appartient à l'organisation de l'utilisateur
     stmt = select(TenderFolder).where(
         TenderFolder.id == request.folder_id,
@@ -44,13 +38,13 @@ async def chat_with_folder(
     )
     result = await db.execute(stmt)
     folder = result.scalar_one_or_none()
-    
+
     if not folder:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Dossier non trouvé ou accès non autorisé"
         )
-    
+
     # 2. Vectoriser la question de l'utilisateur
     try:
         question_vector = embed_text(request.message)
@@ -59,9 +53,8 @@ async def chat_with_folder(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur lors de la vectorisation: {str(e)}"
         )
-    
+
     # 3. Rechercher dans Qdrant les chunks les plus similaires pour ce dossier
-    # SOLUTION 1: Recherche simple sans filtre si l'index n'existe pas
     try:
         # D'abord, essayons avec le filtre (méthode préférée)
         search_results = qdrant_client.search(
@@ -83,16 +76,13 @@ async def chat_with_folder(
                 all_results = qdrant_client.search(
                     collection_name=qdrant_collection,
                     query_vector=question_vector,
-                    limit=50,  # Récupérer plus de résultats pour le filtrage manuel
+                    limit=50,
                     score_threshold=0.3
                 )
-                
-                # Filtrage manuel par tender_folder_id
                 search_results = [
-                    result for result in all_results 
+                    result for result in all_results
                     if result.payload.get("tender_folder_id") == str(request.folder_id)
-                ][:5]  # Limiter à 5 résultats
-                
+                ][:5]
             except Exception as e:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -103,31 +93,25 @@ async def chat_with_folder(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Erreur lors de la recherche vectorielle: {str(filter_error)}"
             )
-    
+
     # 4. Construire le contexte à partir des chunks trouvés
     context_chunks = []
-    sources = []
     unique_filenames = set()
-
     for result in search_results:
         chunk_text = result.payload.get("text", "")
         if chunk_text:
             context_chunks.append(chunk_text)
-            
             filename = result.payload.get("filename")
             if filename:
                 unique_filenames.add(filename)
-
     sources = list(unique_filenames)
 
-
-    
     if not context_chunks:
         return ChatResponse(
             response="Je n'ai pas trouvé d'informations pertinentes dans les documents de ce dossier pour répondre à votre question.",
             sources=[]
         )
-    
+
     # 5. Construire le prompt pour l'IA
     context = f"""
 Vous êtes un assistant IA spécialisé dans l'analyse d'appels d'offres. 
@@ -155,34 +139,26 @@ INSTRUCTIONS:
 
 Réponse:"""
 
-    # 6. Appeler l'API OpenRouter
-    # ... tout ton code avant ...
-
-    # 6. Appeler l'API OpenRouter (modèle gratuit Nous Hermes 2 Pro Llama-3-8B)
+    # 6. Appeler l'API OpenRouter avec GPT-4o-mini via requests
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": "Bearer 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",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "nousresearch/hermes-2-pro-llama-3-8b",
-                    "messages": [{"role": "user", "content": context}],
-                    "temperature": 0.3,
-                    "max_tokens": 1000
-                }
-            )
-            response.raise_for_status()
-            ai_response = response.json()
-            generated_text = ai_response["choices"][0]["message"]["content"].strip()
-
-            return ChatResponse(
-                response=generated_text,
-                sources=sources
-            )
-    except httpx.HTTPError as e:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": "Bearer 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"
+            },
+            json={
+                "model": "openai/gpt-4o-mini",
+                "messages": [{"role": "user", "content": context}]
+            }
+        )
+        response.raise_for_status()
+        ai_response = response.json()
+        generated_text = ai_response["choices"][0]["message"]["content"].strip()
+        return ChatResponse(
+            response=generated_text,
+            sources=sources
+        )
+    except requests.RequestException as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur lors de l'appel à l'API OpenRouter: {str(e)}"
