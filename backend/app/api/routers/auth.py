@@ -103,10 +103,7 @@ async def login(
 
 
 @router.post("/refresh", response_model=Token)
-async def refresh_access_token(
-    response: Response,
-    refresh_token: str = Cookie(None),
-):
+async def refresh_access_token(refresh_token: str = Cookie(None)):
     if not refresh_token:
         raise HTTPException(401, "refresh token manquant")
 
@@ -114,9 +111,7 @@ async def refresh_access_token(
     if not payload:
         raise HTTPException(401, "refresh token invalide ou expiré")
 
-    user_id = payload["sub"]
-
-    new_access = create_access_token(str(user_id))
+    new_access = create_access_token(str(payload))
     return {"access_token": new_access, "token_type": "bearer"}
 
 
@@ -183,9 +178,6 @@ async def resend_verification(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """
-    Renvoie l'email de vérification pour l'utilisateur connecté
-    """
     if current_user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
