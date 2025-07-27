@@ -39,6 +39,7 @@ function LoginForm() {
 
     try {
       const result = await login(email, password);
+      console.log("Login result:", result);
       if (result.success) {
         if (!result.isVerified) {
           navigate("/verify-email-prompt");

@@ -7,11 +7,32 @@ const SettingsPage = () => {
   const {
     authState: { user },
   } = useAuth();
-
+  const [organisation, setOrganisation] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    const fetchOrganisation = async () => {
+      if (!user?.organisation_id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get("/me/organisation");
+        setOrganisation(response.data);
+      } catch (error) {
+        console.error("Failed to load organisation:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganisation();
+  }, [user]);
+
   const handleCopy = () => {
-    const code = user.organisation?.code;
+    const code = organisation?.code;
     if (!code) return;
     navigator.clipboard.writeText(code);
     setCopied(true);
@@ -26,19 +47,20 @@ const SettingsPage = () => {
           Paramètres
         </h1>
 
-        {/* Autres sections de paramètres */}
-        {/* ... */}
-
         {user?.is_owner && (
           <section className="mt-8">
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              Code d’invitation
+              Code d'invitation
             </h2>
             <div className="mt-2 flex items-center bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-              {user.organisation ? (
+              {loading ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Chargement du code…
+                </p>
+              ) : organisation ? (
                 <>
                   <code className="font-mono text-xl text-gray-900 dark:text-white">
-                    {user.organisation.code}
+                    {organisation.code}
                   </code>
                   <button
                     onClick={handleCopy}
@@ -57,7 +79,7 @@ const SettingsPage = () => {
                 </>
               ) : (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Chargement du code…
+                  Aucune organisation
                 </p>
               )}
             </div>
