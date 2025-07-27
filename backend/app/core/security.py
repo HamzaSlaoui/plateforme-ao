@@ -15,7 +15,7 @@ from models.user import User
 from core.config import Config
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
