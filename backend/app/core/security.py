@@ -1,4 +1,3 @@
-# auth.py
 from datetime import datetime, timedelta, timezone # type: ignore
 from typing import Optional # type: ignore
 from jose import JWTError, jwt # type: ignore
@@ -26,18 +25,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
-
-
-# def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-#     to_encode = data.copy()
-#     if expires_delta:
-#         expire = datetime.now(timezone.utc) + expires_delta
-#     else:
-#         expire = datetime.now(timezone.utc) + timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-#     to_encode["exp"] = expire
-#     encoded_jwt = jwt.encode(to_encode, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
-#     return encoded_jwt
 
 def create_access_token(
     user_id: str,
@@ -136,14 +123,3 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
-
-
-# async def get_current_verified_user(
-#     current_user: User = Depends(get_current_user)
-# ):
-#     if not current_user.is_verified:
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Email non verifié"
-#         )
-#     return current_user
