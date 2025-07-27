@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone # type: ignore
+import logging
 from typing import Optional # type: ignore
 from jose import JWTError, jwt # type: ignore
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status # type: ignore
-from fastapi.security import OAuth2PasswordBearer # type: ignore
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from sqlalchemy import select # type: ignore
-from sqlalchemy.orm import selectinload
 from uuid import UUID
 
 from api.deps import get_db
@@ -16,7 +16,8 @@ from core.config import Config
 
 
 pwd_context = CryptContext(schemes=["bcrypt"])
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+security = HTTPBearer()
+
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -26,100 +27,122 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(
-    user_id: str,
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    Génère un JWT de type 'access' avec :
-      - sub: user_id
-      - exp: expiration (par défaut Config.ACCESS_TOKEN_EXPIRE_MINUTES)
-    """
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
+def create_access_token(user_id: str, refresh: bool = False) -> str:
+    if refresh:
+        expiry = timedelta(days=Config.REFRESH_TOKEN_EXPIRE_DAYS)
+    else:
+        expiry = timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    expire = datetime.now(timezone.utc) + expiry
     payload = {
         "sub": user_id,
-        "exp": expire
-        # Optionnel : ajouter "type": "access" si tu veux marquer explicitement
-    }
-    return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
-
-
-def create_refresh_token(
-    user_id: str,
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    expire = datetime.now(timezone.utc) + (
-        expires_delta or timedelta(days=Config.REFRESH_TOKEN_EXPIRE_DAYS)
-    )
-    payload = {
-        "sub": user_id,
-        "type": "refresh",
+        "type": "refresh" if refresh else "access",
         "exp": expire
     }
     return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
 
-
-
-def create_verification_token(user_id: str) -> str:
-    data = {
-        "user_id": user_id,
-        "type": "email_verification",
+def create_verification_token(user_id: str, purpose: str = "email_verification") -> str:
+    payload = {
+        "sub": user_id,
+        "purpose": purpose,  # "email_verification" ou "password_reset"
         "exp": datetime.now(timezone.utc) + timedelta(hours=Config.VERIFICATION_TOKEN_EXPIRE_HOURS)
     }
-    return jwt.encode(data, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
+    return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
 
 
-def verify_token(token: str, expected_type: Optional[str] = None) -> Optional[dict]:
-    """
-    Decode un JWT et, si expected_type est précisé,
-    vérifie que payload["type"] == expected_type.
-    Mappe aussi payload["sub"] → payload["user_id"] pour l'accès utilisateur.
-    """
+def verify_refresh_token(refresh_token: str) -> Optional[str]:
+    try:
+        payload = jwt.decode(
+            refresh_token, 
+            Config.SECRET_KEY, 
+            algorithms=[Config.ALGORITHM]
+        )
+        
+        # Vérifier que c'est bien un refresh token
+        token_type = payload.get("type")
+        if token_type != "refresh":
+            logging.warning("Tentative d'utiliser un access token comme refresh token")
+            return None
+            
+        return payload.get("sub")
+        
+    except jwt.ExpiredSignatureError:
+        logging.info("Refresh token expiré")
+        return None
+    except JWTError as e:
+        logging.error(f"Refresh token invalide: {e}")
+        return None
+    
+    
+def verify_verification_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
-
-        # Vérification du type de token (si demandé)
-        if expected_type and payload.get("type") != expected_type:
+        
+        # Vérifier que c'est bien un token de vérification
+        purpose = payload.get("purpose")
+        if purpose != "email_verification":
             return None
-
-        # Mapping sub → user_id pour simplifier la lecture
-        sub = payload.get("sub")
-        if sub:
-            payload["user_id"] = sub
-
-        return payload
-
-    except JWTError:
+            
+        return payload.get("sub")  # Retourne user_id
+        
+    except jwt.ExpiredSignatureError:
+        logging.error("Token de vérification expiré")
+        return None
+    except JWTError as e:
+        logging.error(f"Token invalide: {e}")
         return None
 
 
+# def verify_reset_token(token: str) -> Optional[str]:
+#     try:
+#         payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
+        
+#         if payload.get("purpose") != "password_reset":
+#             return None
+            
+#         return payload.get("sub")
+        
+#     except JWTError:
+#         return None
+
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncSession = Depends(get_db),
 ) -> User:
+    token = credentials.credentials
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
     try:
         payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
-        user_id: str = payload.get("sub")  # type: ignore
+        user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
 
+    # D'abord, charger juste l'utilisateur sans l'organisation
     result = await db.execute(
-        # on precharge la relation organisation
-        select(User)
-        .options(selectinload(User.organisation))
-        .where(User.id == UUID(user_id))
+        select(User).where(User.id == UUID(user_id))
     )
     user = result.scalar_one_or_none()
+    
     if user is None:
         raise credentials_exception
+    
+    return user
+
+
+async def get_current_verified_user(
+    user: User = Depends(get_current_user)
+) -> User:
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Email non vérifié"
+        )
     return user

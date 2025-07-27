@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 from db.session import get_db
-from core.security import get_current_user
+from core.security import get_current_verified_user
 from models.user import User
 from models.tender_folder import TenderFolder
 from services.vector_database import qdrant_client, qdrant_collection, embed_text
@@ -25,7 +25,7 @@ class ChatResponse(BaseModel):
 async def chat_with_folder(
     request: ChatRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
 ):
     """
     Chatbot RAG pour un dossier spécifique.

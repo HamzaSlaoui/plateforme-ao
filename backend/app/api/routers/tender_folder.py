@@ -13,7 +13,7 @@ from sqlalchemy.orm import selectinload
 from services.vector_database import qdrant_client, qdrant_collection, embed_text
 
 from db.session import get_db
-from core.security import get_current_user
+from core.security import get_current_verified_user
 from models.tender_folder import TenderFolder, TenderStatus
 from models.document import Document
 from models.document_chunk import DocumentChunk
@@ -34,7 +34,7 @@ async def create_tender_folder(
     organisation_id: UUID = Form(...),
     files: List[UploadFile] = File(None),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
 ):
     # 1) Création du dossier
     tender_folder = TenderFolder(
@@ -187,7 +187,7 @@ async def create_tender_folder(
 
 @router.get("/", response_model=FolderListResponse, status_code=status.HTTP_200_OK)
 async def list_tender_folders(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
     # 1️⃣ Vérif organisation
@@ -239,7 +239,7 @@ async def list_tender_folders(
 async def get_tender_folder(
     folder_id: UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
 ):
     stmt = (
         select(TenderFolder)

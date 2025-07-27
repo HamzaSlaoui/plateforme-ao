@@ -1,9 +1,10 @@
-from datetime import timedelta
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status, Response
 from sqlalchemy import select 
 from sqlalchemy.ext.asyncio import AsyncSession 
 from uuid import UUID
-from core.security import create_access_token, create_refresh_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_token
+from models.organisation import Organisation
+from schemas.organisation import OrganisationResponse
+from core.security import create_access_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_refresh_token, verify_verification_token
 from services.email import send_verification_email
 from db.session import get_db
 from models.user import User
@@ -84,7 +85,7 @@ async def login(
     # Créer le token
     access_token = create_access_token(str(user.id))
 
-    refresh_token = create_refresh_token(str(user.id))
+    refresh_token = create_access_token(str(user.id), refresh=True)
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -109,12 +110,11 @@ async def refresh_access_token(
     if not refresh_token:
         raise HTTPException(401, "refresh token manquant")
 
-    payload = verify_token(refresh_token, expected_type="refresh")
+    payload = verify_refresh_token(refresh_token)
     if not payload:
         raise HTTPException(401, "refresh token invalide ou expiré")
 
     user_id = payload["sub"]
-    # (Optionnel) vérifier en base que ce refresh n’a pas été révoqué
 
     new_access = create_access_token(str(user_id))
     return {"access_token": new_access, "token_type": "bearer"}
@@ -132,7 +132,7 @@ async def verify_email(
     data: EmailVerification,
     db: AsyncSession = Depends(get_db)
 ):
-    payload = verify_token(data.token, "email_verification")
+    payload = verify_verification_token(data.token)
     if not payload:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -141,7 +141,7 @@ async def verify_email(
     
     # Mettre à jour l'utilisateur
     result = await db.execute(
-        select(User).where(User.id == UUID(payload["user_id"]))
+        select(User).where(User.id == UUID(payload))
     )
     user = result.scalar_one_or_none()
     
@@ -162,6 +162,19 @@ async def read_current_user(
     current_user: User = Depends(get_current_user)
 ):
     return current_user
+
+@router.get("/me/organisation", response_model=OrganisationResponse)
+async def get_my_organisation(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not current_user.organisation_id:
+        raise HTTPException(status_code=404, detail="Pas d'organisation")
+    
+    result = await db.execute(
+        select(Organisation).where(Organisation.id == current_user.organisation_id)
+    )
+    return result.scalar_one()
 
 
 

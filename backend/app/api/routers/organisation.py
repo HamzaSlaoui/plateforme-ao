@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy.exc import IntegrityError
 import secrets, string
 
-from core.security import get_current_user
+from core.security import get_current_verified_user
 
 from db.session import get_db
 from schemas.user import UserResponse
@@ -34,7 +34,7 @@ async def generate_unique_code(session: AsyncSession, length: int = 8) -> str:
 @router.post("/create", response_model=OrganisationResponse)
 async def create_organisation(
     org_data: OrganisationCreate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db)
 ):
     # Vérifier que l'utilisateur n'a pas déjà une organisation
@@ -89,17 +89,16 @@ async def create_organisation(
 @router.post("/join", status_code=status.HTTP_202_ACCEPTED)
 async def join_organisation(
     payload: JoinOrgRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # 1️⃣ Vous ne pouvez pas faire plus d'une demande ou appartenir déjà
     if current_user.organisation_id is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vous appartenez déjà à une organisation"
         )
 
-    # 2️⃣ Éviter les demandes en double vers la même organisation
+    # Éviter les demandes en double vers la même organisation
     existing = await db.scalar(
         select(OrganisationJoinRequest)
         .where(
@@ -113,7 +112,7 @@ async def join_organisation(
             detail="Vous avez déjà une demande en attente"
         )
 
-    # 3️⃣ Normalisation et recherche de l'organisation
+    # Normalisation et recherche de l'organisation
     code = payload.code.strip().upper()
     org = (await db.execute(
         select(Organisation).where(Organisation.code == code)
@@ -124,7 +123,7 @@ async def join_organisation(
             detail="Code d’organisation invalide"
         )
 
-    # 4️⃣ Création de la demande sans lier immédiatement l’utilisateur
+    # Création de la demande sans lier immédiatement l’utilisateur
     join_req = OrganisationJoinRequest(
         user_id=current_user.id,
         organisation_id=org.id,
@@ -149,7 +148,7 @@ async def join_organisation(
     status_code=status.HTTP_200_OK,
 )
 async def list_join_requests(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
     # Seul le propriétaire peut voir les demandes
@@ -187,10 +186,9 @@ async def list_join_requests(
 )
 async def accept_join_request(
     request_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Check propriétaire
     if not current_user.is_owner or not current_user.organisation_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -213,7 +211,7 @@ async def accept_join_request(
             detail="Cette demande a déjà été traitée",
         )
 
-    # Accepter : changer le status et lier l'utilisateur
+    # Accepter : changer le statut et lier l'utilisateur
     join_req.status = "accepte"
     user_to_accept = await db.scalar(
         select(User).where(User.id == join_req.user_id)
@@ -230,7 +228,7 @@ async def accept_join_request(
 )
 async def reject_join_request(
     request_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
     # Check propriétaire
@@ -264,10 +262,9 @@ async def reject_join_request(
 
 @router.get("/members",response_model=List[UserResponse])
 async def list_members(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Seul le propriétaire peut accéder
     if not current_user.is_owner or not current_user.organisation_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -291,10 +288,9 @@ async def list_members(
 )
 async def remove_member(
     member_id: UUID,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Vérifier que c'est bien l'owner
     if not current_user.is_owner or not current_user.organisation_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

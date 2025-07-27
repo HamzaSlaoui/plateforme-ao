@@ -32,7 +32,7 @@ class UserResponse(BaseModel):
     email: str
     is_verified: bool
     is_owner: bool
-    organisation: Optional[OrganisationInfo]
+    organisation_id: Optional[UUID] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
