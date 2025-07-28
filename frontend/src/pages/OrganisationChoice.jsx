@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users, ArrowRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const OrganisationChoice = () => {
   const navigate = useNavigate();
-  const { authState } = useAuth();
+  const { authState, hasOrganisation } = useAuth();
 
   // Rediriger si l'utilisateur a déjà une organisation
-  React.useEffect(() => {
-    if (authState.user?.organisation_id) {
+  useEffect(() => {
+    if (hasOrganisation()) {
       navigate("/dashboard");
     }
   }, [authState.user, navigate]);

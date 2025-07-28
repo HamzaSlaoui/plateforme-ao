@@ -24,7 +24,7 @@ function VerifyEmailPrompt() {
     if (email) {
       setUserEmail(email);
     } else {
-      navigate("/login", { replace: true });
+      navigate("/");
     }
     return () => {
       if (authState.isAuthenticated) {
@@ -117,7 +117,7 @@ function VerifyEmailPrompt() {
   const handleLogout = () => {
     localStorage.removeItem("resendCooldown");
     logout();
-    navigate("/", { replace: true });
+    navigate("/");
   };
 
   const canResend = !resendStatus.loading && resendStatus.cooldown === 0;

@@ -128,7 +128,7 @@ const TenderFolderForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const orgId = authState.user.organisation?.id;
+    const orgId = authState.user.organisation_id;
 
     const formDataToSend = new FormData();
     formDataToSend.append("name", formData.name);

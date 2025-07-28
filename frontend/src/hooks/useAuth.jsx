@@ -145,7 +145,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isUserVerified = () => Boolean(authState.user?.is_verified);
-  const hasOrganisation = () => Boolean(authState.user?.organisation.id);
+  const hasOrganisation = () => Boolean(authState.user?.organisation_id);
   const isOwner = () => Boolean(authState.user?.is_owner);
 
   const refreshUser = async () => {
