@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Cookie, Depends, HTTPException, status, Response
-from sqlalchemy import select 
+from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
 from uuid import UUID
 from models.organisation import Organisation
@@ -169,7 +169,20 @@ async def get_my_organisation(
     result = await db.execute(
         select(Organisation).where(Organisation.id == current_user.organisation_id)
     )
-    return result.scalar_one()
+    organisation = result.scalar_one()
+
+    # Calculer le nombre de membres
+    member_count = await db.scalar(
+        select(func.count(User.id)).where(User.organisation_id == organisation.id)
+    )
+
+    return OrganisationResponse(
+        id=organisation.id,
+        name=organisation.name,
+        code=organisation.code,
+        created_at=organisation.created_at,
+        member_count=member_count or 1,
+    )
 
 
 
