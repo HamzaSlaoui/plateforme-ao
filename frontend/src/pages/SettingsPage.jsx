@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { Clipboard, Check } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
@@ -6,6 +6,7 @@ import { useAuth } from "../hooks/useAuth";
 const SettingsPage = () => {
   const {
     authState: { user },
+    api,
   } = useAuth();
   const [organisation, setOrganisation] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,8 +20,9 @@ const SettingsPage = () => {
       }
 
       try {
-        const response = await api.get("/me/organisation");
+        const response = await api.get("/auth/me/organisation");
         setOrganisation(response.data);
+        console.log("Organisation loaded:", response.data);
       } catch (error) {
         console.error("Failed to load organisation:", error);
       } finally {

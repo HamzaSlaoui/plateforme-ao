@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from contextlib import asynccontextmanager # type: ignore
 import uvicorn # type: ignore
 
-from db.session import create_tables
+from db.session import create_tables #, drop_tables
 from api.routers.auth import router as auth_router
 from api.routers.organisation import router as organisations_routes
 from api.routers.tender_folder import router as tender_folders_routes
@@ -14,6 +14,7 @@ from api.routers.chatbot import router as chatbot_routes
 async def lifespan(app: FastAPI):
     # Startup
     print("Creating database tables...")
+    #await drop_tables() 
     await create_tables()
     print("Tables created successfully!")
     yield

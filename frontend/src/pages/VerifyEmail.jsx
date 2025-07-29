@@ -35,7 +35,7 @@ function VerifyEmail() {
               navigate("/dashboard");
             }
           } else {
-            navigate("/login");
+            navigate("/");
           }
         }, 3000);
       } else {
