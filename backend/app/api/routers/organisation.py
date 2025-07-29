@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Response, status # type: ignore
-from sqlalchemy import func, select # type: ignore
+from sqlalchemy import func, select, update # type: ignore
 from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
 from typing import List
 from uuid import UUID
@@ -54,9 +54,15 @@ async def create_organisation(
     db.add(new_organisation)
     await db.flush()  # Pour obtenir l'ID
     
-    # Mettre à jour l'utilisateur
-    current_user.organisation_id = new_organisation.id
-    current_user.is_owner = True
+    # Mettre à jour l'utilisateurs
+    await db.execute(
+        update(User)
+        .where(User.id == current_user.id)
+        .values(
+            organisation_id=new_organisation.id,
+            is_owner=True
+        )
+    )
     
     try:
         await db.commit()
