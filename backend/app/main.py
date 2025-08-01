@@ -1,7 +1,7 @@
-from fastapi import FastAPI # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from contextlib import asynccontextmanager # type: ignore
-import uvicorn # type: ignore
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import uvicorn 
 
 from db.session import create_tables #, drop_tables
 from api.routers.auth import router as auth_router
@@ -17,8 +17,7 @@ async def lifespan(app: FastAPI):
     #await drop_tables() 
     await create_tables()
     print("Tables created successfully!")
-    yield
-    # Shutdown     
+    yield   
     print("Application shutting down...")
 
 
@@ -29,7 +28,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configuration CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -38,7 +36,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routess
 app.include_router(auth_router)
 app.include_router(organisations_routes)
 app.include_router(tender_folders_routes)

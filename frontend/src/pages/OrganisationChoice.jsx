@@ -7,7 +7,6 @@ const OrganisationChoice = () => {
   const navigate = useNavigate();
   const { authState, hasOrganisation } = useAuth();
 
-  // Rediriger si l'utilisateur a déjà une organisation
   useEffect(() => {
     if (hasOrganisation()) {
       navigate("/dashboard");
@@ -27,7 +26,6 @@ const OrganisationChoice = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Créer une organisation */}
           <div
             onClick={() => navigate("/create-organisation")}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 cursor-pointer transition-all hover:shadow-xl hover:scale-105 group"
@@ -53,7 +51,6 @@ const OrganisationChoice = () => {
             </div>
           </div>
 
-          {/* Rejoindre une organisation */}
           <div
             onClick={() => navigate("/join-organisation")}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 cursor-pointer transition-all hover:shadow-xl hover:scale-105 group"

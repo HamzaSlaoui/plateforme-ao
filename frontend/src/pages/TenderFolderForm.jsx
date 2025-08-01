@@ -40,7 +40,6 @@ const TenderFolderForm = () => {
   };
 
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
-    // Gestion des fichiers acceptés
     const newDocuments = acceptedFiles.map((file) => ({
       id: Date.now() + Math.random(),
       file: file,
@@ -52,7 +51,6 @@ const TenderFolderForm = () => {
 
     setDocuments((prev) => [...prev, ...newDocuments]);
 
-    // Gestion des fichiers rejetés (optionnel)
     if (rejectedFiles.length > 0) {
       const rejectedDocs = rejectedFiles.map((rejection) => ({
         id: Date.now() + Math.random(),
@@ -61,12 +59,9 @@ const TenderFolderForm = () => {
         errors: rejection.errors,
         status: "rejected",
       }));
-      console.log("Fichiers rejetés:", rejectedDocs);
-      // Vous pouvez afficher une notification d'erreur ici
     }
   }, []);
 
-  // Remplace la fonction getDocumentType par une version simplifiée
   const getDocumentType = (filename) => "PDF";
 
   const removeDocument = (documentId) => {
@@ -81,7 +76,6 @@ const TenderFolderForm = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  // Configuration de react-dropzone
   const {
     getRootProps,
     getInputProps,
@@ -95,17 +89,10 @@ const TenderFolderForm = () => {
       "application/pdf": [".pdf"],
     },
     multiple: true,
-    maxFiles: 10, // Limite de 10 fichiers
-    maxSize: 10 * 1024 * 1024, // 10MB max par fichier
-    onDropRejected: (rejectedFiles) => {
-      console.log("Fichiers rejetés:", rejectedFiles);
-    },
-    onError: (error) => {
-      console.error("Erreur dropzone:", error);
-    },
+    maxFiles: 10,
+    maxSize: 10 * 1024 * 1024,
   });
 
-  // Styles dynamiques pour la dropzone
   const getDropzoneClassName = () => {
     let baseClass =
       "border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 cursor-pointer ";
@@ -166,8 +153,10 @@ const TenderFolderForm = () => {
         setSuccessMessage("");
       }, 5000);
     } catch (error) {
-      console.error(error.response?.data || error);
-      // inspectez error.response.data.detail pour voir quels champs cassent
+      setSuccessMessage(
+        error?.response?.data?.message ||
+          "Erreur lors de la création du dossier. Veuillez réessayer."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -191,7 +180,6 @@ const TenderFolderForm = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Informations du dossier */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
             <div className="flex items-center mb-6">
               <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
@@ -282,7 +270,6 @@ const TenderFolderForm = () => {
             </div>
           </div>
 
-          {/* Zone de téléchargement des documents avec react-dropzone */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
@@ -340,7 +327,6 @@ const TenderFolderForm = () => {
               )}
             </div>
 
-            {/* Statistiques des fichiers */}
             {documents.length > 0 && (
               <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <div className="flex items-center justify-between text-sm">
@@ -361,7 +347,6 @@ const TenderFolderForm = () => {
               </div>
             )}
 
-            {/* Liste des documents */}
             {documents.length > 0 && (
               <div className="mt-6 space-y-3">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">
@@ -420,7 +405,6 @@ const TenderFolderForm = () => {
             )}
           </div>
 
-          {/* Boutons d'action */}
           <div className="flex justify-end space-x-4">
             <button
               type="button"
@@ -449,7 +433,6 @@ const TenderFolderForm = () => {
             </button>
           </div>
         </form>
-        {/* Affichage du toast de succès en bas à droite */}
         {successMessage && (
           <AlertToast
             message={successMessage}

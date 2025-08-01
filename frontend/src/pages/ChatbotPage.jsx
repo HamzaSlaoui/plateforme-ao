@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Bot, User, ArrowLeft, FileText, Loader2 } from "lucide-react";
+import { Send, Bot, User, FileText, Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Sidebar from "../components/Sidebar";
@@ -30,7 +30,6 @@ const ChatbotPage = () => {
         const response = await api.get(`/tender-folders/${dossierId}`);
         setFolderInfo(response.data);
       } catch (err) {
-        console.error("Erreur lors de la récupération du dossier:", err);
         setError("Impossible de charger les informations du dossier");
       }
     };
@@ -64,13 +63,13 @@ const ChatbotPage = () => {
 
     try {
       const response = await api.post("/chatbot/chat", {
-        message: inputMessage,
-        folder_id: dossierId,
+        question: inputMessage,
+        dossier_id: dossierId,
       });
 
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        message: response.data.response,
+        message: response.data.reponse,
         isUser: false,
         timestamp: new Date().toISOString(),
         sources: response.data.sources || [],
@@ -78,8 +77,6 @@ const ChatbotPage = () => {
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
-      console.error("Erreur lors de l'envoi du message:", err);
-
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         message:
@@ -131,7 +128,6 @@ const ChatbotPage = () => {
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
-        {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -160,7 +156,6 @@ const ChatbotPage = () => {
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
             <div
@@ -186,24 +181,31 @@ const ChatbotPage = () => {
                       {message.message}
                     </p>
 
-                    {/* Sources */}
                     {message.sources && message.sources.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                         <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                           Sources consultées:
                         </p>
                         <div className="space-y-1">
-                          {message.sources.map((source, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center space-x-2 text-xs"
-                            >
-                              <FileText className="w-3 h-3 text-gray-500" />
-                              <span className="text-gray-600 dark:text-gray-400">
-                                {source}
-                              </span>
+                          {message.sources?.length > 0 && (
+                            <div className="space-y-1">
+                              {message.sources.map((src, idx) => {
+                                const label =
+                                  typeof src === "string" ? src : src.document;
+                                return (
+                                  <div
+                                    key={idx}
+                                    className="flex items-center space-x-2 text-xs"
+                                  >
+                                    <FileText className="w-3 h-3 text-gray-500" />
+                                    <span className="text-gray-600 dark:text-gray-400">
+                                      {label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
                             </div>
-                          ))}
+                          )}
                         </div>
                       </div>
                     )}
@@ -248,7 +250,6 @@ const ChatbotPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
           <div className="flex space-x-3">
             <input
@@ -276,7 +277,6 @@ const ChatbotPage = () => {
             </button>
           </div>
 
-          {/* Quick suggestions */}
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               onClick={() =>

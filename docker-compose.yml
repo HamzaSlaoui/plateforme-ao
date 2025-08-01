@@ -8,19 +8,19 @@ services:
     volumes:
       - ./backend/app:/app
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/ma_db
+      - DATABASE_URL=postgresql+asyncpg://postgres:password@db:5432/ma_db2
       - FRONTEND_URL=http://localhost:5173
     depends_on:
       - db
 
   db:
-    image: postgres:15
+    image: pgvector/pgvector:pg15
     container_name: postgres_db
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: ma_db
+      POSTGRES_DB: ma_db2
     ports:
       - "5433:5432"
     volumes:

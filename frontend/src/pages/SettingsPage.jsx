@@ -22,9 +22,8 @@ const SettingsPage = () => {
       try {
         const response = await api.get("/auth/me/organisation");
         setOrganisation(response.data);
-        console.log("Organisation loaded:", response.data);
       } catch (error) {
-        console.error("Failed to load organisation:", error);
+        setOrganisation(null);
       } finally {
         setLoading(false);
       }

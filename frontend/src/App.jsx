@@ -21,7 +21,6 @@ import JoinOrganisation from "./pages/JoinOrganisation";
 import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
-// import TenderDetail from "./components/TenderDetail.jsx";
 
 function App() {
   return (
@@ -33,11 +32,13 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
 
-          {/* Route pour utilisateurs connectés mais non vérifiés */}
           <Route
             path="/verify-email-prompt"
             element={
-              <PrivateRoute requireVerified={false}>
+              <PrivateRoute
+                requireVerified={false}
+                allowGuestPendingEmail={true}
+              >
                 <VerifyEmailPrompt />
               </PrivateRoute>
             }
@@ -121,7 +122,6 @@ function App() {
             }
           /> */}
 
-          {/* 2) Chat IA */}
           <Route
             path="/chat/:dossierId"
             element={

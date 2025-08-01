@@ -77,7 +77,6 @@ const MembersPage = () => {
           </div>
         )}
 
-        {/* Onglets */}
         <div className="mb-6 border-b border-gray-200 dark:border-gray-700">
           <nav className="flex -mb-px">
             <button
@@ -103,7 +102,6 @@ const MembersPage = () => {
           </nav>
         </div>
 
-        {/* Table des demandes */}
         {activeTab === "requests" && (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -187,7 +185,6 @@ const MembersPage = () => {
           </div>
         )}
 
-        {/* Table des membres */}
         {activeTab === "members" && (
           <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

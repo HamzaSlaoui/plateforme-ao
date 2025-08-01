@@ -10,7 +10,6 @@ const Sidebar = () => {
   } = useAuth();
   const navigate = useNavigate();
 
-  // On insère conditionnellement "Membres" si l'utilisateur est owner
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Dossiers", path: "/folders" },
@@ -27,7 +26,6 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-white dark:bg-gray-800 shadow-lg h-screen flex flex-col">
-      {/* User Profile */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-3">
           <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
@@ -44,7 +42,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {menuItems.map(({ icon: Icon, label, path }) => (
@@ -67,7 +64,6 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      {/* Logout */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={handleLogout}

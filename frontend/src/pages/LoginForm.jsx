@@ -18,7 +18,6 @@ function LoginForm() {
     setErrors({});
     setIsLoading(true);
 
-    // Validation
     const newErrors = {};
 
     if (!validateRequired(email)) {
@@ -39,15 +38,12 @@ function LoginForm() {
 
     try {
       const result = await login(email, password);
-      console.log("Login result:", result);
       if (result.success) {
         if (!result.isVerified) {
           navigate("/verify-email-prompt");
         } else if (!result.hasOrganisation) {
-          // Nouveau : si pas d'organisation, aller au choix
           navigate("/organisation-choice");
         } else {
-          // Si vérifié et a une organisation, aller au dashboard
           navigate("/dashboard");
         }
       } else {
@@ -73,7 +69,6 @@ function LoginForm() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -106,7 +101,6 @@ function LoginForm() {
               )}
             </div>
 
-            {/* Password */}
             <div>
               <label
                 htmlFor="password"

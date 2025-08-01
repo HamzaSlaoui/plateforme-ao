@@ -104,7 +104,6 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      setAuthState((prev) => ({ ...prev, isAuthenticated: true }));
       return { success: true, needsVerification: true };
     } catch (error) {
       return {

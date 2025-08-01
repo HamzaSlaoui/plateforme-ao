@@ -26,6 +26,7 @@ class User(Base):
     organisation = relationship("Organisation", back_populates="users", lazy="selectin")
     created_folders = relationship("TenderFolder", foreign_keys="TenderFolder.created_by", back_populates="creator", lazy="selectin")
     uploaded_documents = relationship("Document", foreign_keys="Document.uploaded_by", back_populates="uploader", lazy="selectin")
+
     
 
     # Méthodes pour le password

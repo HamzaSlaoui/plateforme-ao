@@ -26,7 +26,6 @@ function VerifyEmail() {
       if (result.success) {
         setStatus({ loading: false, success: true });
 
-        // Rediriger après 3 secondes
         setTimeout(() => {
           if (authState.isAuthenticated) {
             if (hasOrganisation) {

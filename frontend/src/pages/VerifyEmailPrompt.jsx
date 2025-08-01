@@ -16,7 +16,6 @@ function VerifyEmailPrompt() {
     cooldown: 0,
   });
 
-  // Récupération de l'email à vérifier
   useEffect(() => {
     const email =
       authState.user?.email ||
@@ -33,7 +32,6 @@ function VerifyEmailPrompt() {
     };
   }, [authState.user, navigate]);
 
-  // Chargement du cooldown depuis localStorage
   useEffect(() => {
     const saved = localStorage.getItem("resendCooldown");
     if (saved) {
@@ -50,7 +48,6 @@ function VerifyEmailPrompt() {
     }
   }, []);
 
-  // Timer de cooldown
   useEffect(() => {
     if (resendStatus.cooldown > 0) {
       const timer = setTimeout(() => {
@@ -210,7 +207,6 @@ function VerifyEmailPrompt() {
           </>
         )}
 
-        {/* Message d'aide */}
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
             Vérifiez votre dossier spam. Si vous continuez à avoir des

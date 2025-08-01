@@ -32,7 +32,6 @@ function SignupForm() {
     setErrors({});
     setIsLoading(true);
 
-    // Validation
     const newErrors = {};
 
     if (!validateRequired(formData.firstName)) {
@@ -103,7 +102,6 @@ function SignupForm() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Prénom */}
             <div>
               <label
                 htmlFor="firstName"
@@ -136,7 +134,6 @@ function SignupForm() {
               )}
             </div>
 
-            {/* Nom */}
             <div>
               <label
                 htmlFor="lastName"
@@ -169,7 +166,6 @@ function SignupForm() {
               )}
             </div>
 
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -203,7 +199,6 @@ function SignupForm() {
               )}
             </div>
 
-            {/* Mot de passe */}
             <div>
               <label
                 htmlFor="password"
@@ -248,7 +243,6 @@ function SignupForm() {
               )}
             </div>
 
-            {/* Confirmation du mot de passe */}
             <div>
               <label
                 htmlFor="confirmPassword"

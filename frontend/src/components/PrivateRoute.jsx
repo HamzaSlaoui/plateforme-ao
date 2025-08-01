@@ -7,9 +7,11 @@ const PrivateRoute = ({
   requireVerified = true,
   requireOrganisation = false,
   requireOwner = false,
+  allowGuestPendingEmail = false,
 }) => {
   const { authState, isUserVerified, hasOrganisation, isOwner } = useAuth();
-  // Afficher un loader pendant la vérification de l'auth
+  const pendingEmail = sessionStorage.getItem("pendingVerificationEmail");
+
   if (authState.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -18,23 +20,25 @@ const PrivateRoute = ({
     );
   }
 
-  // Si non authentifié, rediriger vers login
   if (!authState.isAuthenticated) {
+    if (allowGuestPendingEmail && pendingEmail) {
+      return children;
+    }
     return <Navigate to="/" replace />;
   }
 
-  // Si authentifié mais non vérifié et que la route nécessite vérification
   if (requireVerified && !isUserVerified()) {
     return <Navigate to="/verify-email-prompt" replace />;
   }
 
-  // Si la route est /organisation-choice (requireOrganisation=false)
-  // et que l'utilisateur a déjà une organisation, rediriger vers dashboard
+  if (!requireVerified && isUserVerified()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   if (!requireOrganisation && hasOrganisation()) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Si la route nécessite une org et que l'utilisateur n'en a pas
   if (requireOrganisation && !hasOrganisation()) {
     return <Navigate to="/organisation-choice" replace />;
   }

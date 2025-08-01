@@ -31,11 +31,9 @@ function Dashboard() {
     const fetchDossiers = async () => {
       try {
         const res = await api.get("/tender-folders");
-        console.log(res.data);
         setStats(res.data.stats);
         setDossiers(res.data.folders);
       } catch (err) {
-        console.error(err);
         setError("Impossible de charger les dossiers.");
       } finally {
         setLoading(false);
@@ -154,7 +152,6 @@ function Dashboard() {
             </div>
           )}
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
               <div className="flex items-center justify-between">
@@ -218,7 +215,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Filters */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex-1 relative">
@@ -248,7 +244,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Dossiers Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredDossiers.map((dossier) => (
               <div
@@ -298,7 +293,6 @@ function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
                   <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700">
                     <button
                       onClick={(e) => handleViewClick(e, dossier.id)}

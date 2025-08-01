@@ -31,7 +31,6 @@ const CreateOrganisation = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -45,11 +44,8 @@ const CreateOrganisation = () => {
       const response = await api.post("/organisations/create", {
         name: formData.name.trim(),
       });
-
-      // Succès
       setSuccess(true);
 
-      // Rafraîchir les données utilisateur après 2 secondes
       setTimeout(async () => {
         await refreshUser();
         navigate("/dashboard");
@@ -65,7 +61,6 @@ const CreateOrganisation = () => {
     }
   };
 
-  // Affichage du succès
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
@@ -89,7 +84,6 @@ const CreateOrganisation = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
-        {/* Header avec retour */}
         <div className="mb-8">
           <button
             onClick={() => navigate("/organisation-choice")}
@@ -113,7 +107,6 @@ const CreateOrganisation = () => {
             </p>
           </div>
 
-          {/* Message d'erreur général */}
           {errors.general && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <div className="flex items-start">

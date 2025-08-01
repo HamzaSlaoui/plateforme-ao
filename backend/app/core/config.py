@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-
+    APP_NAME: str = "IntelliAO"
     DATABASE_URL : str
 
     ALGORITHM: str
@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     VECTOR_SIZE : int
     QDRANT_URL : str
     QDRANT_API_KEY : str
+
+    OPENROUTER_API_KEY: str
+    OPENROUTER_BASE_URL: str
 
     model_config = SettingsConfigDict(env_file=".env")
  

@@ -29,17 +29,20 @@ class TenderFolderUpdate(BaseModel):
     client_name: Optional[str] = Field(None, max_length=255)
 
 
-class TenderFolderResponse(TenderFolderBase):
+class TenderFolderResponse(BaseModel):
     id: UUID
-    status: TenderStatusEnum
+    name: str
+    description: Optional[str]
+    status: str
+    submission_deadline: Optional[datetime]
+    client_name: Optional[str]
     organisation_id: UUID
     created_by: UUID
     created_at: datetime
-
-    # Nombre de documents (pour le badge "Pièces jointes")
-    document_count: int
-
-    model_config = ConfigDict(from_attributes=True)
+    document_count: int = 0
+    
+    class Config:
+        from_attributes = True  # Permet de créer depuis un objet ORM
 
 class FolderListResponse(BaseModel):
     folders: List[TenderFolderResponse]

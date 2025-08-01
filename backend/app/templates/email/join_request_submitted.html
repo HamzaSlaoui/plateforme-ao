@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="font-family: sans-serif; color: #333; line-height: 1.4">
+    <h3>Votre demande a bien été envoyée !</h3>
+    <p>Bonjour {{ firstname }},</p>
+
+    <p>
+      Vous avez demandé à rejoindre <strong>{{ organisation_name }}</strong>
+      (code&nbsp;: {{ code }}).
+    </p>
+
+    <p>
+      Le propriétaire a été notifié. Vous recevrez un e-mail dès qu'il aura
+      <em>accepté</em> ou <em>refusé</em> votre demande.
+    </p>
+
+    <p style="font-size: 12px; color: #888">— L'équipe {{ app_name }}</p>
+  </body>
+</html>

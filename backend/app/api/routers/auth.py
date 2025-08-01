@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Cookie, Depends, HTTPException, status, Response
+from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
 from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
 from uuid import UUID
@@ -17,6 +17,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/register", response_model=UserResponse)
 async def register(
     user_data: UserCreate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     # 1) Rechercher l'utilisateur par email
@@ -37,7 +38,9 @@ async def register(
 
             # (Ré)envoi du mail de vérification
             token = create_verification_token(str(user.id))
-            await send_verification_email(user.email, token)
+            background_tasks.add_task(                    # ← ② tâche asynchrone
+                send_verification_email, user.email, token
+            )
 
             return user
 
@@ -60,7 +63,9 @@ async def register(
 
     # Envoi du mail de vérification
     token = create_verification_token(str(user.id))
-    await send_verification_email(user.email, token)
+    background_tasks.add_task(                            # ← ③ tâche asynchrone
+        send_verification_email, user.email, token
+    )
     return user
 
 
