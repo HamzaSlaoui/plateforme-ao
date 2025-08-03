@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 from sqlalchemy import Column, ForeignKey, String, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -24,7 +24,7 @@ class TenderFolder(Base):
     client_name = Column(String(50), nullable=True)
     organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id"), nullable=False)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(tz=timezone.utc))
     
     # Relations
     organisation = relationship("Organisation", back_populates="tender_folders", lazy="selectin")

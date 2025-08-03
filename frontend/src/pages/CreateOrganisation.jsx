@@ -51,11 +51,7 @@ const CreateOrganisation = () => {
         navigate("/dashboard");
       }, 3000);
     } catch (error) {
-      if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
-      } else {
-        setErrors({ general: "Une erreur s'est produite lors de la création" });
-      }
+      setErrors({ general: "Une erreur s'est produite lors de la création" });
     } finally {
       setIsLoading(false);
     }

@@ -50,13 +50,9 @@ const JoinOrganisation = () => {
         navigate("/");
       }, 2000);
     } catch (error) {
-      if (error.response?.data?.detail) {
-        setErrors({ general: error.response.data.detail });
-      } else {
-        setErrors({
-          general: "Une erreur s'est produite lors de l'envoi de la demande",
-        });
-      }
+      setErrors({
+        general: "Une erreur s'est produite lors de l'envoi de la demande",
+      });
     } finally {
       setIsLoading(false);
     }

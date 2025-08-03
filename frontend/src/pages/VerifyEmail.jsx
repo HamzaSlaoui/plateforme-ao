@@ -36,7 +36,7 @@ function VerifyEmail() {
           } else {
             navigate("/");
           }
-        }, 3000);
+        }, 2000);
       } else {
         setStatus({ loading: false, success: false });
       }

@@ -107,7 +107,7 @@ function SignupForm() {
                 htmlFor="firstName"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Prénom
+                Prénom <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -139,7 +139,7 @@ function SignupForm() {
                 htmlFor="lastName"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Nom
+                Nom <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -171,7 +171,7 @@ function SignupForm() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -204,7 +204,7 @@ function SignupForm() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Mot de passe
+                Mot de passe <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -248,8 +248,10 @@ function SignupForm() {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Confirmer le mot de passe
+                Confirmer le mot de passe{" "}
+                <span className="text-red-500">*</span>
               </label>
+
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />

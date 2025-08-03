@@ -1,11 +1,11 @@
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
 from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
-from uuid import UUID
+from api.deps import get_auth_service
+from services.auth_service import AuthService
 from models.organisation import Organisation
 from schemas.organisation import OrganisationResponse
-from core.security import create_access_token, create_verification_token, get_current_user, get_password_hash, verify_password, verify_refresh_token, verify_verification_token
-from services.email import send_verification_email
+from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin, UserResponse
@@ -16,109 +16,34 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse)
 async def register(
-    user_data: UserCreate,
-    background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db)
+    data: UserCreate,
+    bg: BackgroundTasks,
+    auth: AuthService = Depends(get_auth_service),
 ):
-    # 1) Rechercher l'utilisateur par email
-    result = await db.execute(select(User).where(User.email == user_data.email))
-    user = result.scalar_one_or_none()
-
-    if user:
-        # 2) Si non vérifié, on autorise la mise à jour
-        if not user.is_verified:
-            # Mettre à jour les champs modifiables
-            user.firstname     = user_data.firstname
-            user.lastname      = user_data.lastname
-            user.password_hash = get_password_hash(user_data.password)
-
-
-            await db.commit()
-            await db.refresh(user)
-
-            # (Ré)envoi du mail de vérification
-            token = create_verification_token(str(user.id))
-            background_tasks.add_task(                    # ← ② tâche asynchrone
-                send_verification_email, user.email, token
-            )
-
-            return user
-
-        # 3) Si déjà vérifié, on bloque la réinscription
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Un compte vérifié existe déjà avec cet email."
-        )
-
-    # 4) Email inconnu → création du nouvel utilisateur
-    user = User(
-        email         = user_data.email,
-        firstname     = user_data.firstname,
-        lastname      = user_data.lastname,
-        password_hash = get_password_hash(user_data.password)
-    )
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
-
-    # Envoi du mail de vérification
-    token = create_verification_token(str(user.id))
-    background_tasks.add_task(                            # ← ③ tâche asynchrone
-        send_verification_email, user.email, token
-    )
-    return user
-
+    try:
+        user = await auth.register(data, bg)
+        return UserResponse.model_validate(user)
+    except ValueError as e:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
 @router.post("/login", response_model=Token)
 async def login(
+    form: UserLogin,
     response: Response,
-    form_data: UserLogin,
-    db: AsyncSession = Depends(get_db)
+    auth: AuthService = Depends(get_auth_service),
 ):
-    # Authentifier l'utilisateur
-    result = await db.execute(
-        select(User).where(User.email == form_data.email)
-    )
-    user = result.scalar_one_or_none()
-    
-    if not user or not verify_password(form_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Email ou Mot de passe incorrect"
-        )
-    
-    # Créer le token
-    access_token = create_access_token(str(user.id))
+    try:
+        access, refresh = await auth.login(form.email, form.password)
+    except ValueError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Email ou mot de passe incorrect")
 
-    refresh_token = create_access_token(str(user.id), refresh=True)
     response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=not Config.DEBUG,
-        samesite="lax",
-        max_age=Config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        "refresh_token", refresh,
+        httponly=True, secure=not Config.DEBUG, samesite="lax",
+        max_age=Config.REFRESH_TOKEN_EXPIRE_DAYS*24*3600,
         path="/"
     )
-
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-    }
-
-
-@router.post("/refresh", response_model=Token)
-async def refresh_access_token(refresh_token: str = Cookie(None)):
-    if not refresh_token:
-        raise HTTPException(401, "refresh token manquant")
-
-    payload = verify_refresh_token(refresh_token)
-    if not payload:
-        raise HTTPException(401, "refresh token invalide ou expiré")
-
-    new_access = create_access_token(str(payload))
-    return {"access_token": new_access, "token_type": "bearer"}
-
+    return {"access_token": access, "token_type": "bearer"}
 
 @router.post("/logout")
 async def logout(response: Response):
@@ -126,35 +51,46 @@ async def logout(response: Response):
     return {"msg": "Déconnexion réussie"}
 
 
+@router.post("/refresh", response_model=Token)
+async def refresh(
+    refresh_token: str | None = Cookie(None),
+    auth: AuthService = Depends(get_auth_service)
+):
+    if not refresh_token:
+        raise HTTPException(401, "refresh token manquant")
+    try:
+        new_access = await auth.refresh_access(refresh_token)
+        return {"access_token": new_access, "token_type": "bearer"}
+    except ValueError as e:
+        raise HTTPException(401, str(e))
+
 
 @router.post("/verify-email")
 async def verify_email(
-    data: EmailVerification,
-    db: AsyncSession = Depends(get_db)
+    payload: EmailVerification,
+    auth: AuthService = Depends(get_auth_service)
 ):
-    payload = verify_verification_token(data.token)
-    if not payload:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Jeton invalide ou expiré"
-        )
+    try:
+        await auth.verify_email(payload.token)
+        return {"message": "Email vérifié avec succès"}
+    except (ValueError, LookupError) as e:
+        raise HTTPException(400, str(e))
+
+
+@router.post("/resend-verification")
+async def resend_verification(
+    current_user: User = Depends(get_current_user),
+    auth: AuthService = Depends(get_auth_service)
+):
+    try:
+        await auth.resend_verification(current_user)
+        return {
+            "message": "Email de vérification renvoyé",
+            "email": current_user.email,
+        }
+    except ValueError as e:
+        raise HTTPException(400, str(e))
     
-    # Mettre à jour l'utilisateur
-    result = await db.execute(
-        select(User).where(User.id == UUID(payload))
-    )
-    user = result.scalar_one_or_none()
-    
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Utilisateur introuvable"
-        )
-    
-    user.is_verified = True
-    await db.commit()
-    
-    return {"message": "Email verifié avec succès"}
 
 
 @router.get("/me", response_model=UserResponse)
@@ -163,9 +99,10 @@ async def read_current_user(
 ):
     return current_user
 
+
 @router.get("/me/organisation", response_model=OrganisationResponse)
 async def get_my_organisation(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_verified_user),
     db: AsyncSession = Depends(get_db)
 ):
     if not current_user.organisation_id:
@@ -176,7 +113,6 @@ async def get_my_organisation(
     )
     organisation = result.scalar_one()
 
-    # Calculer le nombre de membres
     member_count = await db.scalar(
         select(func.count(User.id)).where(User.organisation_id == organisation.id)
     )
@@ -188,32 +124,3 @@ async def get_my_organisation(
         created_at=organisation.created_at,
         member_count=member_count or 1,
     )
-
-
-
-@router.post("/resend-verification")
-async def resend_verification(
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    if current_user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Votre email est déjà vérifié, reconnectez vous"
-        )
-    
-    # Créer un nouveau token
-    verification_token = create_verification_token(str(current_user.id))
-    
-    try:
-        await send_verification_email(current_user.email, verification_token)
-        
-        return {
-            "message": "Email de vérification renvoyé avec succès",
-            "email": current_user.email
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erreur lors de l'envoi de l'email"
-        )

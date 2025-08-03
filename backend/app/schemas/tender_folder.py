@@ -1,3 +1,4 @@
+from fastapi import Form
 from pydantic import BaseModel, Field, ConfigDict 
 from datetime import datetime
 from uuid import UUID
@@ -11,15 +12,33 @@ class TenderStatusEnum(str, Enum):
     GAGNE = "gagne"
     PERDU = "perdu"
 
-class TenderFolderBase(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    description: Optional[str] = None
-    submission_deadline: Optional[datetime] = None
-    client_name: Optional[str] = Field(None, max_length=255)
 
+class TenderFolderCreate(BaseModel):
+    name: str
+    description: str | None
+    status: str
+    submission_deadline: datetime | None
+    client_name: str | None
+    organisation_id: UUID
 
-class TenderFolderCreate(TenderFolderBase):
-    pass
+    @classmethod
+    def as_form(cls,            
+                name: str = Form(...),
+                description: Optional[str] = Form(None),
+                status: str = Form(...),
+                submission_deadline: Optional[datetime] = Form(None),
+                client_name: Optional[str] = Form(None),
+                organisation_id: UUID = Form(...),
+    ):
+        return cls(
+            name=name,
+            description=description,
+            status=status,
+            submission_deadline=submission_deadline,
+            client_name=client_name,
+            organisation_id=organisation_id,
+        )
+
 
 
 class TenderFolderUpdate(BaseModel):
@@ -43,8 +62,7 @@ class TenderFolderResponse(BaseModel):
     document_count: int = 0
     documents: List[DocumentResponse] = []
     
-    class Config:
-        from_attributes = True  # Permet de créer depuis un objet ORM
+    model_config = ConfigDict(from_attributes=True)
 
 class FolderListResponse(BaseModel):
     folders: List[TenderFolderResponse]
@@ -60,7 +78,6 @@ class TenderDetailResponse(BaseModel):
     attachments: List[str]
     createdAt: datetime
 
-    # alias Pydantic
     model_config = ConfigDict(from_attributes=True)
  
 
