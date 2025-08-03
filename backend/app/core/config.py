@@ -19,10 +19,6 @@ class Settings(BaseSettings):
 
     FRONTEND_URL: str
 
-    VECTOR_SIZE : int
-    QDRANT_URL : str
-    QDRANT_API_KEY : str
-
     OPENROUTER_API_KEY: str
     OPENROUTER_BASE_URL: str
 
