@@ -62,7 +62,11 @@ const TenderFolderForm = () => {
     }
   }, []);
 
-  const getDocumentType = (filename) => "PDF";
+  const getDocumentType = (filename) => {
+    const ext = filename.split(".").pop().toLowerCase();
+    return ext.toUpperCase();
+  };
+  
 
   const removeDocument = (documentId) => {
     setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
@@ -85,13 +89,12 @@ const TenderFolderForm = () => {
     open,
   } = useDropzone({
     onDrop,
-    accept: {
-      "application/pdf": [".pdf"],
-    },
+    accept: {}, // <--- supprime ou laisse vide pour accepter tous les fichiers
     multiple: true,
     maxFiles: 10,
     maxSize: 10 * 1024 * 1024,
   });
+  
 
   const getDropzoneClassName = () => {
     let baseClass =
@@ -318,7 +321,7 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Formats acceptés: PDF uniquement
+                      📁 Formats acceptés : tous types de fichiers (PDF, Word, Excel, etc.)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier
