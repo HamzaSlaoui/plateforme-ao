@@ -1,49 +1,23 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker # type: ignore
-from sqlalchemy.pool import NullPool # type: ignore
-from typing import AsyncGenerator
-import os
-
-from db.base import Base
-
-# Configuration de la base de données
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://postgres:password@db:5433/ma_db"
-)
-
-# Création du moteur async
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=True,  # Mettre False en production
-    poolclass=NullPool,  # Recommandé pour asyncpg
-)
-
-# Session factory
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False,
-)
+from fastapi.params import Depends
+from db.session import get_db
+from services.organisation_service import OrganisationService
+from services.auth_service import AuthService
+from services.tender_folder_service import TenderFolderService
+from services.organisation_join_service import OrganisationJoinService
+from services.organisation_member_service import OrganisationMemberService
 
 
-# Dependency pour FastAPI
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+async def get_org_service(db = Depends(get_db)) -> OrganisationService:
+    return OrganisationService(db)
 
+async def get_auth_service(db = Depends(get_db)) -> AuthService:
+    return AuthService(db)
 
-# Fonction pour créer les tables
-async def create_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+async def get_tf_service(db = Depends(get_db)) -> TenderFolderService:
+    return TenderFolderService(db)
 
+async def get_join_service(db=Depends(get_db)) -> OrganisationJoinService:
+    return OrganisationJoinService(db)
 
-# Fonction pour supprimer les tables
-async def drop_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+async def get_org_member_service(db = Depends(get_db)) -> OrganisationMemberService:
+    return OrganisationMemberService(db)

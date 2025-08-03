@@ -21,6 +21,5 @@ class OrganisationResponse(OrganisationBase):
     id: UUID
     created_at: datetime
     code: str
-    member_count: int
     
     model_config = ConfigDict(from_attributes=True)

@@ -1,17 +1,15 @@
-from datetime import datetime, timedelta, timezone # type: ignore
+from datetime import datetime, timedelta, timezone
 import logging
-from typing import Optional # type: ignore
-from jose import JWTError, jwt # type: ignore
+from typing import Optional
+from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status # type: ignore
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession # type: ignore
-from sqlalchemy import select # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from uuid import UUID
-
 from api.deps import get_db
 from models.user import User
-
 from core.config import Config
 
 
@@ -78,12 +76,11 @@ def verify_verification_token(token: str) -> Optional[str]:
     try:
         payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
         
-        # Vérifier que c'est bien un token de vérification
         purpose = payload.get("purpose")
         if purpose != "email_verification":
             return None
             
-        return payload.get("sub")  # Retourne user_id
+        return payload.get("sub")  
         
     except jwt.ExpiredSignatureError:
         logging.error("Token de vérification expiré")

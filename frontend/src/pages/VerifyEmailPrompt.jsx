@@ -74,7 +74,13 @@ function VerifyEmailPrompt() {
 
     try {
       setResendStatus({ sent: false, error: null, loading: true, cooldown: 0 });
-      await api.post("/auth/resend-verification");
+
+      if (!authState.isAuthenticated && userEmail) {
+        await api.post("/auth/resend-verification", { email: userEmail });
+      } else {
+        await api.post("/auth/resend-verification");
+      }
+
       const duration = 60;
       const end = Date.now() + duration * 1000;
       localStorage.setItem("resendCooldown", end.toString());
@@ -103,7 +109,7 @@ function VerifyEmailPrompt() {
       } else {
         setResendStatus({
           sent: false,
-          error: error.response?.data?.detail || "Erreur lors de l'envoi",
+          error: "Erreur lors de l'envoi",
           loading: false,
           cooldown: 0,
         });

@@ -234,29 +234,39 @@ const MembersPage = () => {
                           {is_owner ? "Propriétaire" : "Membre"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  "Voulez-vous vraiment retirer ce membre de l'organisation ?"
-                                )
-                              ) {
-                                handleRemove(id);
-                              }
-                            }}
-                            disabled={loadingIds[id]}
-                            className={`p-2 rounded-full transition-colors ${
-                              loadingIds[id]
-                                ? "bg-gray-300 dark:bg-gray-700 cursor-not-allowed"
-                                : "bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
-                            }`}
-                          >
-                            {loadingIds[id] ? (
-                              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin block" />
-                            ) : (
+                          {is_owner ? (
+                            <button
+                              disabled
+                              className="p-2 rounded-full bg-gray-300 dark:bg-gray-700 cursor-not-allowed text-gray-400"
+                              title="Impossible de retirer le propriétaire"
+                            >
                               <XCircle className="w-5 h-5" />
-                            )}
-                          </button>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    "Voulez-vous vraiment retirer ce membre de l'organisation ?"
+                                  )
+                                ) {
+                                  handleRemove(id);
+                                }
+                              }}
+                              disabled={loadingIds[id]}
+                              className={`p-2 rounded-full transition-colors ${
+                                loadingIds[id]
+                                  ? "bg-gray-300 dark:bg-gray-700 cursor-not-allowed"
+                                  : "bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
+                              }`}
+                            >
+                              {loadingIds[id] ? (
+                                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin block" />
+                              ) : (
+                                <XCircle className="w-5 h-5" />
+                              )}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     )

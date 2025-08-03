@@ -17,3 +17,4 @@ class Organisation(Base):
     # Relations
     users = relationship("User", back_populates="organisation", lazy="selectin")
     tender_folders = relationship("TenderFolder", back_populates="organisation", cascade="all, delete-orphan", lazy="selectin")
+    join_requests = relationship("OrganisationJoinRequest", back_populates="organisation", cascade="all, delete-orphan", passive_deletes=True)

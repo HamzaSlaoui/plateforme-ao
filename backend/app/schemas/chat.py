@@ -9,4 +9,3 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reponse: str
     sources: List[dict]
-    conversation_id: UUID
