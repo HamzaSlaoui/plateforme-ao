@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import UUID
 from typing import List, Optional, Dict
 from enum import Enum
+from .document import DocumentResponse
 
 class TenderStatusEnum(str, Enum):
     EN_COURS = "en_cours"
@@ -40,6 +41,7 @@ class TenderFolderResponse(BaseModel):
     created_by: UUID
     created_at: datetime
     document_count: int = 0
+    documents: List[DocumentResponse] = []
     
     class Config:
         from_attributes = True  # Permet de créer depuis un objet ORM
@@ -60,3 +62,16 @@ class TenderDetailResponse(BaseModel):
 
     # alias Pydantic
     model_config = ConfigDict(from_attributes=True)
+ 
+
+class TenderFolderLiteResponse(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str]
+    status: str
+    submission_deadline: Optional[datetime]
+    client_name: Optional[str]
+    organisation_id: UUID
+    created_by: UUID
+    created_at: datetime
+    document_count: int

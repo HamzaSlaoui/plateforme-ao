@@ -21,6 +21,7 @@ import JoinOrganisation from "./pages/JoinOrganisation";
 import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
+import TenderFolderDetail from "./pages/TenderFolderDetail.jsx";
 
 function App() {
   return (
@@ -113,14 +114,14 @@ function App() {
           />
 
           {/* 1) Page de détail « Voir » */}
-          {/* <Route
+          { <Route
             path="/tender-folders/:dossierId"
             element={
               <PrivateRoute requireVerified={true} requireOrganisation={true}>
-                <TenderDetail />
+                <TenderFolderDetail />
               </PrivateRoute>
             }
-          /> */}
+          /> }
 
           <Route
             path="/chat/:dossierId"
