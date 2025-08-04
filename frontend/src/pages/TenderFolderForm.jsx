@@ -30,6 +30,7 @@ const TenderFolderForm = () => {
   const [documents, setDocuments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -155,9 +156,8 @@ const TenderFolderForm = () => {
         setSuccessMessage("");
       }, 5000);
     } catch (error) {
-      setSuccessMessage(
-        error?.response?.data?.message ||
-          "Erreur lors de la création du dossier. Veuillez réessayer."
+      setErrorMessage(
+        "Erreur lors de la création du dossier. Veuillez réessayer."
       );
     } finally {
       setIsSubmitting(false);
@@ -320,8 +320,7 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    📁 Formats acceptés : tous types de fichiers (PDF, Word,
-                    Excel, etc.)
+                    📁 Formats acceptés : tous types de fichiers (PDF, Word.)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier
@@ -439,7 +438,15 @@ const TenderFolderForm = () => {
         {successMessage && (
           <AlertToast
             message={successMessage}
+            type="success"
             onClose={() => setSuccessMessage("")}
+          />
+        )}
+        {errorMessage && (
+          <AlertToast
+            message={errorMessage}
+            type="error"
+            onClose={() => setErrorMessage("")}
           />
         )}
       </div>
