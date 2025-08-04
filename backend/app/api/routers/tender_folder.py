@@ -4,7 +4,7 @@ from typing import List
 from api.deps import get_tf_service
 from core.security import get_current_verified_user
 from schemas.tender_folder import (
-    FolderListResponse, TenderFolderCreate, TenderFolderLiteResponse, TenderFolderResponse,
+    FolderListResponse, TenderFolderCreate, TenderFolderResponse,
 )
 from schemas.document import DocumentResponse
 from services.tender_folder_service import TenderFolderService
@@ -41,7 +41,7 @@ async def list_folders(
 
     return FolderListResponse(
         folders=[
-            TenderFolderLiteResponse(
+            TenderFolderResponse(
                 id=f.id,
                 name=f.name,
                 description=f.description,

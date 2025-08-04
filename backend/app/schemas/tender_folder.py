@@ -80,15 +80,3 @@ class TenderDetailResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
  
-
-class TenderFolderLiteResponse(BaseModel):
-    id: UUID
-    name: str
-    description: Optional[str]
-    status: str
-    submission_deadline: Optional[date]
-    client_name: Optional[str]
-    organisation_id: UUID
-    created_by: UUID
-    created_at: datetime
-    document_count: int

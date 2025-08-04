@@ -124,10 +124,11 @@ const TenderFolderForm = () => {
     formDataToSend.append("client_name", formData.client_name);
     formDataToSend.append("status", formData.status);
     if (formData.submission_deadline) {
-      formDataToSend.append(
-        "submission_deadline",
-        formData.submission_deadline
-      );
+      const dateStr =
+        formData.submission_deadline instanceof Date
+          ? formData.submission_deadline.toISOString().slice(0, 10) // "YYYY-MM-DD"
+          : formData.submission_deadline;
+      formDataToSend.append("submission_deadline", dateStr);
     }
     formDataToSend.append("organisation_id", orgId);
 
