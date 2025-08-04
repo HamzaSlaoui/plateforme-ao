@@ -9,6 +9,10 @@ class OrganisationRepo:
     async def by_code(self, code: str) -> Organisation | None:
         stmt = select(Organisation).where(Organisation.code == code)
         return (await self.session.execute(stmt)).scalar_one_or_none()
+    
+    async def by_id(self, org_id: UUID) -> Organisation | None:
+        stmt = select(Organisation).where(Organisation.id == org_id)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
 
     async def add(self, org: Organisation):
         self.session.add(org)

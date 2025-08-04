@@ -1,9 +1,9 @@
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
 from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
-from api.deps import get_auth_service
+from api.deps import get_auth_service, get_org_service
+from services.organisation_service import OrganisationService
 from services.auth_service import AuthService
-from models.organisation import Organisation
 from schemas.organisation import OrganisationResponse
 from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
@@ -103,23 +103,21 @@ async def read_current_user(
 @router.get("/me/organisation", response_model=OrganisationResponse)
 async def get_my_organisation(
     current_user: User = Depends(get_current_verified_user),
+    svc: OrganisationService = Depends(get_org_service),
     db: AsyncSession = Depends(get_db)
 ):
     if not current_user.organisation_id:
         raise HTTPException(status_code=404, detail="Pas d'organisation")
     
-    result = await db.execute(
-        select(Organisation).where(Organisation.id == current_user.organisation_id)
-    )
-    organisation = result.scalar_one()
+    try:
+        organisation = await svc.get_organisation_by_id(current_user.organisation_id, db)
+        return OrganisationResponse(
+            id=organisation.id,
+            name=organisation.name,
+            code=organisation.code,
+            created_at=organisation.created_at,
+        )
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e))
 
-    member_count = await db.scalar(
-        select(func.count(User.id)).where(User.organisation_id == organisation.id)
-    )
-
-    return OrganisationResponse(
-        id=organisation.id,
-        name=organisation.name,
-        code=organisation.code,
-        created_at=organisation.created_at,
-    )
+    

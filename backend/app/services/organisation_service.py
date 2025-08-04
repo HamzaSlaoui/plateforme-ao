@@ -42,3 +42,6 @@ class OrganisationService:
         except IntegrityError:
             await self.db.rollback()
             raise
+
+    async def get_organisation_by_id(self, org_id: UUID, db: AsyncSession) -> Organisation:
+        return await self.org_repo.by_id(org_id)
