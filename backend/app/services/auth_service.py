@@ -22,6 +22,7 @@ class AuthService:
             user.firstname = data.firstname
             user.lastname  = data.lastname
             user.password_hash = get_password_hash(data.password)
+            
         else:                 
             user = User(
                 email=data.email,
@@ -29,6 +30,7 @@ class AuthService:
                 lastname=data.lastname,
                 password_hash=get_password_hash(data.password),
             )
+        
             await self.repo.add(user)
 
         await self.db.commit()
@@ -36,7 +38,9 @@ class AuthService:
 
         token = create_verification_token(str(user.id))
         bg_tasks.add_task(send_verification_email, user.email, token)
-        return user
+
+        access_token = create_access_token(str(user.id))
+        return user, access_token
 
 
     async def login(self, email, password):

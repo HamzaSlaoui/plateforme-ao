@@ -76,7 +76,6 @@ function SignupForm() {
       );
 
       if (result.success) {
-        sessionStorage.setItem("pendingVerificationEmail", formData.email);
         navigate("/verify-email-prompt");
       } else {
         setErrors({ general: result.error });

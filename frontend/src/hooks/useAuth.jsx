@@ -97,17 +97,29 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (firstname, lastname, email, password) => {
     try {
-      await api.post("/auth/register", {
+      const response = await api.post("/auth/register", {
         firstname,
         lastname,
         email,
         password,
       });
-      return { success: true, needsVerification: true };
+      const { access_token, user } = response.data;
+
+      localStorage.setItem("token", access_token);
+
+      setAuthState({
+        user,
+        token: access_token,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
+      return { success: true, needsVerification: !user.is_verified };
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || "Erreur lors de l'inscription",
+        error: "Erreur lors de l'inscription",
       };
     }
   };
@@ -125,7 +137,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: error.response?.data?.detail || "Token invalide ou expiré",
+        error: "Token invalide ou expiré",
       };
     }
   };

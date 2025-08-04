@@ -17,22 +17,6 @@ function VerifyEmailPrompt() {
   });
 
   useEffect(() => {
-    const email =
-      authState.user?.email ||
-      sessionStorage.getItem("pendingVerificationEmail");
-    if (email) {
-      setUserEmail(email);
-    } else {
-      navigate("/");
-    }
-    return () => {
-      if (authState.isAuthenticated) {
-        sessionStorage.removeItem("pendingVerificationEmail");
-      }
-    };
-  }, [authState.user, navigate]);
-
-  useEffect(() => {
     const saved = localStorage.getItem("resendCooldown");
     if (saved) {
       const end = parseInt(saved, 10);
@@ -75,11 +59,7 @@ function VerifyEmailPrompt() {
     try {
       setResendStatus({ sent: false, error: null, loading: true, cooldown: 0 });
 
-      if (!authState.isAuthenticated && userEmail) {
-        await api.post("/auth/resend-verification", { email: userEmail });
-      } else {
-        await api.post("/auth/resend-verification");
-      }
+      await api.post("/auth/resend-verification");
 
       const duration = 60;
       const end = Date.now() + duration * 1000;

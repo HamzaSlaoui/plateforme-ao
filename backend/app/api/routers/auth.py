@@ -14,15 +14,26 @@ from core.config import Config
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(
     data: UserCreate,
     bg: BackgroundTasks,
     auth: AuthService = Depends(get_auth_service),
 ):
     try:
-        user = await auth.register(data, bg)
-        return UserResponse.model_validate(user)
+        user, access_token = await auth.register(data, bg)
+
+        return {
+            "access_token": access_token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "is_verified": user.is_verified,
+                "organisation_id": user.organisation_id
+            }
+        }
     except ValueError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
