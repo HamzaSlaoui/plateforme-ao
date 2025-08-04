@@ -122,5 +122,4 @@ async def get_my_organisation(
         name=organisation.name,
         code=organisation.code,
         created_at=organisation.created_at,
-        member_count=member_count or 1,
     )

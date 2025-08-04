@@ -19,6 +19,7 @@ class OrganisationCreate(OrganisationBase):
 
 class OrganisationResponse(OrganisationBase):
     id: UUID
+    name: str
     created_at: datetime
     code: str
     

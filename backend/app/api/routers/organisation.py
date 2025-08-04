@@ -15,7 +15,7 @@ from models.user import User
 router = APIRouter(prefix="/organisations", tags=["organisations"])
 
 
-@router.post("/create", response_model=OrganisationResponse)
+@router.post("/create", response_model=OrganisationResponse, status_code=status.HTTP_201_CREATED)
 async def create_organisation(
     org_data: OrganisationCreate,
     current_user = Depends(get_current_verified_user),

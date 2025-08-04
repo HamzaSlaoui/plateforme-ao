@@ -30,7 +30,6 @@ export const AuthProvider = ({ children }) => {
           try {
             const { data } = await api.post("/auth/refresh");
             const bearer = `Bearer ${data.access_token}`;
-            // Update localStorage & axios header
             localStorage.setItem("token", bearer);
             api.defaults.headers.common["Authorization"] = bearer;
             originalReq.headers["Authorization"] = bearer;
