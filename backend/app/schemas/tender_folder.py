@@ -1,6 +1,6 @@
 from fastapi import Form
 from pydantic import BaseModel, Field, ConfigDict 
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 from typing import List, Optional, Dict
 from enum import Enum
@@ -17,7 +17,7 @@ class TenderFolderCreate(BaseModel):
     name: str
     description: str | None
     status: str
-    submission_deadline: datetime | None
+    submission_deadline: date | None
     client_name: str | None
     organisation_id: UUID
 
@@ -26,7 +26,7 @@ class TenderFolderCreate(BaseModel):
                 name: str = Form(...),
                 description: Optional[str] = Form(None),
                 status: str = Form(...),
-                submission_deadline: Optional[datetime] = Form(None),
+                submission_deadline: Optional[date] = Form(None),
                 client_name: Optional[str] = Form(None),
                 organisation_id: UUID = Form(...),
     ):
@@ -45,7 +45,7 @@ class TenderFolderUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
     status: Optional[TenderStatusEnum] = None
-    submission_deadline: Optional[datetime] = None
+    submission_deadline: Optional[date] = None
     client_name: Optional[str] = Field(None, max_length=255)
 
 
@@ -54,7 +54,7 @@ class TenderFolderResponse(BaseModel):
     name: str
     description: Optional[str]
     status: str
-    submission_deadline: Optional[datetime]
+    submission_deadline: Optional[date]
     client_name: Optional[str]
     organisation_id: UUID
     created_by: UUID
@@ -73,7 +73,7 @@ class TenderDetailResponse(BaseModel):
     id: UUID
     title: str
     description: Optional[str]
-    deadline: Optional[datetime]
+    deadline: Optional[date]
     status: str
     attachments: List[str]
     createdAt: datetime
@@ -86,7 +86,7 @@ class TenderFolderLiteResponse(BaseModel):
     name: str
     description: Optional[str]
     status: str
-    submission_deadline: Optional[datetime]
+    submission_deadline: Optional[date]
     client_name: Optional[str]
     organisation_id: UUID
     created_by: UUID

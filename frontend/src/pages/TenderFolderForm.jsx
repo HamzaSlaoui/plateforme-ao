@@ -66,7 +66,6 @@ const TenderFolderForm = () => {
     const ext = filename.split(".").pop().toLowerCase();
     return ext.toUpperCase();
   };
-  
 
   const removeDocument = (documentId) => {
     setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
@@ -94,7 +93,6 @@ const TenderFolderForm = () => {
     maxFiles: 10,
     maxSize: 10 * 1024 * 1024,
   });
-  
 
   const getDropzoneClassName = () => {
     let baseClass =
@@ -231,7 +229,7 @@ const TenderFolderForm = () => {
                 <div className="relative">
                   <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="submission_deadline"
                     value={formData.submission_deadline}
                     onChange={handleInputChange}
@@ -321,7 +319,8 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      📁 Formats acceptés : tous types de fichiers (PDF, Word, Excel, etc.)
+                    📁 Formats acceptés : tous types de fichiers (PDF, Word,
+                    Excel, etc.)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier
