@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from uuid import UUID
 from typing import List
 from api.deps import get_tf_service
 from core.security import get_current_verified_user
 from schemas.tender_folder import (
-    FolderListResponse, TenderFolderCreate, TenderFolderLiteResponse, TenderFolderResponse,
+    FolderListResponse, TenderFolderCreate, TenderFolderResponse,
 )
 from schemas.document import DocumentResponse
 from services.tender_folder_service import TenderFolderService
@@ -12,7 +12,7 @@ from models.user import User
 
 router = APIRouter(prefix="/tender-folders", tags=["tender-folders"])
 
-@router.post("/create", status_code=201)
+@router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_folder(
     data: TenderFolderCreate = Depends(TenderFolderCreate.as_form), 
     files: List[UploadFile] = File(None),
@@ -41,7 +41,7 @@ async def list_folders(
 
     return FolderListResponse(
         folders=[
-            TenderFolderLiteResponse(
+            TenderFolderResponse(
                 id=f.id,
                 name=f.name,
                 description=f.description,

@@ -64,6 +64,30 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "user" && e.newValue) {
+        const newUser = JSON.parse(e.newValue);
+        setAuthState((prev) => ({ ...prev, user: newUser }));
+      }
+      if (e.key === "token" && e.newValue) {
+        api.defaults.headers.common.Authorization = e.newValue;
+        setAuthState((prev) => ({ ...prev, token: e.newValue }));
+      }
+      if (e.key === "token" && e.newValue === null) {
+        // logout depuis un autre onglet
+        setAuthState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/login", { email, password });
@@ -98,13 +122,25 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (firstname, lastname, email, password) => {
     try {
-      await api.post("/auth/register", {
+      const response = await api.post("/auth/register", {
         firstname,
         lastname,
         email,
         password,
       });
-      return { success: true, needsVerification: true };
+      const bearer = `Bearer ${response.data.access_token}`;
+      localStorage.setItem("token", bearer);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      api.defaults.headers.common["Authorization"] = bearer;
+
+      setAuthState({
+        user: response.data.user,
+        token: bearer,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
     } catch (error) {
       return {
         success: false,
@@ -163,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         authState,
+        setAuthState,
         login,
         signup,
         logout,

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import uuid4
 from sqlalchemy import Column, ForeignKey, String, DateTime, LargeBinary
 from sqlalchemy.dialects.postgresql import UUID
@@ -13,8 +13,8 @@ class Document(Base):
     document_type = Column(String(10), nullable=True)
     tender_folder_id = Column(UUID(as_uuid=True), ForeignKey("tender_folders.id", ondelete="CASCADE"), nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, nullable=True, default=lambda: datetime.now(tz=timezone.utc))
     file_content = Column(LargeBinary, nullable=True) 
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
     tender_folder = relationship("TenderFolder", back_populates="documents", lazy="selectin")

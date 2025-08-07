@@ -37,10 +37,7 @@ function App() {
           <Route
             path="/verify-email-prompt"
             element={
-              <PrivateRoute
-                requireVerified={false}
-                allowGuestPendingEmail={true}
-              >
+              <PrivateRoute requireVerified={false} requireOrganisation={false}>
                 <VerifyEmailPrompt />
               </PrivateRoute>
             }
@@ -115,14 +112,16 @@ function App() {
           />
 
           {/* 1) Page de détail « Voir » */}
-          { <Route
-            path="/tender-folders/:dossierId"
-            element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
-                <TenderFolderDetail />
-              </PrivateRoute>
-            }
-          /> }
+          {
+            <Route
+              path="/tender-folders/:dossierId"
+              element={
+                <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                  <TenderFolderDetail />
+                </PrivateRoute>
+              }
+            />
+          }
 
           <Route
             path="/chat/:dossierId"

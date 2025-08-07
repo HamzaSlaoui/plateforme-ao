@@ -76,7 +76,6 @@ function SignupForm() {
       );
 
       if (result.success) {
-        sessionStorage.setItem("pendingVerificationEmail", formData.email);
         navigate("/verify-email-prompt");
       } else {
         setErrors({ general: result.error });
@@ -124,7 +123,7 @@ function SignupForm() {
                       ? "border-red-300 dark:border-red-600"
                       : "border-gray-300 dark:border-gray-600"
                   } dark:bg-gray-800 dark:text-white`}
-                  placeholder="Jean"
+                  placeholder="Votre prénom"
                 />
               </div>
               {errors.firstName && (
@@ -156,7 +155,7 @@ function SignupForm() {
                       ? "border-red-300 dark:border-red-600"
                       : "border-gray-300 dark:border-gray-600"
                   } dark:bg-gray-800 dark:text-white`}
-                  placeholder="Dupont"
+                  placeholder="Votre nom"
                 />
               </div>
               {errors.lastName && (
@@ -189,7 +188,7 @@ function SignupForm() {
                       ? "border-red-300 dark:border-red-600"
                       : "border-gray-300 dark:border-gray-600"
                   } dark:bg-gray-800 dark:text-white`}
-                  placeholder="jean.dupont@email.com"
+                  placeholder="exemple@email.com"
                 />
               </div>
               {errors.email && (

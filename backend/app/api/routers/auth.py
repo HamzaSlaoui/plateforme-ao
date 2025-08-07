@@ -1,9 +1,10 @@
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
+from pydantic import EmailStr
 from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
-from api.deps import get_auth_service
+from api.deps import get_auth_service, get_org_service
+from services.organisation_service import OrganisationService
 from services.auth_service import AuthService
-from models.organisation import Organisation
 from schemas.organisation import OrganisationResponse
 from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
@@ -14,15 +15,26 @@ from core.config import Config
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(
     data: UserCreate,
     bg: BackgroundTasks,
     auth: AuthService = Depends(get_auth_service),
 ):
     try:
-        user = await auth.register(data, bg)
-        return UserResponse.model_validate(user)
+        user, access_token = await auth.register(data, bg)
+
+        return {
+            "access_token": access_token,
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "firstname": user.firstname,
+                "lastname": user.lastname,
+                "is_verified": user.is_verified,
+                "organisation_id": user.organisation_id
+            }
+        }
     except ValueError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
@@ -91,6 +103,14 @@ async def resend_verification(
     except ValueError as e:
         raise HTTPException(400, str(e))
     
+@router.post("/resend-verification-public")
+async def resend_verification_public(payload: EmailStr, auth: AuthService = Depends(get_auth_service)):
+    user = await auth.get_user_by_email(payload.email)
+    if not user or user.is_verified:
+        raise HTTPException(400, "Adresse déjà vérifiée ou inconnue")
+
+    await auth.resend_verification(user)
+    return {"message": "Email renvoyé"}
 
 
 @router.get("/me", response_model=UserResponse)
@@ -103,24 +123,21 @@ async def read_current_user(
 @router.get("/me/organisation", response_model=OrganisationResponse)
 async def get_my_organisation(
     current_user: User = Depends(get_current_verified_user),
+    svc: OrganisationService = Depends(get_org_service),
     db: AsyncSession = Depends(get_db)
 ):
     if not current_user.organisation_id:
         raise HTTPException(status_code=404, detail="Pas d'organisation")
     
-    result = await db.execute(
-        select(Organisation).where(Organisation.id == current_user.organisation_id)
-    )
-    organisation = result.scalar_one()
+    try:
+        organisation = await svc.get_organisation_by_id(current_user.organisation_id, db)
+        return OrganisationResponse(
+            id=organisation.id,
+            name=organisation.name,
+            code=organisation.code,
+            created_at=organisation.created_at,
+        )
+    except ValueError as e:
+        raise HTTPException(400, detail=str(e))
 
-    member_count = await db.scalar(
-        select(func.count(User.id)).where(User.organisation_id == organisation.id)
-    )
-
-    return OrganisationResponse(
-        id=organisation.id,
-        name=organisation.name,
-        code=organisation.code,
-        created_at=organisation.created_at,
-        member_count=member_count or 1,
-    )
+    

@@ -2,7 +2,6 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 from uuid import UUID
 from typing import Optional
-from schemas.organisation import OrganisationInfo
 
 
 class UserBase(BaseModel):

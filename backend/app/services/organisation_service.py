@@ -2,6 +2,7 @@ import secrets, string
 from sqlalchemy import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from repositories.organisation_join_request_repo import OrganisationJoinRequestRepo
 from models.organisation import Organisation
 from repositories.organisation_repo import OrganisationRepo
 from repositories.user_repo import UserRepo
@@ -10,6 +11,7 @@ class OrganisationService:
     def __init__(self, db: AsyncSession):
         self.org_repo = OrganisationRepo(db)
         self.user_repo = UserRepo(db)
+        self.join_repo = OrganisationJoinRequestRepo(db)
         self.db = db
 
     async def _generate_unique_code(self, length=8) -> str:
@@ -26,6 +28,7 @@ class OrganisationService:
         if owner.organisation_id:
             raise ValueError("L'utilisateur appartient déjà à une organisation.")
 
+        await self.join_repo.cancel_pending_by_user(owner_id)
         code = await self._generate_unique_code()
         org = Organisation(name=name.strip(), code=code)
         await self.org_repo.add(org)
@@ -38,7 +41,11 @@ class OrganisationService:
         try:
             await self.db.commit()
             await self.db.refresh(org)
-            return org
+            await self.db.refresh(owner)     # ← on veut l’utilisateur à jour
+            return org, owner
         except IntegrityError:
             await self.db.rollback()
             raise
+
+    async def get_organisation_by_id(self, org_id: UUID, db: AsyncSession) -> Organisation:
+        return await self.org_repo.by_id(org_id)

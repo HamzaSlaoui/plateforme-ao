@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User
 from repositories.user_repo import UserRepo
 from core.security import (
-    create_access_token, create_verification_token,
+    create_access_token, create_refresh_token, create_verification_token,
     verify_password, get_password_hash, verify_refresh_token, verify_verification_token,
 )
 from services.email_service import send_verification_email
@@ -16,12 +16,13 @@ class AuthService:
         user = await self.repo.by_email(data.email)
 
         if user and user.is_verified:
-            raise ValueError("Compte déjà vérifié.")
+            raise ValueError("Compte avec cet email déjà vérifié.")
 
-        if user:               
+        if user and not user.is_verified:
             user.firstname = data.firstname
             user.lastname  = data.lastname
             user.password_hash = get_password_hash(data.password)
+            
         else:                 
             user = User(
                 email=data.email,
@@ -29,6 +30,7 @@ class AuthService:
                 lastname=data.lastname,
                 password_hash=get_password_hash(data.password),
             )
+        
             await self.repo.add(user)
 
         await self.db.commit()
@@ -36,7 +38,9 @@ class AuthService:
 
         token = create_verification_token(str(user.id))
         bg_tasks.add_task(send_verification_email, user.email, token)
-        return user
+
+        access_token = create_access_token(str(user.id))
+        return user, access_token
 
 
     async def login(self, email, password):
@@ -45,7 +49,7 @@ class AuthService:
             raise ValueError("Identifiants invalides")
 
         access  = create_access_token(str(user.id))
-        refresh = create_access_token(str(user.id), refresh=True)
+        refresh = create_refresh_token(str(user.id))
         return access, refresh
 
     async def mark_verified(self, uid):

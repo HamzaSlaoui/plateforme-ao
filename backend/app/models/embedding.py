@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID
 from uuid import uuid4
@@ -17,7 +17,7 @@ class Embedding(Base):
     chunk_text = Column(Text, nullable=False)
     chunk_index = Column(Integer)
     extra_data = Column(JSON)
-    created_at = Column(DateTime, default=lambda: datetime.now(tz=timezone.utc))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
     document = relationship("Document", back_populates="embeddings", lazy="selectin")

@@ -30,6 +30,7 @@ const TenderFolderForm = () => {
   const [documents, setDocuments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,7 +67,6 @@ const TenderFolderForm = () => {
     const ext = filename.split(".").pop().toLowerCase();
     return ext.toUpperCase();
   };
-  
 
   const removeDocument = (documentId) => {
     setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
@@ -94,7 +94,6 @@ const TenderFolderForm = () => {
     maxFiles: 10,
     maxSize: 10 * 1024 * 1024,
   });
-  
 
   const getDropzoneClassName = () => {
     let baseClass =
@@ -126,10 +125,11 @@ const TenderFolderForm = () => {
     formDataToSend.append("client_name", formData.client_name);
     formDataToSend.append("status", formData.status);
     if (formData.submission_deadline) {
-      formDataToSend.append(
-        "submission_deadline",
-        formData.submission_deadline
-      );
+      const dateStr =
+        formData.submission_deadline instanceof Date
+          ? formData.submission_deadline.toISOString().slice(0, 10) // "YYYY-MM-DD"
+          : formData.submission_deadline;
+      formDataToSend.append("submission_deadline", dateStr);
     }
     formDataToSend.append("organisation_id", orgId);
 
@@ -156,9 +156,8 @@ const TenderFolderForm = () => {
         setSuccessMessage("");
       }, 5000);
     } catch (error) {
-      setSuccessMessage(
-        error?.response?.data?.message ||
-          "Erreur lors de la création du dossier. Veuillez réessayer."
+      setErrorMessage(
+        "Erreur lors de la création du dossier. Veuillez réessayer."
       );
     } finally {
       setIsSubmitting(false);
@@ -231,7 +230,7 @@ const TenderFolderForm = () => {
                 <div className="relative">
                   <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="submission_deadline"
                     value={formData.submission_deadline}
                     onChange={handleInputChange}
@@ -321,7 +320,7 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      📁 Formats acceptés : tous types de fichiers (PDF, Word, Excel, etc.)
+                    📁 Formats acceptés : tous types de fichiers (PDF, Word.)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier
@@ -439,7 +438,15 @@ const TenderFolderForm = () => {
         {successMessage && (
           <AlertToast
             message={successMessage}
+            type="success"
             onClose={() => setSuccessMessage("")}
+          />
+        )}
+        {errorMessage && (
+          <AlertToast
+            message={errorMessage}
+            type="error"
+            onClose={() => setErrorMessage("")}
           />
         )}
       </div>

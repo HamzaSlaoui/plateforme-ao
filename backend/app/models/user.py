@@ -19,11 +19,11 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     is_verified = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
-    organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id"), nullable=True)
+    organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
-    organisation = relationship("Organisation", back_populates="users", lazy="selectin")
+    organisation = relationship("Organisation", back_populates="users", lazy="selectin", passive_deletes=True)
     created_folders = relationship("TenderFolder", foreign_keys="TenderFolder.created_by", back_populates="creator", lazy="selectin")
     uploaded_documents = relationship("Document", foreign_keys="Document.uploaded_by", back_populates="uploader", lazy="selectin")
     join_requests = relationship("OrganisationJoinRequest", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)

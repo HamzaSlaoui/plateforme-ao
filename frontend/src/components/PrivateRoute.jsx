@@ -7,10 +7,8 @@ const PrivateRoute = ({
   requireVerified = true,
   requireOrganisation = false,
   requireOwner = false,
-  allowGuestPendingEmail = false,
 }) => {
   const { authState, isUserVerified, hasOrganisation, isOwner } = useAuth();
-  const pendingEmail = sessionStorage.getItem("pendingVerificationEmail");
 
   if (authState.isLoading) {
     return (
@@ -21,9 +19,6 @@ const PrivateRoute = ({
   }
 
   if (!authState.isAuthenticated) {
-    if (allowGuestPendingEmail && pendingEmail) {
-      return children;
-    }
     return <Navigate to="/" replace />;
   }
 
@@ -31,15 +26,13 @@ const PrivateRoute = ({
     return <Navigate to="/verify-email-prompt" replace />;
   }
 
-  if (!requireVerified && isUserVerified()) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   if (!requireOrganisation && hasOrganisation()) {
+    console.error(authState);
     return <Navigate to="/dashboard" replace />;
   }
 
   if (requireOrganisation && !hasOrganisation()) {
+    console.error(authState);
     return <Navigate to="/organisation-choice" replace />;
   }
 
