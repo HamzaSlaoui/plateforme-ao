@@ -26,15 +26,13 @@ const PrivateRoute = ({
     return <Navigate to="/verify-email-prompt" replace />;
   }
 
-  if (!requireVerified && isUserVerified()) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   if (!requireOrganisation && hasOrganisation()) {
+    console.error(authState);
     return <Navigate to="/dashboard" replace />;
   }
 
   if (requireOrganisation && !hasOrganisation()) {
+    console.error(authState);
     return <Navigate to="/organisation-choice" replace />;
   }
 

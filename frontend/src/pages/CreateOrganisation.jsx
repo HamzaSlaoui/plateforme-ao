@@ -1,18 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Building2, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Building2, ArrowLeft, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const CreateOrganisation = () => {
   const navigate = useNavigate();
-  const { api, refreshUser } = useAuth();
+  const { api, setAuthState, authState } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -41,41 +40,18 @@ const CreateOrganisation = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/organisations/create", {
+      const { data } = await api.post("/organisations/create", {
         name: formData.name.trim(),
       });
-      setSuccess(true);
 
-      setTimeout(async () => {
-        await refreshUser();
-        navigate("/dashboard");
-      }, 3000);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setAuthState((prev) => ({ ...prev, user: data.user }));
     } catch (error) {
       setErrors({ general: "Une erreur s'est produite lors de la création" });
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-          <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-            <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
-          </div>
-
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Organisation créée avec succès !
-          </h2>
-
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Redirection vers le tableau de bord...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">

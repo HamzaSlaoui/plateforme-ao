@@ -17,26 +17,22 @@ pwd_context = CryptContext(schemes=["bcrypt"])
 security = HTTPBearer()
 
 
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
-
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(user_id: str, refresh: bool = False) -> str:
-    if refresh:
-        expiry = timedelta(days=Config.REFRESH_TOKEN_EXPIRE_DAYS)
-    else:
-        expiry = timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
-
+def create_access_token(user_id: str) -> str:
+    expiry = timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
     expire = datetime.now(timezone.utc) + expiry
-    payload = {
-        "sub": user_id,
-        "type": "refresh" if refresh else "access",
-        "exp": expire
-    }
+    payload = {"sub": user_id, "type": "access", "exp": expire}
+    return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
+
+def create_refresh_token(user_id: str) -> str:
+    expiry = timedelta(days=Config.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(timezone.utc) + expiry
+    payload = {"sub": user_id, "type": "refresh", "exp": expire}
     return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
 
 def create_verification_token(user_id: str, purpose: str = "email_verification") -> str:
@@ -46,7 +42,6 @@ def create_verification_token(user_id: str, purpose: str = "email_verification")
         "exp": datetime.now(timezone.utc) + timedelta(hours=Config.VERIFICATION_TOKEN_EXPIRE_HOURS)
     }
     return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
-
 
 def verify_refresh_token(refresh_token: str) -> Optional[str]:
     try:
@@ -118,6 +113,9 @@ async def get_current_user(
         payload = jwt.decode(token, Config.SECRET_KEY, algorithms=[Config.ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
+            raise credentials_exception
+        token_type = payload.get("type")
+        if token_type != "access":
             raise credentials_exception
     except JWTError:
         raise credentials_exception

@@ -100,6 +100,8 @@ class OrganisationJoinService:
         if jr.status != "en attente":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Demande déjà traitée")
 
+        await self.join_repo.cancel_pending_by_user(jr.user_id)
+
         jr.status = "accepte"
         user = await self.user_repo.by_id(jr.user_id)
         user.organisation_id = jr.organisation_id

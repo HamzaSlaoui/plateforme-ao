@@ -36,7 +36,7 @@ function App() {
           <Route
             path="/verify-email-prompt"
             element={
-              <PrivateRoute requireVerified={false}>
+              <PrivateRoute requireVerified={false} requireOrganisation={false}>
                 <VerifyEmailPrompt />
               </PrivateRoute>
             }

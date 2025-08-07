@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.organisation_join_request import OrganisationJoinRequest
@@ -16,6 +16,14 @@ class OrganisationJoinRequestRepo:
             OrganisationJoinRequest.status == "en attente",
         )
         return (await self.db.execute(stmt)).scalar_one_or_none() is not None
+    
+    async def cancel_pending_by_user(self, user_id: UUID):
+        await self.db.execute(
+            update(OrganisationJoinRequest)
+              .where(OrganisationJoinRequest.user_id == user_id,
+                     OrganisationJoinRequest.status == "en attente")
+              .values(status="annulee")
+        )
 
     async def add(self, join_req: OrganisationJoinRequest) -> None:
         self.db.add(join_req)

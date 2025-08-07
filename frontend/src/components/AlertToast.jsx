@@ -10,7 +10,11 @@ const AlertToast = ({ message, onClose, type }) => (
           : "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300"
       }`}
     >
-      <CheckCircle className="h-5 w-5 mr-3" />
+      {type === "success" ? (
+        <CheckCircle className="h-5 w-5 mr-3" />
+      ) : (
+        <X className="h-5 w-5 mr-3" />
+      )}
       <span className="font-medium flex-1">{message}</span>
       <button
         onClick={onClose}

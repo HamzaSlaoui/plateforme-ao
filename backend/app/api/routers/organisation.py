@@ -7,7 +7,7 @@ from services.organisation_join_service import OrganisationJoinService
 from services.organisation_service import OrganisationService
 from core.security import get_current_verified_user
 from schemas.user import UserResponse
-from schemas.organisation import OrganisationCreate, OrganisationResponse
+from schemas.organisation import OrganisationCreate, OrganisationCreateResponse, OrganisationResponse
 from schemas.organisation_join_request import JoinOrgRequest, JoinRequestResponse
 from models.user import User
 
@@ -15,15 +15,18 @@ from models.user import User
 router = APIRouter(prefix="/organisations", tags=["organisations"])
 
 
-@router.post("/create", response_model=OrganisationResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=OrganisationCreateResponse, status_code=status.HTTP_201_CREATED)
 async def create_organisation(
     org_data: OrganisationCreate,
     current_user = Depends(get_current_verified_user),
     org_srv: OrganisationService = Depends(get_org_service),
 ):
     try:
-        org = await org_srv.create(org_data.name, current_user.id)
-        return OrganisationResponse.model_validate(org)
+        org, updated_user = await org_srv.create(org_data.name, current_user.id)
+        return OrganisationCreateResponse(
+            organisation=OrganisationResponse.model_validate(org),
+            user=UserResponse.model_validate(updated_user),
+        )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -53,6 +56,7 @@ async def list_join_requests(
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
     raw = await svc.list_pending(current_user.organisation_id)
+    print(raw)
     return [
         JoinRequestResponse(
             id=jr["join"].id,

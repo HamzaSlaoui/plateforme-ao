@@ -30,6 +30,7 @@ export const AuthProvider = ({ children }) => {
           try {
             const { data } = await api.post("/auth/refresh");
             const bearer = `Bearer ${data.access_token}`;
+            // Update localStorage & axios header
             localStorage.setItem("token", bearer);
             api.defaults.headers.common["Authorization"] = bearer;
             originalReq.headers["Authorization"] = bearer;
@@ -61,6 +62,30 @@ export const AuthProvider = ({ children }) => {
     } else {
       setAuthState((prev) => ({ ...prev, isLoading: false }));
     }
+  }, []);
+
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "user" && e.newValue) {
+        const newUser = JSON.parse(e.newValue);
+        setAuthState((prev) => ({ ...prev, user: newUser }));
+      }
+      if (e.key === "token" && e.newValue) {
+        api.defaults.headers.common.Authorization = e.newValue;
+        setAuthState((prev) => ({ ...prev, token: e.newValue }));
+      }
+      if (e.key === "token" && e.newValue === null) {
+        // logout depuis un autre onglet
+        setAuthState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const login = async (email, password) => {
@@ -103,23 +128,23 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      const { access_token, user } = response.data;
-
-      localStorage.setItem("token", access_token);
+      const bearer = `Bearer ${response.data.access_token}`;
+      localStorage.setItem("token", bearer);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      api.defaults.headers.common["Authorization"] = bearer;
 
       setAuthState({
-        user,
-        token: access_token,
+        user: response.data.user,
+        token: bearer,
         isAuthenticated: true,
         isLoading: false,
       });
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
-      return { success: true, needsVerification: !user.is_verified };
+      return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: "Erreur lors de l'inscription",
+        error: error.response?.data?.detail || "Erreur lors de l'inscription",
       };
     }
   };
@@ -137,7 +162,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        error: "Token invalide ou expiré",
+        error: error.response?.data?.detail || "Token invalide ou expiré",
       };
     }
   };
@@ -174,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         authState,
+        setAuthState,
         login,
         signup,
         logout,

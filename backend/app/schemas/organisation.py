@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from uuid import UUID
 
+from schemas.user import UserResponse
+
 
 class OrganisationInfo(BaseModel):
     id: UUID
@@ -24,3 +26,7 @@ class OrganisationResponse(OrganisationBase):
     code: str
     
     model_config = ConfigDict(from_attributes=True)
+
+class OrganisationCreateResponse(BaseModel):
+    organisation: OrganisationResponse
+    user: UserResponse  

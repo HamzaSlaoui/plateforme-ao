@@ -5,7 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 
 const JoinOrganisation = () => {
   const navigate = useNavigate();
-  const { api, refreshUser } = useAuth();
+  const { api } = useAuth();
 
   const [formData, setFormData] = useState({
     code: "",
@@ -42,16 +42,12 @@ const JoinOrganisation = () => {
       await api.post("/organisations/join", {
         code: formData.code.trim().toUpperCase(),
       });
-
       setSuccess(true);
-
-      setTimeout(async () => {
-        await refreshUser();
-        navigate("/");
-      }, 2000);
     } catch (error) {
       setErrors({
-        general: "Une erreur s'est produite lors de l'envoi de la demande",
+        general:
+          error.response?.data?.detail ||
+          "Une erreur s'est produite lors de l'envoi de la demande",
       });
     } finally {
       setIsLoading(false);
@@ -70,8 +66,10 @@ const JoinOrganisation = () => {
             Demande envoyée !
           </h2>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Redirection vers la page d'authentification...
+          <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
+            Votre demande d'adhésion a bien été transmise au propriétaire de
+            l'organisation. Vous recevrez un e-mail dès qu'elle sera acceptée ou
+            refusée.
           </p>
         </div>
       </div>

@@ -12,38 +12,34 @@ function VerifyEmail() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-
+    const token = new URLSearchParams(window.location.search).get("token");
     if (!token) {
       setStatus({ loading: false, success: false });
       return;
     }
 
-    const verify = async () => {
+    (async () => {
       const result = await verifyEmail(token);
+      setStatus({ loading: false, success: result.success });
+      if (!result.success) return;
 
-      if (result.success) {
-        setStatus({ loading: false, success: true });
+      setTimeout(() => setStatus((s) => ({ ...s, success: "redirect" })), 1500);
+    })();
+  }, [verifyEmail]);
 
-        setTimeout(() => {
-          if (authState.isAuthenticated) {
-            if (hasOrganisation) {
-              navigate("/organisation-choice");
-            } else {
-              navigate("/dashboard");
-            }
-          } else {
-            navigate("/");
-          }
-        }, 2000);
-      } else {
-        setStatus({ loading: false, success: false });
-      }
-    };
+  useEffect(() => {
+    if (status.success !== "redirect") return;
 
-    verify();
-  }, [verifyEmail, authState.isAuthenticated]);
+    if (!authState.isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    if (!hasOrganisation()) {
+      navigate("/organisation-choice");
+    } else {
+      navigate("/dashboard");
+    }
+  }, [status.success, authState.user]);
 
   if (status.loading) {
     return (

@@ -4,11 +4,10 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
 function VerifyEmailPrompt() {
-  const { authState, logout, api } = useAuth();
+  const { authState, logout, isUserVerified, api, refreshUser } = useAuth();
   const navigate = useNavigate();
-  const isVerified = authState.user?.is_verified;
+  const user = localStorage.getItem("user");
 
-  const [userEmail, setUserEmail] = useState(null);
   const [resendStatus, setResendStatus] = useState({
     sent: false,
     error: null,
@@ -46,7 +45,8 @@ function VerifyEmailPrompt() {
   }, [resendStatus.cooldown]);
 
   const handleResendEmail = async () => {
-    if (isVerified) {
+    await refreshUser();
+    if (isUserVerified()) {
       setResendStatus((prev) => ({
         ...prev,
         error: "Votre email est déjà vérifié.",
@@ -61,7 +61,7 @@ function VerifyEmailPrompt() {
 
       await api.post("/auth/resend-verification");
 
-      const duration = 60;
+      const duration = 0;
       const end = Date.now() + duration * 1000;
       localStorage.setItem("resendCooldown", end.toString());
       setResendStatus({
@@ -122,12 +122,12 @@ function VerifyEmailPrompt() {
           <AlertCircle className="h-5 w-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
           <p className="text-gray-600 dark:text-gray-300 text-sm">
             Nous avons envoyé un email de vérification à{" "}
-            <strong>{userEmail}</strong>. Cliquez sur le lien dans l'email pour
-            activer votre compte.
+            <strong>{authState.user?.email}</strong>. Cliquez sur le lien dans
+            l'email pour activer votre compte.
           </p>
         </div>
 
-        {isVerified ? (
+        {isUserVerified() ? (
           <>
             <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-700 dark:text-green-300 text-center">
               <CheckCircle className="inline w-5 h-5 mr-2" />
