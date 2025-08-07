@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Eye, Download } from "lucide-react";
+  import { Eye, Download, FolderOpen } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import Sidebar from "../components/Sidebar";
 
@@ -64,10 +64,14 @@ function TenderFolderDetail() {
     return (
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
         <Sidebar />
-        <main className="flex-1 p-8 text-gray-700 dark:text-white">Chargement...</main>
+        <main className="flex-1 flex items-center justify-center">
+          <FolderOpen className="animate-spin w-12 h-12 text-gray-400" />
+        </main>
       </div>
     );
   }
+  
+  
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">

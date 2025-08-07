@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, FolderOpen, Settings, LogOut, User, Users } from "lucide-react";
+import { Home, FolderOpen, Settings, LogOut, User, Users, FolderSearch2  } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const Sidebar = () => {
@@ -13,19 +13,20 @@ const Sidebar = () => {
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Dossiers", path: "/folders" },
+    { icon: FolderSearch2 , label: "Marchés", path: "/marches" }, 
     ...(user?.is_owner
       ? [{ icon: Users, label: "Membres", path: "/members" }]
       : []),
     { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
-
+  
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800 shadow-lg h-screen flex flex-col">
+    <div className="w-64 bg-white dark:bg-gray-800 shadow-lg min-h-screen flex flex-col">
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-3">
           <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">

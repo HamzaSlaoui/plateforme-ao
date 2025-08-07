@@ -22,6 +22,7 @@ import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import TenderFolderDetail from "./pages/TenderFolderDetail.jsx";
+import Marches from "./pages/Marches.jsx";
 
 function App() {
   return (
@@ -128,6 +129,15 @@ function App() {
             element={
               <PrivateRoute requireVerified={true} requireOrganisation={true}>
                 <ChatbotPage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/marches"
+            element={
+              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <Marches />
               </PrivateRoute>
             }
           />

@@ -8,6 +8,7 @@ from api.routers.auth import router as auth_router
 from api.routers.organisation import router as organisations_routes
 from api.routers.tender_folder import router as tender_folders_routes
 from api.routers.chatbot import router as chatbot_routes
+from api.routers.marche import router as marche_routes
 
 
 @asynccontextmanager
@@ -15,9 +16,9 @@ async def lifespan(app: FastAPI):
     # Startup
     print("Creating database tables...")
     #await drop_tables() 
-    await create_tables()
+    await create_tables() 
     print("Tables created successfully!")
-    yield   
+    yield  
     print("Application shutting down...")
 
 
@@ -40,6 +41,7 @@ app.include_router(auth_router)
 app.include_router(organisations_routes)
 app.include_router(tender_folders_routes)
 app.include_router(chatbot_routes)
+app.include_router(marche_routes)
 
 
 @app.get("/")
