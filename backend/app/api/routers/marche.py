@@ -1,5 +1,4 @@
 from typing import List
-from typing import List
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -9,7 +8,7 @@ router = APIRouter()
 
 @router.get("/marches")
 async def lancer_scraping(
-    domaine: List[str] = Query(default=[]),  # 👈 accepte une liste# ✅ Ceci permet de recevoir ?domaine=abc&domaine=def
+    domaine: List[str] = Query(default=[]),
     reference: str = Query(default=""),
     acheteur: str = Query(default=""),
 ):
