@@ -19,12 +19,6 @@ import fitz
 import tiktoken
 
 
-def _clean_text(s: str) -> str:
-    s = re.sub(r'(\w)-\n(\w)', r'\1\2', s)
-    s = re.sub(r'[ \t]+', ' ', s)
-    s = re.sub(r'\n{3,}', '\n\n', s)
-    return s.strip()
-
 def _pdf_is_scanned(file_bytes: bytes, min_chars_per_page: int = 40) -> bool:
     doc = fitz.open(stream=file_bytes, filetype="pdf")
     try:
