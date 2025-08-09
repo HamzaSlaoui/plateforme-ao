@@ -200,3 +200,4 @@ function TenderFolderDetail() {
 }
 
 export default TenderFolderDetail;
+export { DocumentPreview };
