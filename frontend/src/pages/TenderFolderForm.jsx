@@ -29,6 +29,8 @@ const TenderFolderForm = () => {
 
   const [documents, setDocuments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [progressStep, setProgressStep] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -89,7 +91,7 @@ const TenderFolderForm = () => {
     open,
   } = useDropzone({
     onDrop,
-    accept: {}, // <--- supprime ou laisse vide pour accepter tous les fichiers
+    accept: {},
     multiple: true,
     maxFiles: 10,
     maxSize: 10 * 1024 * 1024,
@@ -113,36 +115,77 @@ const TenderFolderForm = () => {
     return baseClass;
   };
 
+  const updateProgress = (percent, message) => {
+    setProgressPercent(percent);
+    setProgressStep(message);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setProgressPercent(0);
+    setProgressStep("");
 
     const orgId = authState.user.organisation_id;
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("name", formData.name);
-    formDataToSend.append("description", formData.description);
-    formDataToSend.append("client_name", formData.client_name);
-    formDataToSend.append("status", formData.status);
-    if (formData.submission_deadline) {
-      const dateStr =
-        formData.submission_deadline instanceof Date
-          ? formData.submission_deadline.toISOString().slice(0, 10) // "YYYY-MM-DD"
-          : formData.submission_deadline;
-      formDataToSend.append("submission_deadline", dateStr);
-    }
-    formDataToSend.append("organisation_id", orgId);
-
-    documents
-      .filter((doc) => doc.status === "accepted")
-      .forEach((doc) => formDataToSend.append("files", doc.file));
-
     try {
+      // Étape 1 : Initialisation
+      updateProgress(5, "Initialisation...");
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Étape 2 : Validation des données
+      updateProgress(15, "Validation des données...");
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Étape 3 : Préparation des fichiers
+      updateProgress(25, "Préparation des fichiers...");
+      
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("client_name", formData.client_name);
+      formDataToSend.append("status", formData.status);
+      if (formData.submission_deadline) {
+        const dateStr =
+          formData.submission_deadline instanceof Date
+            ? formData.submission_deadline.toISOString().slice(0, 10)
+            : formData.submission_deadline;
+        formDataToSend.append("submission_deadline", dateStr);
+      }
+      formDataToSend.append("organisation_id", orgId);
+
+      documents
+        .filter((doc) => doc.status === "accepted")
+        .forEach((doc) => formDataToSend.append("files", doc.file));
+
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Étape 4 : Envoi au serveur (avec progression d'upload)
+      updateProgress(35, "Envoi des données...");
+      
       const response = await api.post(
         "/tender-folders/create",
         formDataToSend,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { 
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              // Progression de l'upload : de 35% à 85%
+              const uploadPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              const totalPercent = 35 + Math.round((uploadPercent * 50) / 100); // 35% + 50% max pour l'upload
+              updateProgress(totalPercent, `Upload en cours... ${uploadPercent}%`);
+            }
+          }
+        }
       );
+
+      // Étape 5 : Finalisation
+      updateProgress(95, "Traitement final...");
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      // Étape 6 : Terminé
+      updateProgress(100, "Dossier créé avec succès !");
+      
       setSuccessMessage("Dossier créé avec succès !");
       setFormData({
         name: "",
@@ -152,13 +195,20 @@ const TenderFolderForm = () => {
         status: "en_cours",
       });
       setDocuments([]);
+      
+      // Reset de la barre de progression après un délai
       setTimeout(() => {
+        setProgressPercent(0);
+        setProgressStep("");
         setSuccessMessage("");
-      }, 5000);
+      }, 3000);
+      
     } catch (error) {
       setErrorMessage(
         "Erreur lors de la création du dossier. Veuillez réessayer."
       );
+      setProgressPercent(0);
+      setProgressStep("");
     } finally {
       setIsSubmitting(false);
     }
@@ -180,6 +230,56 @@ const TenderFolderForm = () => {
             Créez un nouveau dossier et ajoutez vos documents
           </p>
         </div>
+
+        {/* Overlay de progression */}
+        {isSubmitting && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+              <div className="text-center mb-6">
+                <div className="flex justify-center mb-4">
+                  <div className="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full">
+                    <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Création en cours...
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Veuillez patienter pendant la création de votre dossier
+                </p>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Progression
+                  </span>
+                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                    {progressPercent}%
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 h-full rounded-full transition-all duration-500 ease-out relative"
+                    style={{ width: `${progressPercent}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {progressStep && (
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
+                    <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
+                    {progressStep}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
@@ -411,7 +511,8 @@ const TenderFolderForm = () => {
             <button
               type="button"
               onClick={() => navigate("/dashboard")}
-              className="px-6 py-3 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              disabled={isSubmitting}
+              className="px-6 py-3 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Annuler
             </button>
@@ -435,6 +536,7 @@ const TenderFolderForm = () => {
             </button>
           </div>
         </form>
+        
         {successMessage && (
           <AlertToast
             message={successMessage}
