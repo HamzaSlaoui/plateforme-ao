@@ -3,6 +3,7 @@ from PIL import Image
 import openai
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
+from sqlalchemy.orm import selectinload
 from typing import List, Dict
 import docx
 from io import BytesIO
@@ -314,9 +315,11 @@ class RAGService:
         messages = [
             {
                 "role": "system",
-                "content": """Tu es un assistant spécialisé dans l'analyse d'appels d'offres. 
-                Réponds précisément aux questions en te basant UNIQUEMENT sur les documents fournis.
-                Cite toujours tes sources. Si l'information n'est pas dans les documents, dis-le clairement."""
+                "content": "Tu es un assistant expert en rédaction de documents administratifs et techniques pour les appels d'offres publics.\n\n"
+                    "Ta mission :\n- Répondre de manière claire, utile et professionnelle aux questions de l'utilisateur.\n"
+                    "- Utiliser exclusivement les informations trouvées dans les documents SI elles sont présentes.\n"
+                    "- Si une information n'est pas trouvée explicitement, tu peux proposer une réponse générique structurée, en précisant que certains éléments doivent être complétés.\n"
+                    "- Toujours répondre en français et rester factuel."
             },
             {
                 "role": "user",
