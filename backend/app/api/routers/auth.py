@@ -8,7 +8,7 @@ from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin, UserResponse
-from schemas.auth import EmailVerification, Token 
+from schemas.auth import EmailVerification, Token
 from core.config import Config
 
 router = APIRouter(prefix="/auth", tags=["auth"])
