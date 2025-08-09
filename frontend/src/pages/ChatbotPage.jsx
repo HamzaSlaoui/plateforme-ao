@@ -1,8 +1,13 @@
+// pages/ChatbotPage.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Send, Bot, User, FileText, Loader2 } from "lucide-react";
+import { Bot, Loader2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Sidebar from "../components/Sidebar";
+import DocumentViewerPanel from "../components/DocumentViewerPanel";
+import DocumentPreview from "../components/DocumentPreview";
+import ChatMessage from "../components/ChatMessage";
+import ChatInput from "../components/ChatInput";
 
 const ChatbotPage = () => {
   const { dossierId } = useParams();
@@ -10,6 +15,7 @@ const ChatbotPage = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
 
+  // États principaux
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -23,7 +29,11 @@ const ChatbotPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [folderInfo, setFolderInfo] = useState(null);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState("rag");
+  const [selectedDoc, setSelectedDoc] = useState(null);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
 
+  // Chargement des données du dossier
   useEffect(() => {
     const fetchFolderInfo = async () => {
       try {
@@ -39,6 +49,7 @@ const ChatbotPage = () => {
     }
   }, [dossierId, api]);
 
+  // Auto-scroll vers le bas
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -47,6 +58,7 @@ const ChatbotPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Envoi de message
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
@@ -65,6 +77,7 @@ const ChatbotPage = () => {
       const response = await api.post("/chatbot/chat", {
         question: inputMessage,
         dossier_id: dossierId,
+        mode,
       });
 
       const aiMessage = {
@@ -91,6 +104,7 @@ const ChatbotPage = () => {
     }
   };
 
+  // Gestion des touches
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -98,6 +112,12 @@ const ChatbotPage = () => {
     }
   };
 
+  // Sélection de document
+  const handleDocumentSelect = (doc) => {
+    setSelectedDoc(doc);
+  };
+
+  // Affichage d'erreur
   if (error) {
     return (
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -124,118 +144,62 @@ const ChatbotPage = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 relative">
       <Sidebar />
-
-      <div className="flex-1 flex flex-col">
+      
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isPanelVisible ? 'mr-80' : 'mr-0'}`}>
+        {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-full">
-                  <Bot className="w-5 h-5 text-blue-600" />
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl shadow-lg">
+                  <Bot className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-semibold text-gray-900 dark:text-white">
-                    Assistant IA - {folderInfo?.name || "Chargement..."}
+                  <h1 className="font-bold text-xl text-gray-900 dark:text-white">
+                    Assistant IA
                   </h1>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Chatbot RAG pour ce dossier
+                    {folderInfo?.name || "Chargement..."} • Mode {mode === "llm" ? "LLM natif" : "RAG"}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {folderInfo && (
-                <span>
-                  {folderInfo.document_count} document
-                  {folderInfo.document_count !== 1 ? "s" : ""}
-                </span>
-              )}
+
+            {/* Mode Selector */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Mode :
+                </label>
+                <select
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="rag">RAG</option>
+                  <option value="llm">LLM natif</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.isUser ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-xs lg:max-w-md xl:max-w-2xl p-4 rounded-lg ${
-                  message.isUser
-                    ? "bg-blue-600 text-white"
-                    : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-                }
-                `}
-              >
-                <div className="flex items-start space-x-3">
-                  {!message.isUser && (
-                    <Bot className="w-5 h-5 mt-0.5 flex-shrink-0 text-blue-600" />
-                  )}
-                  <div className="flex-1">
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.message}
-                    </p>
-
-                    {message.sources && message.sources.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                          Sources consultées:
-                        </p>
-                        <div className="space-y-1">
-                          {message.sources?.length > 0 && (
-                            <div className="space-y-1">
-                              {message.sources.map((src, idx) => {
-                                const label =
-                                  typeof src === "string" ? src : src.document;
-                                return (
-                                  <div
-                                    key={idx}
-                                    className="flex items-center space-x-2 text-xs"
-                                  >
-                                    <FileText className="w-3 h-3 text-gray-500" />
-                                    <span className="text-gray-600 dark:text-gray-400">
-                                      {label}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    <p
-                      className={`text-xs mt-2 opacity-70 ${
-                        message.isUser
-                          ? "text-blue-100"
-                          : "text-gray-500 dark:text-gray-400"
-                      }`}
-                    >
-                      {new Date(message.timestamp).toLocaleTimeString("fr-FR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </p>
-                  </div>
-                  {message.isUser && (
-                    <User className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                  )}
-                </div>
-              </div>
-            </div>
+            <ChatMessage key={message.id} message={message} />
           ))}
 
+          {/* Loading indicator */}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center space-x-3">
-                  <Bot className="w-5 h-5 text-blue-600" />
+                  <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
+                    <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
                   <div className="flex items-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
                     <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -250,75 +214,31 @@ const ChatbotPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex space-x-3">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Posez votre question sur ce dossier..."
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              disabled={isLoading}
-            />
-            <button
-              onClick={handleSendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-              <span className="hidden sm:inline">
-                {isLoading ? "Envoi..." : "Envoyer"}
-              </span>
-            </button>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              onClick={() =>
-                setInputMessage(
-                  "Quels sont les critères d'évaluation de cet appel d'offres ?"
-                )
-              }
-              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              disabled={isLoading}
-            >
-              Critères d'évaluation
-            </button>
-            <button
-              onClick={() =>
-                setInputMessage("Quelle est la date limite de soumission ?")
-              }
-              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              disabled={isLoading}
-            >
-              Date limite
-            </button>
-            <button
-              onClick={() =>
-                setInputMessage("Quels documents dois-je fournir ?")
-              }
-              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              disabled={isLoading}
-            >
-              Documents requis
-            </button>
-            <button
-              onClick={() =>
-                setInputMessage("Résume-moi les points clés de ce dossier")
-              }
-              className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              disabled={isLoading}
-            >
-              Points clés
-            </button>
-          </div>
-        </div>
+        {/* Chat Input */}
+        <ChatInput
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
+          onSendMessage={handleSendMessage}
+          onKeyPress={handleKeyPress}
+          isLoading={isLoading}
+        />
       </div>
+
+      {/* Document Viewer Panel */}
+      <DocumentViewerPanel
+        documents={folderInfo?.documents || []}
+        onSelect={handleDocumentSelect}
+        isVisible={isPanelVisible}
+        onToggle={() => setIsPanelVisible(!isPanelVisible)}
+      />
+
+      {/* Document Preview Modal */}
+      {selectedDoc && (
+        <DocumentPreview
+          doc={selectedDoc}
+          onClose={() => setSelectedDoc(null)}
+        />
+      )}
     </div>
   );
 };
