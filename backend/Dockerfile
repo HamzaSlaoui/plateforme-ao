@@ -32,6 +32,17 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
+# 🔽 Ajout OCR (append-only)
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-fra \
+    tesseract-ocr-eng \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV TESSERACT_CMD=/usr/bin/tesseract
+ENV RAG_LANGS=fra+eng
+# 🔼 Fin ajout OCR
+
 # Définir le binaire chromium utilisé par Selenium
 ENV CHROME_BIN=/usr/bin/chromium
 ENV PATH=$CHROME_BIN:$PATH
