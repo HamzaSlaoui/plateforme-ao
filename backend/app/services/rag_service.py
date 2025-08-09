@@ -4,7 +4,6 @@ import openai
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 from typing import List, Dict
-import PyPDF2
 import docx
 from io import BytesIO
 from sentence_transformers import SentenceTransformer
@@ -15,18 +14,11 @@ from models.document import Document
 from core.config import Config
 from models.embedding import Embedding
 import re
-
-
-# requirements en plus
-# pymupdf
-# pdf2image
-# pytesseract
-
-import fitz  # PyMuPDF
+import fitz 
+import tiktoken
 
 
 def _clean_text(s: str) -> str:
-    # déhyphénation simple + normalisation espaces
     s = re.sub(r'(\w)-\n(\w)', r'\1\2', s)
     s = re.sub(r'[ \t]+', ' ', s)
     s = re.sub(r'\n{3,}', '\n\n', s)
@@ -46,14 +38,10 @@ def _pdf_is_scanned(file_bytes: bytes, min_chars_per_page: int = 40) -> bool:
 
 
 def _ocr_pdf_bytes(file_bytes: bytes, lang: str = "fra") -> str:
-    """
-    Effectue l'OCR sur un PDF scanné avec nettoyage robuste du texte.
-    """
     doc = fitz.open(stream=file_bytes, filetype="pdf")
     out_parts = []
     
     try:
-        # zoom ~300 DPI (MuPDF par défaut ~72 DPI, 300/72 ≈ 4.17)
         zoom = 4.0
         mat = fitz.Matrix(zoom, zoom)
 
@@ -62,18 +50,15 @@ def _ocr_pdf_bytes(file_bytes: bytes, lang: str = "fra") -> str:
                 pix = page.get_pixmap(matrix=mat, alpha=False)
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
-                # OCR avec gestion d'erreur
                 try:
                     txt = pytesseract.image_to_string(img, lang=lang)
-                    # Nettoyage immédiat du texte OCR
                     txt = _clean_text(txt)
-                    if txt.strip():  # N'ajouter que si du texte valide
+                    if txt.strip(): 
                         out_parts.append(f"\n--- Page {i} ---\n{txt}\n")
                 except pytesseract.TesseractNotFoundError:
                     raise RuntimeError("Tesseract introuvable dans le conteneur. Installe tesseract-ocr (+ tesseract-ocr-fra).")
                 except Exception as ocr_error:
                     print(f"Erreur OCR page {i}: {ocr_error}")
-                    # Continuer avec les autres pages
                     continue
                     
             except Exception as page_error:
@@ -84,10 +69,7 @@ def _ocr_pdf_bytes(file_bytes: bytes, lang: str = "fra") -> str:
         doc.close()
         
     result = "".join(out_parts)
-    return _clean_text(result)  # Nettoyage final
-
-
-import tiktoken
+    return _clean_text(result)
 
 def _tiktoken_len(text: str) -> int:
     enc = tiktoken.get_encoding("cl100k_base")
@@ -95,10 +77,6 @@ def _tiktoken_len(text: str) -> int:
 
 
 def _clean_text(s: str) -> str:
-    """
-    Nettoie le texte extrait des documents en supprimant les caractères problématiques
-    et en normalisant le formatage.
-    """
     if not s:
         return ""
     
