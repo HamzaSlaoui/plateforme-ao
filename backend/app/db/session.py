@@ -7,7 +7,7 @@ from core.config import Config
 
 engine = create_async_engine(
     url=Config.DATABASE_URL,
-    echo=True,  # Mettre False en production
+    echo=Config.DEBUG,  # Mettre False en production
     poolclass=NullPool,  # Recommandé pour asyncpg
 )
 

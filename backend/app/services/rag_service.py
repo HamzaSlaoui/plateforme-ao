@@ -28,6 +28,7 @@ def _tiktoken_len(text: str) -> int:
     return len(enc.encode(text))
 
 
+
 def _clean_text(s: str) -> str:
     if not s:
         return ""
@@ -48,6 +49,7 @@ def _clean_text(s: str) -> str:
 
 
 # -------------- Détection PDF scanné --------------
+
 def _pdf_is_scanned(file_bytes: bytes, min_chars_per_page: int = 40) -> bool:
     doc = fitz.open(stream=file_bytes, filetype="pdf")
     try:

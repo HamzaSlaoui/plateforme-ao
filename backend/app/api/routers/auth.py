@@ -1,6 +1,4 @@
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
-from pydantic import EmailStr
-from sqlalchemy import func, select 
 from sqlalchemy.ext.asyncio import AsyncSession 
 from api.deps import get_auth_service, get_org_service
 from services.organisation_service import OrganisationService
@@ -10,7 +8,7 @@ from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
 from models.user import User
 from schemas.user import UserCreate, UserLogin, UserResponse
-from schemas.auth import EmailVerification, Token 
+from schemas.auth import EmailVerification, Token
 from core.config import Config
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -102,15 +100,6 @@ async def resend_verification(
         }
     except ValueError as e:
         raise HTTPException(400, str(e))
-    
-@router.post("/resend-verification-public")
-async def resend_verification_public(payload: EmailStr, auth: AuthService = Depends(get_auth_service)):
-    user = await auth.get_user_by_email(payload.email)
-    if not user or user.is_verified:
-        raise HTTPException(400, "Adresse déjà vérifiée ou inconnue")
-
-    await auth.resend_verification(user)
-    return {"message": "Email renvoyé"}
 
 
 @router.get("/me", response_model=UserResponse)
