@@ -71,24 +71,26 @@ async def list_join_requests(
 @router.post("/join-requests/{request_id}/accept", status_code=status.HTTP_200_OK)
 async def accept_join_request(
     request_id: UUID,
+    bg: BackgroundTasks,
     current_user=Depends(get_current_verified_user),
     svc: OrganisationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
-    await svc.accept(request_id, current_user.id)
+    await svc.accept(request_id, current_user.id, bg)
     return {"message": "Utilisateur accepté dans l'organisation"}
 
 
 @router.post("/join-requests/{request_id}/reject", status_code=status.HTTP_200_OK)
 async def reject_join_request(
     request_id: UUID,
+    bg: BackgroundTasks,
     current_user=Depends(get_current_verified_user),
     svc: OrganisationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
-    await svc.reject(request_id, current_user.id)
+    await svc.reject(request_id, current_user.id, bg)
     return {"message": "Demande rejetée"}
 
 

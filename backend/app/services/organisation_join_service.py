@@ -93,7 +93,7 @@ class OrganisationJoinService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisation introuvable")
         return await self.join_repo.list_pending_by_org(org_id)
 
-    async def accept(self, request_id: UUID, owner_id: UUID) -> None:
+    async def accept(self, request_id: UUID, owner_id: UUID, bg: BackgroundTasks) -> None:
         jr = await self.join_repo.get_by_id(request_id)
         if not jr or jr.organisation_id != (await self.user_repo.by_id(owner_id)).organisation_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Demande introuvable")
@@ -105,13 +105,25 @@ class OrganisationJoinService:
         jr.status = "accepte"
         user = await self.user_repo.by_id(jr.user_id)
         user.organisation_id = jr.organisation_id
+        org = await self.org_repo.by_id(jr.organisation_id)
         try:
             await self.db.commit()
+            bg.add_task(
+                send_email,
+                to=user.email,
+                subject="Demande d'adhésion acceptée",
+                template_name="join_request_accepted.html",
+                context={
+                    "firstname": user.firstname,
+                    "organisation_name": org.name,
+                    "app_name": Config.APP_NAME,
+                },
+            )
         except IntegrityError:
             await self.db.rollback()
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Échec de l'acceptation")
 
-    async def reject(self, request_id: UUID, owner_id: UUID) -> None:
+    async def reject(self, request_id: UUID, owner_id: UUID, bg: BackgroundTasks) -> None:
         jr = await self.join_repo.get_by_id(request_id)
         if not jr or jr.organisation_id != (await self.user_repo.by_id(owner_id)).organisation_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Demande introuvable")
@@ -119,8 +131,21 @@ class OrganisationJoinService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Demande déjà traitée")
 
         jr.status = "rejetee"
+        user = await self.user_repo.by_id(jr.user_id)
+        org = await self.org_repo.by_id(jr.organisation_id)
         try:
             await self.db.commit()
+            bg.add_task(
+                send_email,
+                to=user.email,
+                subject="Demande d'adhésion rejetée",
+                template_name="join_request_rejected.html",
+                context={
+                    "firstname": user.firstname,
+                    "organisation_name": org.name,
+                    "app_name": Config.APP_NAME,
+                },
+            )
         except IntegrityError:
             await self.db.rollback()
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Échec du refus")
