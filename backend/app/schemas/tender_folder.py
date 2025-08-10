@@ -1,10 +1,11 @@
 from fastapi import Form
-from pydantic import BaseModel, Field, ConfigDict 
+from pydantic import BaseModel, ConfigDict 
 from datetime import date, datetime
 from uuid import UUID
 from typing import List, Optional, Dict
 from enum import Enum
 from .document import DocumentResponse
+from typing import Literal
 
 class TenderStatusEnum(str, Enum):
     EN_COURS = "en_cours"
@@ -16,7 +17,6 @@ class TenderStatusEnum(str, Enum):
 class TenderFolderCreate(BaseModel):
     name: str
     description: str | None
-    status: str
     submission_deadline: date | None
     client_name: str | None
     organisation_id: UUID
@@ -25,7 +25,6 @@ class TenderFolderCreate(BaseModel):
     def as_form(cls,            
                 name: str = Form(...),
                 description: Optional[str] = Form(None),
-                status: str = Form(...),
                 submission_deadline: Optional[date] = Form(None),
                 client_name: Optional[str] = Form(None),
                 organisation_id: UUID = Form(...),
@@ -33,20 +32,13 @@ class TenderFolderCreate(BaseModel):
         return cls(
             name=name,
             description=description,
-            status=status,
             submission_deadline=submission_deadline,
             client_name=client_name,
             organisation_id=organisation_id,
         )
 
-
-
-class TenderFolderUpdate(BaseModel):
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    description: Optional[str] = None
-    status: Optional[TenderStatusEnum] = None
-    submission_deadline: Optional[date] = None
-    client_name: Optional[str] = Field(None, max_length=255)
+class UpdateStatusPayload(BaseModel):
+    status: Literal["en_cours", "soumis", "gagne", "perdu"]
 
 
 class TenderFolderResponse(BaseModel):

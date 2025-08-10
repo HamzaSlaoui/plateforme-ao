@@ -92,6 +92,11 @@ class OrganisationJoinService:
         if not await self.org_repo.exists(org_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisation introuvable")
         return await self.join_repo.list_pending_by_org(org_id)
+    
+    async def count_pending(self, organisation_id: UUID) -> int:
+        if not await self.org_repo.exists(organisation_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organisation introuvable")
+        return await self.join_repo.count_pending(organisation_id)
 
     async def accept(self, request_id: UUID, owner_id: UUID, bg: BackgroundTasks) -> None:
         jr = await self.join_repo.get_by_id(request_id)

@@ -67,7 +67,7 @@ const MembersPage = () => {
 
       <main className="flex-1 p-8 overflow-auto">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Gestion des membres
+          Membres
         </h1>
 
         {error && (

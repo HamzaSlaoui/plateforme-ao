@@ -67,6 +67,17 @@ async def list_join_requests(
         for jr in raw
     ]
 
+@router.get("/join-requests/pending-count", status_code=status.HTTP_200_OK)
+async def get_pending_requests_count(
+    current_user=Depends(get_current_verified_user),
+    svc: OrganisationJoinService = Depends(get_join_service),
+):
+    if not current_user.is_owner:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
+    
+    count = await svc.count_pending(current_user.organisation_id)
+    return {"count": count}
+
 
 @router.post("/join-requests/{request_id}/accept", status_code=status.HTTP_200_OK)
 async def accept_join_request(
@@ -108,5 +119,7 @@ async def remove_member(
     current_user: User = Depends(get_current_verified_user),
     svc: OrganisationMemberService = Depends(get_org_member_service),
 ):
+    if not current_user.is_owner:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
     await svc.remove_member(current_user, member_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

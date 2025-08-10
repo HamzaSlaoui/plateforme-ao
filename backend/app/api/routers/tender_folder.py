@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, Body, Depends, File, UploadFile, HTTPException, status
 from uuid import UUID
 from typing import List
 from api.deps import get_tf_service
 from core.security import get_current_verified_user
 from schemas.tender_folder import (
-    FolderListResponse, TenderFolderCreate, TenderFolderResponse,
+    FolderListResponse, TenderFolderCreate, TenderFolderResponse, UpdateStatusPayload,
 )
 from schemas.document import DocumentResponse
 from services.tender_folder_service import TenderFolderService
@@ -84,3 +84,25 @@ async def folder_detail(
         document_count=len(docs),
         documents=docs,
     )
+
+@router.put("/{folder_id}/status", status_code=status.HTTP_204_NO_CONTENT)
+async def update_folder_status(
+    folder_id: UUID,
+    payload: UpdateStatusPayload,
+    current_user: User = Depends(get_current_verified_user),
+    svc: TenderFolderService = Depends(get_tf_service),
+):
+    updated = await svc.update_status(folder_id, current_user.organisation_id, payload.status)
+    if not updated:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
+
+
+@router.delete("/{folder_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_folder(
+    folder_id: UUID,
+    current_user: User = Depends(get_current_verified_user),
+    svc: TenderFolderService = Depends(get_tf_service),
+):
+    deleted = await svc.delete(folder_id, current_user.organisation_id)
+    if not deleted:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")

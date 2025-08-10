@@ -27,7 +27,6 @@ class TenderFolderService:
         folder = TenderFolder(
             name=data.name,
             description=data.description,
-            status=data.status,
             submission_deadline=data.submission_deadline,
             client_name=data.client_name,
             organisation_id=data.organisation_id,
@@ -63,6 +62,11 @@ class TenderFolderService:
         await self.db.refresh(folder)
         return folder
 
+    async def delete(self, folder_id: UUID, org_id: UUID) -> bool:
+        affected = await self.repo.delete(folder_id, org_id)
+        await self.db.commit()
+        return affected > 0
+
     async def list_folders(self, org_id):
         return await self.repo.get_by_org(org_id)
 
@@ -74,3 +78,12 @@ class TenderFolderService:
 
     async def one_with_docs(self, folder_id, org_id):
         return await self.repo.get_with_docs(folder_id, org_id)
+
+    async def update_status(self, folder_id: UUID, org_id: UUID, status: str) -> bool:
+        if status not in {"en_cours", "soumis", "gagne", "perdu"}:
+            raise ValueError("Statut invalide")
+
+        affected = await self.repo.update_status(folder_id, org_id, status)
+        await self.db.commit()
+        return affected > 0
+
