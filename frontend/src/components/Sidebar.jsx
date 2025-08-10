@@ -1,25 +1,44 @@
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, FolderOpen, Settings, LogOut, User, Users, FolderSearch2  } from "lucide-react";
+import {
+  Home,
+  FolderOpen,
+  Settings,
+  LogOut,
+  User,
+  Users,
+  FolderSearch2,
+} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { usePendingRequests } from "../hooks/usePendingRequests";
 
 const Sidebar = () => {
   const {
     authState: { user },
     logout,
+    api,
   } = useAuth();
   const navigate = useNavigate();
+
+  const { hasPendingRequests } = usePendingRequests(api, user);
 
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: FolderOpen, label: "Dossiers", path: "/folders" },
-    { icon: FolderSearch2 , label: "Marchés", path: "/marches" }, 
+    { icon: FolderSearch2, label: "Marchés", path: "/marches" },
     ...(user?.is_owner
-      ? [{ icon: Users, label: "Membres", path: "/members" }]
+      ? [
+          {
+            icon: Users,
+            label: "Membres",
+            path: "/members",
+            hasNotification: hasPendingRequests,
+          },
+        ]
       : []),
     { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
-  
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -45,7 +64,7 @@ const Sidebar = () => {
 
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          {menuItems.map(({ icon: Icon, label, path }) => (
+          {menuItems.map(({ icon: Icon, label, path, hasNotification }) => (
             <li key={path}>
               <NavLink
                 to={path}
@@ -57,7 +76,15 @@ const Sidebar = () => {
                   }`
                 }
               >
-                <Icon className="w-5 h-5" />
+                <div className="relative">
+                  <Icon className="w-5 h-5" />
+                  {hasNotification && (
+                    <span
+                      className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 animate-pulse"
+                      title="Nouvelles demandes d'adhésion en attente"
+                    />
+                  )}
+                </div>
                 <span className="font-medium">{label}</span>
               </NavLink>
             </li>

@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.organisation_join_request import OrganisationJoinRequest
@@ -45,3 +45,10 @@ class OrganisationJoinRequestRepo:
         )
         rows = (await self.db.execute(stmt)).all()
         return [{"join": jr, "user": u} for jr, u in rows]
+    
+    async def count_pending(self, org_id: UUID) -> int:
+        stmt = select(func.count(OrganisationJoinRequest.id)).where(
+            OrganisationJoinRequest.organisation_id == org_id,
+            OrganisationJoinRequest.status == "en attente",
+        )
+        return (await self.db.execute(stmt)).scalar() or 0

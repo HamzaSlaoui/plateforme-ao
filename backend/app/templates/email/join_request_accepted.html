@@ -1,12 +1,97 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <body style="font-family: sans-serif; color: #333">
-    <h3>Votre demande a été acceptée !</h3>
-    <p>Bonjour {{ firstname }},</p>
-    <p>
-      Vous faites désormais partie de l'organisation
-      <strong>{{ organisation_name }}</strong>.
-    </p>
-    <p>À bientôt sur {{ app_name }} !</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+        sans-serif;
+      background-color: #ffffff;
+    "
+  >
+    <table role="presentation" style="width: 100%; border-collapse: collapse">
+      <tr>
+        <td style="padding: 40px 20px">
+          <table
+            role="presentation"
+            style="
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border: 1px solid #e5e5e5;
+            "
+          >
+            <tr>
+              <td style="padding: 40px">
+                <h1
+                  style="
+                    color: #111827;
+                    font-size: 28px;
+                    font-weight: 600;
+                    margin: 0 0 32px 0;
+                    text-align: center;
+                  "
+                >
+                  Demande acceptée
+                </h1>
+
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0 0 24px 0;
+                  "
+                >
+                  Bonjour {{ firstname }},
+                </p>
+
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0 0 32px 0;
+                  "
+                >
+                  Vous faites désormais partie de l'organisation
+                  <strong>{{ organisation_name }}</strong>.
+                </p>
+
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0;
+                  "
+                >
+                  À bientôt sur {{ app_name }} !
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  background-color: #f9fafb;
+                  padding: 24px;
+                  text-align: center;
+                  border-top: 1px solid #e5e5e5;
+                "
+              >
+                <p style="color: #9ca3af; font-size: 14px; margin: 0">
+                  {{ app_name }}
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
