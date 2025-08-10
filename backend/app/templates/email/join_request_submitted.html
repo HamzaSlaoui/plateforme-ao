@@ -1,22 +1,102 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
-  <body style="font-family: sans-serif; color: #333; line-height: 1.4">
-    <h3>Votre demande a bien été envoyée !</h3>
-    <p>Bonjour {{ firstname }},</p>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+        sans-serif;
+      background-color: #ffffff;
+    "
+  >
+    <table role="presentation" style="width: 100%; border-collapse: collapse">
+      <tr>
+        <td style="padding: 40px 20px">
+          <table
+            role="presentation"
+            style="
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border: 1px solid #e5e5e5;
+            "
+          >
+            <tr>
+              <td style="padding: 40px">
+                <h1
+                  style="
+                    color: #111827;
+                    font-size: 28px;
+                    font-weight: 600;
+                    margin: 0 0 32px 0;
+                    text-align: center;
+                  "
+                >
+                  Demande bien envoyée
+                </h1>
 
-    <p>
-      Vous avez demandé à rejoindre <strong>{{ organisation_name }}</strong>
-      (code&nbsp;: {{ code }}).
-    </p>
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0 0 24px 0;
+                  "
+                >
+                  Bonjour {{ firstname }},
+                </p>
 
-    <p>
-      Le propriétaire a été notifié. Vous recevrez un e-mail dès qu'il aura
-      <em>accepté</em> ou <em>refusé</em> votre demande.
-    </p>
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0 0 24px 0;
+                  "
+                >
+                  Vous avez demandé à rejoindre
+                  <strong>{{ organisation_name }}</strong> (code : {{ code }}).
+                </p>
 
-    <p style="font-size: 12px; color: #888">— L'équipe {{ app_name }}</p>
+                <p
+                  style="
+                    color: #374151;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin: 0 0 32px 0;
+                  "
+                >
+                  Le propriétaire a été notifié. Vous recevrez un e-mail dès
+                  qu'il aura <em>accepté</em> ou <em>refusé</em> votre demande.
+                </p>
+
+                <p style="color: #6b7280; font-size: 14px; margin: 0">
+                  — L'équipe {{ app_name }}
+                </p>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style="
+                  background-color: #f9fafb;
+                  padding: 24px;
+                  text-align: center;
+                  border-top: 1px solid #e5e5e5;
+                "
+              >
+                <p style="color: #9ca3af; font-size: 14px; margin: 0">
+                  {{ app_name }}
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
