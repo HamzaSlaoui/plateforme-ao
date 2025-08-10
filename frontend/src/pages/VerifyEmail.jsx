@@ -29,9 +29,9 @@ function VerifyEmail() {
 
   useEffect(() => {
     if (status.success !== "redirect") return;
-
+    console.error("Redirection vers :", authState.user);
     if (!authState.isAuthenticated) {
-      navigate("/login");
+      navigate("/");
       return;
     }
     if (!hasOrganisation()) {
@@ -78,10 +78,10 @@ function VerifyEmail() {
               Échec de la vérification
             </h2>
             <Link
-              to="/login"
+              to="/"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Retour à la connexion
+              Retour
             </Link>
           </>
         )}
