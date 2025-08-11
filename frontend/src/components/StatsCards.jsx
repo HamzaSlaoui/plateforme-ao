@@ -1,53 +1,31 @@
 import React from "react";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
+import { getStatusConfig } from "../utils/status"; // 🔧 adapte le chemin si besoin
 
-const StatsCards = ({ dossiers, stats }) => {
-  const cardData = [
-    {
-      title: "Total des dossiers",
-      value: dossiers.length,
-      color: "indigo",
-      icon: Search,
-    },
-    {
-      title: "En cours",
-      value: stats.en_cours || 0,
-      color: "yellow",
-      icon: Filter,
-    },
-    {
-      title: "Soumis",
-      value: stats.soumis || 0,
-      color: "blue",
-      icon: Filter,
-    },
-    {
-      title: "Gagné",
-      value: stats.gagne || 0,
-      color: "green",
-      icon: Filter,
-    },
-    {
-      title: "Perdu",
-      value: stats.perdu || 0,
-      color: "red",
-      icon: Filter,
-    },
-  ];
-
-  const getColorClasses = (color) => {
-    const colors = {
-      indigo:
-        "text-indigo-600 bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400",
-      blue: "text-blue-600 bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400",
-      yellow:
-        "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400",
-      green:
-        "text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400",
-      red: "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400",
-    };
-    return colors[color];
+const StatsCards = ({ dossiers = [], stats = {} }) => {
+  const totalCard = {
+    title: "Total des dossiers",
+    value: Array.isArray(dossiers) ? dossiers.length : 0,
+    color:
+      "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400",
+    icon: Search,
   };
+
+  const statusCards = [
+    { title: "En cours", value: stats.en_cours || 0, status: "en_cours" },
+    { title: "Soumis", value: stats.soumis || 0, status: "soumis" },
+    { title: "Gagné", value: stats.gagne || 0, status: "gagne" },
+    { title: "Perdu", value: stats.perdu || 0, status: "perdu" },
+  ].map((card) => {
+    const statusConfig = getStatusConfig(card.status);
+    return {
+      ...card,
+      color: statusConfig.color,
+      icon: statusConfig.icon,
+    };
+  });
+
+  const cardData = [totalCard, ...statusCards];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
@@ -63,16 +41,14 @@ const StatsCards = ({ dossiers, stats }) => {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {card.title}
                 </p>
-                <p className={`text-2xl font-bold text-${card.color}-600`}>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {card.value}
                 </p>
               </div>
               <div
-                className={`w-12 h-12 rounded-lg flex items-center justify-center ${getColorClasses(
-                  card.color
-                )}`}
+                className={`w-12 h-12 rounded-lg flex items-center justify-center ${card.color}`}
               >
-                <Icon className="w-6 h-6" />
+                {Icon && <Icon className="w-6 h-6" />}
               </div>
             </div>
           </div>

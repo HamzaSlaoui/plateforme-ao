@@ -118,7 +118,7 @@ class RAGService:
                     with pdfplumber.open(BytesIO(file_content)) as pdf:
                         for page_num, page in enumerate(pdf.pages, start=1):
                             page_text = page.extract_text() or ""
-                            if page_text.strip():
+                            if page_text.strip():  
                                 text += f"\n--- Page {page_num} ---\n{_clean_text(page_text)}\n"
                             tables = page.extract_tables() or []
                             for tnum, table in enumerate(tables, start=1):
@@ -261,6 +261,7 @@ class RAGService:
                 "Tu es un assistant spécialisé dans l'analyse d'appels d'offres. "
                 "Réponds précisément aux questions en te basant UNIQUEMENT sur les extraits fournis. "
                 "Cite toujours tes sources. Si l'information n'est pas dans les documents, dis-le clairement."
+                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d’informations absentes ou incertaines."
             )},
             {"role": "user", "content": f"Question: {question}\n\nContexte des documents:\n{context}\n\nRéponds en français de manière claire et structurée."}
         ]
@@ -297,6 +298,7 @@ class RAGService:
                 "- Utiliser exclusivement les informations trouvées dans les documents SI elles sont présentes.\n"
                 "- Si une information n'est pas trouvée explicitement, tu peux proposer une réponse générique structurée, en précisant que certains éléments doivent être complétés.\n"
                 "- Toujours répondre en français et rester factuel."
+                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d’informations absentes ou incertaines."
             )},
             {"role": "user", "content": f"Voici les documents à ta disposition :\n{full_text}\n\nQuestion posée :\n{question}\n\nRéponds maintenant de manière professionnelle, en te basant sur ces documents.\nS'ils ne suffisent pas, propose un exemple type ou un guide clair pour aider l'utilisateur à avancer."}
         ]
