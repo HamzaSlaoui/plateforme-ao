@@ -44,8 +44,11 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <FolderOpen className="animate-spin w-12 h-12 text-gray-400" />
+      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <FolderOpen className="animate-spin w-12 h-12 text-gray-400" />
+        </main>
       </div>
     );
   }
