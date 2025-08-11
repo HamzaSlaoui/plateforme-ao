@@ -12,6 +12,7 @@ import DocumentPreview from "../components/DocumentPreview";
 import DocumentList from "../components/DocumentList";
 import ConfirmDialog from "../components/ConfirmDialog";
 import FolderInfo from "../components/FolderInfo";
+import AddDocumentDropzone from "../components/AddDocumentDropzone";
 
 function TenderFolderDetail() {
   const { dossierId } = useParams();
@@ -23,6 +24,7 @@ function TenderFolderDetail() {
 
   const { folder, loading, error, updateStatus, deleteFolder } =
     useTenderFolder(api, dossierId);
+
   const {
     selectedDoc,
     docContent,
@@ -42,6 +44,12 @@ function TenderFolderDetail() {
       setDeleting(false);
       setConfirmOpen(false);
     }
+  };
+
+  const handleDocumentsUploaded = () => {
+    // Option simple : recharger la page pour refetch le dossier avec ses nouveaux documents
+    // (à remplacer par un refetch propre si votre hook expose une méthode de rafraîchissement)
+    window.location.reload();
   };
 
   if (loading) {
@@ -108,9 +116,7 @@ function TenderFolderDetail() {
             {isOwner() && (
               <button
                 onClick={() => setConfirmOpen(true)}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl
-                 bg-red-600 hover:bg-red-700 text-white shadow-sm
-                 transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-sm transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
                 <span className="hidden sm:inline">Supprimer</span>
@@ -120,6 +126,14 @@ function TenderFolderDetail() {
         </div>
 
         <FolderInfo folder={folder} />
+
+        {/* Zone d'upload avec le nouveau composant */}
+        <AddDocumentDropzone
+          dossierId={dossierId}
+          api={api}
+          onUploaded={handleDocumentsUploaded}
+          className="mb-4"
+        />
 
         <DocumentList documents={folder.documents} onPreview={openPreview} />
 
@@ -140,8 +154,7 @@ function TenderFolderDetail() {
           title="Supprimer le dossier ?"
           message={
             <>
-              Cette action est{" "}
-              <span className="font-semibold">irréversible</span>. Tous les
+              Cette action est <span className="font-semibold">irréversible</span>. Tous les
               documents liés seront supprimés.
             </>
           }
