@@ -14,6 +14,7 @@ const ChatInput = ({
     "Date limite de soumission ?",
     "Documents requis ?",
     "Résumé du dossier",
+    "Budget estimatif ?",
   ];
 
   return (
