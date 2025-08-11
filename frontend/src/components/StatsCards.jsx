@@ -27,6 +27,12 @@ const StatsCards = ({ dossiers, stats }) => {
       color: "green",
       icon: Filter,
     },
+    {
+      title: "Perdu",
+      value: stats.perdu || 0,
+      color: "red",
+      icon: Filter,
+    },
   ];
 
   const getColorClasses = (color) => {
@@ -38,12 +44,13 @@ const StatsCards = ({ dossiers, stats }) => {
         "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400",
       green:
         "text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400",
+      red: "text-red-600 bg-red-100 dark:bg-red-900/20 dark:text-red-400",
     };
     return colors[color];
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       {cardData.map((card, index) => {
         const Icon = card.icon;
         return (
