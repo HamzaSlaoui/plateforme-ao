@@ -106,3 +106,45 @@ async def delete_folder(
     deleted = await svc.delete(folder_id, current_user.organisation_id)
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
+    
+
+@router.post("/{folder_id}/documents", status_code=status.HTTP_201_CREATED)
+async def add_documents_to_folder(
+    folder_id: UUID,
+    files: List[UploadFile] = File(...),
+    current_user: User = Depends(get_current_verified_user),
+    svc: TenderFolderService = Depends(get_tf_service),
+):
+    """
+    Ajoute un ou plusieurs documents à un dossier existant (du même org que l'utilisateur).
+    """
+    if not files or len(files) == 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Aucun fichier fourni")
+
+    try:
+        created_docs = await svc.add_documents(
+            folder_id=folder_id,
+            org_id=current_user.organisation_id,
+            uploader_id=current_user.id,
+            files=files,
+        )
+    except ValueError as ve:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(ve))
+    except PermissionError:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Accès refusé à ce dossier")
+    except FileNotFoundError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
+
+    return {
+        "message": "Documents ajoutés avec succès",
+        "count": len(created_docs),
+        "documents": [
+            {
+                "id": str(d.id),
+                "filename": d.filename,
+                "file_type": d.file_type,
+                "created_at": d.created_at,
+            }
+            for d in created_docs
+        ],
+    }

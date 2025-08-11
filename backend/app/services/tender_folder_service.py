@@ -87,3 +87,49 @@ class TenderFolderService:
         await self.db.commit()
         return affected > 0
 
+    async def add_documents(
+        self,
+        *,
+        folder_id: UUID,
+        org_id: UUID,
+        uploader_id: UUID,
+        files: List[UploadFile],
+    ) -> list[Document]:
+        """
+        Ajoute des documents à un dossier existant après vérification d'appartenance à l'organisation.
+        """
+        # Vérifier que le dossier existe et appartient à l'orga
+        folder = await self.repo.get_with_docs(folder_id, org_id)
+        if not folder:
+            raise FileNotFoundError()
+
+        created_docs: list[Document] = []
+
+        for f in files:
+            if not f.filename:
+                continue
+            content = await f.read()
+            if not content:
+                continue
+
+            doc = Document(
+                tender_folder_id=folder.id,
+                filename=f.filename,
+                file_type=f.filename.split(".")[-1].lower(),
+                uploaded_by=uploader_id,
+                file_content=content,
+            )
+            await self.doc_repo.add(doc)
+            await self.db.flush()
+            created_docs.append(doc)
+
+            await rag_service.process_document(
+                db=self.db,
+                tender_folder_id=folder.id,
+                document_id=doc.id,
+                file_content=content,
+                file_type=doc.file_type,
+            )
+
+        await self.db.commit()
+        return created_docs

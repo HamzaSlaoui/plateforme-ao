@@ -15,7 +15,7 @@ from api.routers.marche import router as marche_routes
 async def lifespan(app: FastAPI):
     # Startup
     print("Creating database tables...")
-    #await drop_tables() 
+    # await drop_tables() 
     await create_tables() 
     print("Tables created successfully!")
     yield  
