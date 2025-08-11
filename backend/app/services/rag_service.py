@@ -22,7 +22,6 @@ from core.config import Config
 from models.embedding import Embedding
 
 
-# ---------------- Utils texte / tokens ----------------
 def _tiktoken_len(text: str) -> int:
     enc = tiktoken.get_encoding("cl100k_base")
     return len(enc.encode(text))
@@ -32,23 +31,17 @@ def _tiktoken_len(text: str) -> int:
 def _clean_text(s: str) -> str:
     if not s:
         return ""
-    # Supprimer caractères nuls / remplacement
     s = s.replace("\x00", "").replace("\ufffd", "")
     import unicodedata
     s = "".join(ch for ch in s if unicodedata.category(ch)[0] != "C" or ch in "\n\t\r")
-    # Dé-hyphénation simple
     s = re.sub(r"(\w)-\n(\w)", r"\1\2", s)
-    # Espaces / nouvelles lignes
     s = re.sub(r"[ \t]+", " ", s)
     s = re.sub(r"\n{3,}", "\n\n", s)
-    # Trim lignes
     s = "\n".join(line.strip() for line in s.split("\n"))
-    # Normalisation
     s = unicodedata.normalize("NFKC", s)
     return s.strip()
 
 
-# -------------- Détection PDF scanné --------------
 
 def _pdf_is_scanned(file_bytes: bytes, min_chars_per_page: int = 40) -> bool:
     doc = fitz.open(stream=file_bytes, filetype="pdf")
@@ -63,7 +56,6 @@ def _pdf_is_scanned(file_bytes: bytes, min_chars_per_page: int = 40) -> bool:
         doc.close()
 
 
-# -------------- OCR PDF --------------
 def _ocr_pdf_bytes(file_bytes: bytes, lang: str) -> str:
     doc = fitz.open(stream=file_bytes, filetype="pdf")
     out_parts = []
@@ -92,10 +84,8 @@ def _ocr_pdf_bytes(file_bytes: bytes, lang: str) -> str:
 
 class RAGService:
     def __init__(self, api_key: str, base_url: str):
-        # Pointer Tesseract si fourni
         tess_cmd = os.getenv("TESSERACT_CMD") or shutil.which("tesseract") or "/usr/bin/tesseract"
         pytesseract.pytesseract.tesseract_cmd = tess_cmd
-        # Modèles
         self.openai_client = openai.OpenAI(api_key=api_key, base_url=base_url)
         self.embedding_model = SentenceTransformer("BAAI/bge-m3")
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -105,12 +95,10 @@ class RAGService:
             separators=["\n\n", "\n", " ", ""]
         )
 
-    # -------- Embeddings --------
     def generate_embedding(self, text: str, is_query: bool = False) -> List[float]:
         prefix = "query: " if is_query else "passage: "
         return self.embedding_model.encode(prefix + text.strip(), normalize_embeddings=True).tolist()
 
-    # -------- Extraction texte --------
     def extract_text_from_file(self, file_content: bytes, file_type: str) -> str:
         try:
             ftype = (file_type or "").lower()
@@ -126,7 +114,6 @@ class RAGService:
                         print(f"[EXTRACT] OCR terminé, chars={len(text)}")
                         return _clean_text(text)
 
-                    # PDF natif: texte + tableaux
                     text = ""
                     with pdfplumber.open(BytesIO(file_content)) as pdf:
                         for page_num, page in enumerate(pdf.pages, start=1):
@@ -159,7 +146,6 @@ class RAGService:
                 print(f"[EXTRACT] DOCX chars={len(text)}")
                 return _clean_text(text)
 
-            # Fichiers texte / autres encodages
             text = ""
             for enc in ["utf-8", "latin-1", "cp1252", "iso-8859-1"]:
                 try:
@@ -179,22 +165,20 @@ class RAGService:
             except Exception:
                 return ""
 
-    # -------- Chunking --------
     def chunk_text(self, text: str) -> List[str]:
         return self.text_splitter.split_text(text)
 
-    # -------- Ingestion --------
     async def process_document(self, db: AsyncSession, tender_folder_id: int, document_id: int,
                                file_content: bytes, file_type: str):
         document_text = self.extract_text_from_file(file_content, file_type)
         print(f"[INGEST] doc_id={document_id} total_chars={len(document_text)}")
         chunks = self.chunk_text(document_text)
         if not chunks:
-            chunks = [document_text]  # insère au moins un chunk si rien n'a été découpé
+            chunks = [document_text]  
         inserted = 0
         for i, chunk in enumerate(chunks):
             if len(chunk.strip()) < 50 and i > 0:
-                continue  # on tolère le 1er même s'il est court pour tracer le doc
+                continue
             emb = self.generate_embedding(chunk)
             db.add(Embedding(
                 tender_folder_id=tender_folder_id,
@@ -208,7 +192,6 @@ class RAGService:
         await db.commit()
         print(f"[INGEST] inserted_embeddings={inserted} for doc_id={document_id}")
 
-    # -------- Recherche --------
     async def search_similar_chunks(self, db: AsyncSession, tender_folder_id: int, query: str, limit: int = 10) -> List[Dict]:
         q_emb = self.generate_embedding(query, is_query=True)
         stmt = (
@@ -255,7 +238,7 @@ class RAGService:
             "metadata": row.extra_data
         } for row in result]
 
-    # -------- Réponse RAG --------
+
     async def generate_rag_response(self, db: AsyncSession, tender_folder_id: int, question: str) -> Dict:
         vector_chunks = await self.search_similar_chunks(db, tender_folder_id, question, limit=10)
         keyword_chunks = []
@@ -289,7 +272,6 @@ class RAGService:
         sources = list({c['source'] for c in relevant})
         return {"reponse": resp.choices[0].message.content, "sources": [{"document": s} for s in sources]}
 
-    # -------- Réponse LLM plein-texte --------
     async def generate_llm_response(self, db: AsyncSession, tender_folder_id: int, question: str) -> Dict:
         stmt = (
             select(Document)
@@ -326,7 +308,6 @@ class RAGService:
         return {"reponse": response.choices[0].message.content, "sources": [{"document": d.filename} for d in documents]}
 
 
-# Instance globale (OpenRouter)
 rag_service = RAGService(
     api_key=Config.OPENROUTER_API_KEY,
     base_url=Config.OPENROUTER_BASE_URL

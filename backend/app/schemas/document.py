@@ -23,7 +23,7 @@ class DocumentResponse(DocumentBase):
         return cls(
             id=doc.id,
             filename=doc.filename,
-            document_type=doc.document_type,
+            file_type=doc.file_type,
             tender_folder_id=doc.tender_folder_id,
             uploaded_by=doc.uploaded_by,
             created_at=doc.created_at,

@@ -43,7 +43,7 @@ class TenderFolderService:
                 doc = Document(
                     tender_folder_id=folder.id,
                     filename=f.filename,
-                    document_type=f.filename.split(".")[-1].lower(),
+                    file_type=f.filename.split(".")[-1].lower(),
                     uploaded_by=creator_id,
                     file_content=content,
                 )
@@ -55,7 +55,7 @@ class TenderFolderService:
                     tender_folder_id=folder.id,
                     document_id=doc.id,
                     file_content=content,
-                    file_type=doc.document_type,
+                    file_type=doc.file_type,
                 )
 
         await self.db.commit()
