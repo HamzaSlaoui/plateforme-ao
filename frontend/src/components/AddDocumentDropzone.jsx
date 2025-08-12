@@ -235,7 +235,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
 
       {/* Info formats */}
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        Formats acceptés : PDF et Word.
+        Formats acceptés : PDF, Word, CSV et TXT.
       </p>
     </div>
   );
