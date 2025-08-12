@@ -14,9 +14,7 @@ export const useDocumentPreview = (api) => {
       setError(null);
 
       try {
-        // Charge le contenu seulement quand nécessaire
-        const res = await api.get(`/documents/${doc.id}/content`);
-        setDocContent(res.data.content);
+        setDocContent(doc.file_content);
       } catch (err) {
         setError("Impossible de charger le document");
       } finally {

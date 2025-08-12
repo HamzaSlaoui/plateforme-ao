@@ -81,6 +81,15 @@ const TenderFolderForm = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  const ACCEPTED = {
+  "application/pdf": [".pdf"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+  "application/msword": [".doc"],
+  "text/plain": [".txt"],
+  "text/csv": [".csv"],
+};
+
+
   const {
     getRootProps,
     getInputProps,
@@ -90,7 +99,7 @@ const TenderFolderForm = () => {
     open,
   } = useDropzone({
     onDrop,
-    accept: {},
+    accept: ACCEPTED,
     multiple: true,
     maxFiles: 10,
     maxSize: 10 * 1024 * 1024,
@@ -269,15 +278,14 @@ const TenderFolderForm = () => {
                   </div>
                 </div>
               </div>
-
-              {progressStep && (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
-                    <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2"></div>
-                    {progressStep}
-                  </p>
-                </div>
-              )}
+                {progressStep && (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
+                      <span className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2 inline-block"></span>
+                      {progressStep}
+                    </p>
+                  </div>
+                )}
             </div>
           </div>
         )}
@@ -404,7 +412,7 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    📁 Formats acceptés : tous types de fichiers (PDF, Word.)
+                    📁 Formats acceptés : tous types de fichiers (PDF, Word, CSV et TXT)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier

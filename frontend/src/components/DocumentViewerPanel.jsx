@@ -5,6 +5,7 @@ import { FileText, Eye, PanelRightOpen, PanelRightClose } from "lucide-react";
 const DocumentViewerPanel = ({ documents, onSelect, isVisible, onToggle }) => {
   if (!documents?.length) return null;
 
+  //A adapter selon les formats acceptés (par la suite)
   const getFileIcon = (filename) => {
     const extension = filename.split('.').pop().toLowerCase();
     if (extension === 'pdf') return '📄';
