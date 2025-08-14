@@ -11,7 +11,7 @@ class Document(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     filename = Column(String(255), nullable=False)
     file_type = Column(String(10), nullable=True)
-    tender_folder_id = Column(UUID(as_uuid=True), ForeignKey("tender_folders.id", ondelete="CASCADE"), nullable=False)
+    tender_folder_id = Column(UUID(as_uuid=True), ForeignKey("tender_folders.id", ondelete="CASCADE"), nullable=False,index=True)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     file_content = Column(LargeBinary, nullable=True) 
     created_at = Column(DateTime, default=datetime.utcnow)
