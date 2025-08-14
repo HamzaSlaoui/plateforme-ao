@@ -91,7 +91,7 @@ class ChatService:
         # Construire le contexte conversationnel
         if conversation_history:
             context_messages = []
-            for msg in conversation_history[-10:]:  # 10 derniers messages pour éviter overflow
+            for msg in conversation_history[-3:]:  # 3 derniers messages pour éviter overflow
                 role = "Utilisateur" if msg.role == "user" else "Assistant"
                 context_messages.append(f"{role}: {msg.content}")
             
@@ -124,7 +124,7 @@ Question actuelle: {user_message}
         # Construire le contexte conversationnel
         if conversation_history:
             context_messages = []
-            for msg in conversation_history[-10:]:  # 10 derniers messages pour éviter overflow
+            for msg in conversation_history[-3:]:  # 3 derniers messages pour éviter overflow
                 role = "Utilisateur" if msg.role == "user" else "Assistant"
                 context_messages.append(f"{role}: {msg.content}")
             
