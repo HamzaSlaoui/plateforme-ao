@@ -15,6 +15,6 @@ class Organisation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relations
-    users = relationship("User", back_populates="organisation", lazy="selectin")
-    tender_folders = relationship("TenderFolder", back_populates="organisation", cascade="all, delete-orphan", lazy="selectin")
+    users = relationship("User", back_populates="organisation", lazy="noload")
+    tender_folders = relationship("TenderFolder", back_populates="organisation", cascade="all, delete-orphan", lazy="noload")
     join_requests = relationship("OrganisationJoinRequest", back_populates="organisation", cascade="all, delete-orphan", passive_deletes=True)

@@ -327,8 +327,3 @@ class RAGService:
         )
         return {"reponse": response.choices[0].message.content, "sources": [{"document": d.filename} for d in documents]}
 
-
-rag_service = RAGService(
-    api_key=Config.OPENROUTER_API_KEY,
-    base_url=Config.OPENROUTER_BASE_URL
-)

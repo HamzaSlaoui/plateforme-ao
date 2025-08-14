@@ -27,7 +27,8 @@ class TenderFolder(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relations
-    organisation = relationship("Organisation", back_populates="tender_folders", lazy="selectin")
-    creator = relationship("User", foreign_keys=[created_by], back_populates="created_folders", lazy="selectin")
-    documents = relationship("Document", back_populates="tender_folder", cascade="all, delete-orphan", lazy="selectin")
-    embeddings = relationship("Embedding", back_populates="tender_folder")
+    organisation = relationship("Organisation", back_populates="tender_folders", lazy="noload")
+    creator = relationship("User", foreign_keys=[created_by], back_populates="created_folders", lazy="noload")
+    documents = relationship("Document", back_populates="tender_folder", cascade="all, delete-orphan", lazy="noload")
+    embeddings = relationship("Embedding", back_populates="tender_folder", lazy="noload")
+    chat_sessions = relationship("ChatSession", back_populates="tender_folder", lazy="noload")

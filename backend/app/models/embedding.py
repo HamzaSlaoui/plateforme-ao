@@ -20,5 +20,5 @@ class Embedding(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
-    document = relationship("Document", back_populates="embeddings", lazy="selectin")
-    tender_folder = relationship("TenderFolder", back_populates="embeddings")
+    document = relationship("Document", back_populates="embeddings", lazy="noload")
+    tender_folder = relationship("TenderFolder", back_populates="embeddings", lazy="noload")

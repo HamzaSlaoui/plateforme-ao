@@ -1,6 +1,7 @@
-from sqlalchemy import UUID, delete, select, func, update
+from sqlalchemy import UUID, delete, desc, select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from models.document import Document
 from models.tender_folder import TenderFolder
 
 class TenderFolderRepo:
@@ -21,13 +22,12 @@ class TenderFolderRepo:
         result = await self.db.execute(stmt)
         return result.rowcount or 0
 
+
     async def get_by_org(self, org_id):
-        stmt = (
-            select(TenderFolder)
-            .options(selectinload(TenderFolder.documents))
-            .where(TenderFolder.organisation_id == org_id)
-        )
-        return (await self.db.execute(stmt)).scalars().all()
+        stmt = select(TenderFolder).filter(TenderFolder.organisation_id == org_id)
+        result = await self.db.execute(stmt)
+        folders = result.scalars().all()
+        return list(folders)
 
     async def get(self, folder_id: int):
         stmt = (

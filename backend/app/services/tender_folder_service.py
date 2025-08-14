@@ -1,9 +1,9 @@
+# services/tender_folder_service.py
 from typing import List
 from uuid import UUID
 
 from fastapi import UploadFile
 from schemas.tender_folder import TenderFolderCreate
-from services.rag_service import rag_service
 from repositories.tender_folder_repo import TenderFolderRepo
 from repositories.document_repo import DocumentRepo
 from models.tender_folder import TenderFolder
@@ -11,10 +11,11 @@ from models.document import Document
 from sqlalchemy.ext.asyncio import AsyncSession
 
 class TenderFolderService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, rag_service):
         self.db = db
         self.repo = TenderFolderRepo(db)
         self.doc_repo = DocumentRepo(db)
+        self.rag_service = rag_service
 
     async def create_folder(
         self,
@@ -50,7 +51,7 @@ class TenderFolderService:
                 await self.doc_repo.add(doc)
                 await self.db.flush() 
 
-                await rag_service.process_document(
+                await self.rag_service.process_document(  # Utilise self.rag_service
                     db=self.db,
                     tender_folder_id=folder.id,
                     document_id=doc.id,
@@ -67,14 +68,21 @@ class TenderFolderService:
         await self.db.commit()
         return affected > 0
 
-    async def list_folders(self, org_id):
-        return await self.repo.get_by_org(org_id)
-
-    async def stats(self, org_id):
-        raw = await self.repo.status_stats(org_id)
-        base = {"en_cours": 0, "soumis": 0, "gagne": 0, "perdu": 0}
-        base.update(raw)
-        return base
+    async def list_folders_with_stats(self, org_id):
+        # 1. Récupérer tous les dossiers
+        folders = await self.repo.get_by_org(org_id) or []
+        
+        # 2. Calculer les stats en Python (plus rapide qu'une requête SQL séparée)
+        stats = {"en_cours": 0, "soumis": 0, "gagne": 0, "perdu": 0}
+        
+        for folder in folders:
+            if folder.status in stats:
+                stats[folder.status] += 1
+        
+        return {
+            "folders": folders,
+            "stats": stats
+        }
 
     async def one_with_docs(self, folder_id, org_id):
         return await self.repo.get_with_docs(folder_id, org_id)
@@ -123,7 +131,7 @@ class TenderFolderService:
             await self.db.flush()
             created_docs.append(doc)
 
-            await rag_service.process_document(
+            await self.rag_service.process_document(  # Utilise self.rag_service
                 db=self.db,
                 tender_folder_id=folder.id,
                 document_id=doc.id,
