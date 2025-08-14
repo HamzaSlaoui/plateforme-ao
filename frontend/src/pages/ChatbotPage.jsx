@@ -1,6 +1,5 @@
-// pages/ChatbotPage.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { Bot, Loader2 } from "lucide-react";
+import { Bot, Loader2, RotateCcw } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Sidebar from "../components/Sidebar";
@@ -16,15 +15,7 @@ const ChatbotPage = () => {
   const messagesEndRef = useRef(null);
 
   // États principaux
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      message:
-        "Bonjour ! Je suis votre assistant IA pour ce dossier. Je peux répondre à vos questions sur les documents, les exigences, et vous aider dans votre préparation. Comment puis-je vous aider ?",
-      isUser: false,
-      timestamp: new Date().toISOString(),
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [folderInfo, setFolderInfo] = useState(null);
@@ -32,6 +23,7 @@ const ChatbotPage = () => {
   const [mode, setMode] = useState("rag");
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   // Chargement des données du dossier
   useEffect(() => {
@@ -49,6 +41,57 @@ const ChatbotPage = () => {
     }
   }, [dossierId, api]);
 
+  // Chargement de l'historique de conversation
+  useEffect(() => {
+    const fetchChatHistory = async () => {
+      if (!dossierId) return;
+
+      try {
+        setIsLoadingHistory(true);
+        const response = await api.get(`/chat/${dossierId}/history`);
+
+        if (response.data.messages && response.data.messages.length > 0) {
+          // Convertir les messages du format API vers le format frontend
+          const formattedMessages = response.data.messages.map((msg) => ({
+            id: msg.id,
+            message: msg.content,
+            isUser: msg.role === "user",
+            timestamp: msg.created_at,
+            sources: msg.sources || [], // Si disponible depuis l'API
+          }));
+          setMessages(formattedMessages);
+        } else {
+          // Si pas d'historique, afficher le message de bienvenue
+          setMessages([
+            {
+              id: "welcome",
+              message:
+                "Bonjour ! Je suis votre assistant IA pour ce dossier. Je peux répondre à vos questions sur les documents, les exigences, et vous aider dans votre préparation. Comment puis-je vous aider ?",
+              isUser: false,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error("Erreur lors du chargement de l'historique:", err);
+        // Afficher le message de bienvenue en cas d'erreur
+        setMessages([
+          {
+            id: "welcome",
+            message:
+              "Bonjour ! Je suis votre assistant IA pour ce dossier. Comment puis-je vous aider ?",
+            isUser: false,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    fetchChatHistory();
+  }, [dossierId, api]);
+
   // Auto-scroll vers le bas
   useEffect(() => {
     scrollToBottom();
@@ -58,49 +101,90 @@ const ChatbotPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Envoi de message
+  // Envoi de message avec nouvel endpoint
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
     const userMessage = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
       message: inputMessage,
       isUser: true,
       timestamp: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentMessage = inputMessage;
     setInputMessage("");
     setIsLoading(true);
 
     try {
-      const response = await api.post("/chatbot/chat", {
-        question: inputMessage,
-        dossier_id: dossierId,
+      const response = await api.post(`/chat/${dossierId}/message`, {
+        question: currentMessage,
         mode,
       });
 
-      const aiMessage = {
-        id: (Date.now() + 1).toString(),
-        message: response.data.reponse,
-        isUser: false,
-        timestamp: new Date().toISOString(),
-        sources: response.data.sources || [],
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      // Remplacer le message temporaire par les vrais messages de l'API
+      setMessages((prev) => {
+        const withoutTemp = prev.filter((msg) => !msg.id.startsWith("temp-"));
+        return [
+          ...withoutTemp,
+          {
+            id: response.data.user_message.id,
+            message: response.data.user_message.content,
+            isUser: true,
+            timestamp: response.data.user_message.created_at,
+          },
+          {
+            id: response.data.assistant_message.id,
+            message: response.data.assistant_message.content,
+            isUser: false,
+            timestamp: response.data.assistant_message.created_at,
+            sources: response.data.sources || [],
+            mode: response.data.mode,
+          },
+        ];
+      });
     } catch (err) {
-      const errorMessage = {
-        id: (Date.now() + 1).toString(),
-        message:
-          "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.",
-        isUser: false,
-        timestamp: new Date().toISOString(),
-      };
+      console.error("Erreur lors de l'envoi du message:", err);
 
-      setMessages((prev) => [...prev, errorMessage]);
+      // Supprimer le message temporaire et ajouter un message d'erreur
+      setMessages((prev) => {
+        const withoutTemp = prev.filter((msg) => !msg.id.startsWith("temp-"));
+        return [
+          ...withoutTemp,
+          {
+            id: `error-${Date.now()}`,
+            message:
+              "Désolé, une erreur s'est produite lors du traitement de votre message. Veuillez réessayer.",
+            isUser: false,
+            timestamp: new Date().toISOString(),
+          },
+        ];
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Nouvelle conversation (supprime l'historique)
+  const handleNewConversation = async () => {
+    if (isLoading) return;
+
+    try {
+      await api.delete(`/chat/${dossierId}/session`);
+
+      // Réinitialiser avec le message de bienvenue
+      setMessages([
+        {
+          id: "welcome-new",
+          message:
+            "Nouvelle conversation commencée ! Comment puis-je vous aider avec ce dossier ?",
+          isUser: false,
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } catch (err) {
+      console.error("Erreur lors de la suppression de la session:", err);
     }
   };
 
@@ -146,8 +230,12 @@ const ChatbotPage = () => {
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 relative">
       <Sidebar />
-      
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isPanelVisible ? 'mr-80' : 'mr-0'}`}>
+
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ${
+          isPanelVisible ? "mr-80" : "mr-0"
+        }`}
+      >
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
@@ -161,14 +249,28 @@ const ChatbotPage = () => {
                     Assistant IA
                   </h1>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {folderInfo?.name || "Chargement..."} • Mode {mode === "llm" ? "LLM natif" : "RAG"}
+                    {folderInfo?.name || "Chargement..."} • Mode{" "}
+                    {mode === "llm" ? "LLM natif" : "RAG"}
+                    {messages.length > 1 && ` • ${messages.length} messages`}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Mode Selector */}
+            {/* Controls */}
             <div className="flex items-center space-x-4">
+              {/* Bouton Nouvelle conversation */}
+              <button
+                onClick={handleNewConversation}
+                disabled={isLoading}
+                className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                title="Nouvelle conversation"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="hidden sm:inline">Nouveau</span>
+              </button>
+
+              {/* Mode Selector */}
               <div className="flex items-center space-x-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Mode :
@@ -188,9 +290,18 @@ const ChatbotPage = () => {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))}
+          {isLoadingHistory ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400 mr-2" />
+              <span className="text-gray-600 dark:text-gray-400">
+                Chargement de l'historique...
+              </span>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))
+          )}
 
           {/* Loading indicator */}
           {isLoading && (

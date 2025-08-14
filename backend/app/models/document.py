@@ -17,9 +17,9 @@ class Document(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
-    tender_folder = relationship("TenderFolder", back_populates="documents", lazy="selectin")
-    uploader = relationship("User", foreign_keys=[uploaded_by], back_populates="uploaded_documents", lazy="selectin")
-    embeddings = relationship("Embedding", back_populates="document", cascade="all, delete-orphan", lazy="selectin")
+    tender_folder = relationship("TenderFolder", back_populates="documents", lazy="noload")
+    uploader = relationship("User", foreign_keys=[uploaded_by], back_populates="uploaded_documents", lazy="noload")
+    embeddings = relationship("Embedding", back_populates="document", cascade="all, delete-orphan", lazy="noload")
 
 
 

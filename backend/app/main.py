@@ -7,7 +7,7 @@ from db.session import create_tables #, drop_tables
 from api.routers.auth import router as auth_router
 from api.routers.organisation import router as organisations_routes
 from api.routers.tender_folder import router as tender_folders_routes
-from api.routers.chatbot import router as chatbot_routes
+from api.routers.chat import router as chatbot_routes
 from api.routers.marche import router as marche_routes
 
 

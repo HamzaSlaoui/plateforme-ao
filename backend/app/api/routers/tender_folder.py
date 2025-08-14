@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, File, UploadFile, HTTPException, status
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, status
 from uuid import UUID
 from typing import List
 from api.deps import get_tf_service
@@ -29,16 +29,15 @@ async def create_folder(
 
 
 @router.get("/", response_model=FolderListResponse)
-async def list_folders(
+async def list_folders_optimized(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
     if not current_user.organisation_id:
         raise HTTPException(403, "Vous n'appartenez à aucune organisation")
 
-    folders = await svc.list_folders(current_user.organisation_id)
-    stats   = await svc.stats(current_user.organisation_id)
-
+    data = await svc.list_folders_with_stats(current_user.organisation_id)
+    
     return FolderListResponse(
         folders=[
             TenderFolderResponse(
@@ -51,11 +50,11 @@ async def list_folders(
                 organisation_id=f.organisation_id,
                 created_by=f.created_by,
                 created_at=f.created_at,
-                document_count=len(f.documents),
+                document_count=getattr(f, 'document_count', 0),  # Document count from SQL
             )
-            for f in folders
+            for f in data["folders"]
         ],
-        stats=stats,
+        stats=data["stats"],
     )
 
 @router.get("/{folder_id}", response_model=TenderFolderResponse)
