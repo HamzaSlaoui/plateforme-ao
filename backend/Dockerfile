@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     libglib2.0-0 \
     libnss3 \
-    libgconf-2-4 \
     libfontconfig1 \
     libxss1 \
     libappindicator3-1 \
