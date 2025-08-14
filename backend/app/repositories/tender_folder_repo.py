@@ -23,11 +23,32 @@ class TenderFolderRepo:
         return result.rowcount or 0
 
 
-    async def get_by_org(self, org_id):
-        stmt = select(TenderFolder).filter(TenderFolder.organisation_id == org_id)
+    async def get_by_org_with_doc_counts(self, org_id):
+        doc_count_sq = (
+            select(
+                Document.tender_folder_id.label("folder_id"),
+                func.count(Document.id).label("document_count"),
+            )
+            .group_by(Document.tender_folder_id)
+            .subquery()
+        )
+
+        stmt = (
+            select(
+                TenderFolder,
+                func.coalesce(doc_count_sq.c.document_count, 0).label("document_count"),
+            )
+            .outerjoin(doc_count_sq, TenderFolder.id == doc_count_sq.c.folder_id)
+            .where(TenderFolder.organisation_id == org_id)
+        )
+
         result = await self.db.execute(stmt)
-        folders = result.scalars().all()
-        return list(folders)
+        rows = result.all()
+        folders = []
+        for folder, count in rows:
+            setattr(folder, "document_count", int(count))
+            folders.append(folder)
+        return folders
 
     async def get(self, folder_id: int):
         stmt = (

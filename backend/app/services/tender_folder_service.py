@@ -69,10 +69,8 @@ class TenderFolderService:
         return affected > 0
 
     async def list_folders_with_stats(self, org_id):
-        # 1. Récupérer tous les dossiers
-        folders = await self.repo.get_by_org(org_id) or []
+        folders = await self.repo.get_by_org_with_doc_counts(org_id) or []
         
-        # 2. Calculer les stats en Python (plus rapide qu'une requête SQL séparée)
         stats = {"en_cours": 0, "soumis": 0, "gagne": 0, "perdu": 0}
         
         for folder in folders:

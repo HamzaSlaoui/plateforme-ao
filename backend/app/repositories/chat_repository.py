@@ -54,7 +54,7 @@ class ChatRepository:
         await self.db.refresh(conversation)
         return conversation
     
-    async def get_recent_messages(self, session_id: UUID, limit: int = 15) -> List[ChatConversation]:
+    async def get_recent_messages(self, session_id: UUID, limit: int = 3) -> List[ChatConversation]:
         """Récupère les X derniers messages d'une session (pour fenêtre glissante)"""
         stmt = select(ChatConversation).filter(
             ChatConversation.chat_session_id == session_id
