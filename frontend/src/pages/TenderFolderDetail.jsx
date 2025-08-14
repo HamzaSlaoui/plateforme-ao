@@ -47,8 +47,6 @@ function TenderFolderDetail() {
   };
 
   const handleDocumentsUploaded = () => {
-    // Option simple : recharger la page pour refetch le dossier avec ses nouveaux documents
-    // (à remplacer par un refetch propre si votre hook expose une méthode de rafraîchissement)
     window.location.reload();
   };
 

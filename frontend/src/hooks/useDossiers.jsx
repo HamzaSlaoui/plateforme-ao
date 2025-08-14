@@ -11,7 +11,7 @@ export const useDossiers = (api) => {
       try {
         setLoading(true);
         setError(null);
-        const res = await api.get("/tender-folders/");
+        const res = await api.get("/tender-folders");
         setStats(res.data.stats);
         setDossiers(res.data.folders);
       } catch (err) {
