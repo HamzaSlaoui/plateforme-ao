@@ -1,15 +1,12 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
 from httpx import AsyncClient, ASGITransport
 from contextlib import asynccontextmanager
 import uvicorn
 import asyncio
 import time
-import functools
-from typing import Dict, Any, Optional
-import json
+from typing import Dict, Any
 import logging
 import hashlib
 import aiofiles
@@ -48,6 +45,7 @@ CACHE_CONFIG = {
 WARMUP_ENDPOINTS = [
     "/organisations",
     "/tender-folders",
+    "/chat",
     "/health",
 ]
 
