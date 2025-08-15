@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from httpx import AsyncClient, ASGITransport
 from contextlib import asynccontextmanager
 import uvicorn
 import asyncio
@@ -125,7 +126,7 @@ def is_cache_valid(cache_entry: Dict[str, Any], ttl: int) -> bool:
     """Vérifie si l'entrée du cache est encore valide"""
     return time.time() - cache_entry["timestamp"] < ttl
 
-class SmartCacheMiddleware:
+class SmartCacheMiddleware: 
     """Middleware de cache intelligent avec optimisations"""
     
     def __init__(self, app):
@@ -221,27 +222,19 @@ class PerformanceMiddleware:
         else:
             await self.app(scope, receive, send)
 
+
 async def warmup_cache(app: FastAPI):
     """Préchauffe le cache avec les endpoints les plus utilisés"""
     try:
-        from httpx import AsyncClient
-        
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            tasks = []
-            for endpoint in WARMUP_ENDPOINTS:
-                try:
-                    task = client.get(endpoint)
-                    tasks.append(task)
-                except Exception as e:
-                    logger.warning(f"Impossible de préchauffer {endpoint}: {e}")
-            
-            if tasks:
-                responses = await asyncio.gather(*tasks, return_exceptions=True)
-                success_count = sum(1 for r in responses if not isinstance(r, Exception))
-                logger.info(f"Cache préchauffé: {success_count}/{len(tasks)} endpoints")
-    
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            tasks = [client.get(endpoint) for endpoint in WARMUP_ENDPOINTS]
+            responses = await asyncio.gather(*tasks, return_exceptions=True)
+            success_count = sum(1 for r in responses if not isinstance(r, Exception))
+            logger.info(f"Cache préchauffé: {success_count}/{len(tasks)} endpoints")
     except Exception as e:
         logger.warning(f"Erreur lors du préchauffage: {e}")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
