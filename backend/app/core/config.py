@@ -26,3 +26,5 @@ class Settings(BaseSettings):
  
 
 Config = Settings()
+
+
