@@ -8,10 +8,10 @@ const DossierCard = ({ dossier, onViewClick, onChatClick, onCardClick }) => {
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative"
+      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer relative flex flex-col"
       onClick={(e) => onCardClick(e, dossier.id)}
     >
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2 pr-2">
             {dossier.name}
@@ -49,7 +49,8 @@ const DossierCard = ({ dossier, onViewClick, onChatClick, onCardClick }) => {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+        {/* Boutons toujours en bas */}
+        <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
           <button
             onClick={(e) => onViewClick(e, dossier.id)}
             className="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2 text-sm"

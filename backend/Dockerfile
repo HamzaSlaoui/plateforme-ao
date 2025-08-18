@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-fra \
     tesseract-ocr-eng \
- && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 ENV TESSERACT_CMD=/usr/bin/tesseract
 ENV RAG_LANGS=fra+eng
@@ -54,4 +54,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app
 WORKDIR /app
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
