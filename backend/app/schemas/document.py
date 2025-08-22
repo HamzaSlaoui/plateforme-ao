@@ -8,9 +8,6 @@ class DocumentBase(BaseModel):
     filename: str = Field(..., min_length=1, max_length=255)
     document_type: Optional[str] = Field(None, max_length=50)
 
-
-
-
 class DocumentResponse(DocumentBase):
     id: UUID
     tender_folder_id: UUID

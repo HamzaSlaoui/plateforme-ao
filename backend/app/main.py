@@ -1,9 +1,9 @@
-from core.config import Config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn 
 
+from core.config import Config
 from db.session import create_tables #, drop_tables
 from api.routers.auth import router as auth_router
 from api.routers.organisation import router as organisations_routes
@@ -14,8 +14,6 @@ from api.routers.marche import router as marche_routes
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    print("Creating database tables...")
     #await drop_tables() 
     await create_tables() 
     print("Tables created successfully!")
@@ -32,8 +30,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=[Config.FRONTEND_URL if Config.FRONTEND_URL else "*"],
-    allow_origins=["*"],  # For development, allow all origins
+    allow_origins=[Config.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -44,12 +41,6 @@ app.include_router(organisations_routes)
 app.include_router(tender_folders_routes)
 app.include_router(chatbot_routes)
 app.include_router(marche_routes)
-
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
 
 
 @app.get("/")
