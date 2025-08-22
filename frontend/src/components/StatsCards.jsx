@@ -1,6 +1,6 @@
 import React from "react";
 import { Search } from "lucide-react";
-import { getStatusConfig } from "../utils/status"; // 🔧 adapte le chemin si besoin
+import { getStatusConfig } from "../utils/status";
 
 const StatsCards = ({ dossiers = [], stats = {} }) => {
   const totalCard = {

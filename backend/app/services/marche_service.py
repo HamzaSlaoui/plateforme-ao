@@ -1,4 +1,3 @@
-# services/marche_service.py
 from scraping.scraper import (
     init_driver,
     select_domain,

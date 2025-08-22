@@ -41,7 +41,7 @@ class OrganisationService:
         try:
             await self.db.commit()
             await self.db.refresh(org)
-            await self.db.refresh(owner)     # ← on veut l’utilisateur à jour
+            await self.db.refresh(owner)
             return org, owner
         except IntegrityError:
             await self.db.rollback()

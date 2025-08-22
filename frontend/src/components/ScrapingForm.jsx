@@ -17,14 +17,14 @@ const selectStyles = {
     borderColor: state.isFocused ? "#3B82F6" : "#4B5563",
     boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 130, 246, 0.5)" : "none",
     "&:hover": {
-      borderColor: "#3B82F6"
-    }
+      borderColor: "#3B82F6",
+    },
   }),
   menu: (provided) => ({
     ...provided,
     backgroundColor: "rgb(31 41 55)",
     color: "white",
-    zIndex: 50
+    zIndex: 50,
   }),
   option: (provided, state) => ({
     ...provided,
@@ -34,27 +34,27 @@ const selectStyles = {
       ? "rgba(59, 130, 246, 0.3)"
       : "rgb(31 41 55)",
     color: "white",
-    cursor: "pointer"
+    cursor: "pointer",
   }),
   multiValue: (provided) => ({
     ...provided,
     backgroundColor: "#1E3A8A",
-    borderRadius: "6px"
+    borderRadius: "6px",
   }),
   multiValueLabel: (provided) => ({
     ...provided,
     color: "white",
-    fontSize: "13px"
+    fontSize: "13px",
   }),
   placeholder: (provided) => ({
     ...provided,
     color: "#9CA3AF",
-    fontSize: "13px"
+    fontSize: "13px",
   }),
   singleValue: (provided) => ({
     ...provided,
-    color: "white"
-  })
+    color: "white",
+  }),
 };
 
 export default function ScrapingForm({ onResults }) {
@@ -62,7 +62,7 @@ export default function ScrapingForm({ onResults }) {
   const [form, setForm] = useState({
     domaines: [],
     reference: "",
-    acheteur: ""
+    acheteur: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -81,13 +81,13 @@ export default function ScrapingForm({ onResults }) {
       const params = {
         domaine: form.domaines,
         reference: form.reference,
-        acheteur: form.acheteur
+        acheteur: form.acheteur,
       };
 
       const { data } = await api.get("/marches", {
         params,
         paramsSerializer: (params) =>
-          qs.stringify(params, { arrayFormat: "repeat" })
+          qs.stringify(params, { arrayFormat: "repeat" }),
       });
 
       onResults(data);
@@ -104,7 +104,6 @@ export default function ScrapingForm({ onResults }) {
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md"
     >
-      {/* Domaines */}
       <div className="min-w-[200px] flex-1">
         <Select
           isMulti
@@ -120,40 +119,37 @@ export default function ScrapingForm({ onResults }) {
             borderRadius: 8,
             colors: {
               ...theme.colors,
-              primary25: '#1E3A8A',
-              primary: '#3B82F6',
-              neutral0: 'rgb(55 65 81)',
-              neutral5: 'rgb(75 85 99)',
-              neutral10: 'white',
-              neutral20: '#9CA3AF',
-              neutral30: '#6B7280',
-              neutral80: 'white'
+              primary25: "#1E3A8A",
+              primary: "#3B82F6",
+              neutral0: "rgb(55 65 81)",
+              neutral5: "rgb(75 85 99)",
+              neutral10: "white",
+              neutral20: "#9CA3AF",
+              neutral30: "#6B7280",
+              neutral80: "white",
             },
           })}
         />
       </div>
 
-      {/* Référence */}
       <input
         name="reference"
         value={form.reference}
         onChange={handleChange}
         placeholder="Référence"
-        disabled={loading} 
+        disabled={loading}
         className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 w-[160px] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
 
-      {/* Acheteur */}
       <input
         name="acheteur"
         value={form.acheteur}
         onChange={handleChange}
         placeholder="Acheteur"
-        disabled={loading} 
+        disabled={loading}
         className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 w-[200px] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
 
-      {/* Bouton */}
       <button
         type="submit"
         disabled={loading}

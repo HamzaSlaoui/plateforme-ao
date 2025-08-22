@@ -18,8 +18,8 @@ function Hero() {
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-lg">
                 Révolutionnez votre processus de gestion des marchés publics
-                avec notre plateforme intelligente qui automatise la veille, la
-                préparation et la soumission.
+                avec notre plateforme intelligente qui automatise la recherche,
+                le suivi et la préparation.
               </p>
             </div>
 
@@ -31,13 +31,6 @@ function Hero() {
                 Commencer gratuitement
                 <ArrowRight className="w-5 h-5" />
               </Link>
-
-              <button
-                onClick
-                className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Découvrir les fonctionnalités
-              </button>
             </div>
 
             <div className="flex items-center space-x-8 text-sm text-gray-600 dark:text-gray-400">
@@ -78,7 +71,7 @@ function Hero() {
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm font-medium text-green-700 dark:text-green-400">
-                        Veille automatique activée
+                        Recherche automatique activée
                       </span>
                     </div>
                   </div>
@@ -87,7 +80,7 @@ function Hero() {
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                        Documents générés par IA
+                        Chatbot intelligent intégré
                       </span>
                     </div>
                   </div>
