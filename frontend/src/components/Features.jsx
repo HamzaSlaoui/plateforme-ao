@@ -6,17 +6,10 @@ function Features() {
   const features = [
     {
       icon: Search,
-      title: "Veille Automatisée",
+      title: "Recherche Automatisée",
       description:
         "Notre IA surveille en permanence les nouvelles opportunités d'appels d'offres selon vos critères personnalisés.",
       color: "text-blue-600",
-    },
-    {
-      icon: FileText,
-      title: "Génération de Documents",
-      description:
-        "Créez automatiquement tous vos documents de soumission avec une intelligence artificielle spécialisée.",
-      color: "text-green-600",
     },
     {
       icon: Bot,
@@ -31,20 +24,6 @@ function Features() {
       description:
         "Analysez vos taux de succès et optimisez votre stratégie avec des tableaux de bord détaillés.",
       color: "text-orange-600",
-    },
-    {
-      icon: Clock,
-      title: "Gestion des Échéances",
-      description:
-        "Ne manquez plus jamais une date limite avec nos alertes automatiques et notre calendrier intégré.",
-      color: "text-red-600",
-    },
-    {
-      icon: Shield,
-      title: "Sécurité Avancée",
-      description:
-        "Vos données sont protégées par un chiffrement de niveau entreprise et des protocoles de sécurité stricts.",
-      color: "text-indigo-600",
     },
   ];
 
@@ -78,24 +57,6 @@ function Features() {
               </p>
             </div>
           ))}
-        </div>
-
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
-            <h3 className="text-2xl font-bold mb-4">
-              Prêt à transformer votre processus d'appels d'offres ?
-            </h3>
-            <p className="text-lg mb-6 opacity-90">
-              Rejoignez des centaines d'entreprises qui ont déjà automatisé
-              leurs processus.
-            </p>
-            <Link
-              to="/signup"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-            >
-              Commencer maintenant
-            </Link>
-          </div>
         </div>
       </div>
     </div>

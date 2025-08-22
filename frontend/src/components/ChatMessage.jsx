@@ -1,4 +1,3 @@
-// components/ChatMessage.jsx
 import React from "react";
 import { Bot, User, FileText } from "lucide-react";
 
@@ -19,13 +18,12 @@ const ChatMessage = ({ message }) => {
                 <Bot className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
             )}
-            
+
             <div className="flex-1">
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 {message.message}
               </p>
 
-              {/* Sources */}
               {message.sources && message.sources.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 flex items-center space-x-1">
@@ -34,7 +32,8 @@ const ChatMessage = ({ message }) => {
                   </p>
                   <div className="space-y-2">
                     {message.sources.map((src, idx) => {
-                      const label = typeof src === "string" ? src : src.document;
+                      const label =
+                        typeof src === "string" ? src : src.document;
                       return (
                         <div
                           key={idx}
@@ -51,18 +50,21 @@ const ChatMessage = ({ message }) => {
                 </div>
               )}
             </div>
-            
+
             {message.isUser && (
               <div className="bg-white/20 p-2 rounded-lg flex-shrink-0">
                 <User className="w-4 h-4" />
               </div>
             )}
           </div>
-          
-          {/* Timestamp */}
-          <p className={`text-xs mt-3 opacity-70 ${
-            message.isUser ? "text-blue-100 text-right" : "text-gray-500 dark:text-gray-400"
-          }`}>
+
+          <p
+            className={`text-xs mt-3 opacity-70 ${
+              message.isUser
+                ? "text-blue-100 text-right"
+                : "text-gray-500 dark:text-gray-400"
+            }`}
+          >
             {new Date(message.timestamp).toLocaleTimeString("fr-FR", {
               hour: "2-digit",
               minute: "2-digit",

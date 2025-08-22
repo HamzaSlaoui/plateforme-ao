@@ -19,8 +19,8 @@ const DocumentPreview = ({ doc, onClose }) => {
           />
         </div>
       );
-    } 
-    
+    }
+
     if (["txt", "md", "csv", "log"].includes(extension)) {
       const decoded = atob(base64);
       return (
@@ -30,8 +30,8 @@ const DocumentPreview = ({ doc, onClose }) => {
           </pre>
         </div>
       );
-    } 
-    
+    }
+
     if (["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension)) {
       return (
         <div className="flex-1 p-4 overflow-auto flex items-center justify-center">
@@ -44,13 +44,13 @@ const DocumentPreview = ({ doc, onClose }) => {
       );
     }
 
-    // Fichier non supporté
     return (
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="text-center text-gray-600 dark:text-gray-300">
           <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <p className="mb-4">
-            Aperçu non disponible pour ce type de fichier ({extension.toUpperCase()}).
+            Aperçu non disponible pour ce type de fichier (
+            {extension.toUpperCase()}).
           </p>
           <a
             href={`data:application/octet-stream;base64,${base64}`}
@@ -68,7 +68,6 @@ const DocumentPreview = ({ doc, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
             {doc.filename}
@@ -90,8 +89,7 @@ const DocumentPreview = ({ doc, onClose }) => {
             </button>
           </div>
         </div>
-        
-        {/* Content */}
+
         {renderContent()}
       </div>
     </div>

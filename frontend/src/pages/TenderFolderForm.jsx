@@ -82,13 +82,14 @@ const TenderFolderForm = () => {
   };
 
   const ACCEPTED = {
-  "application/pdf": [".pdf"],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-  "application/msword": [".doc"],
-  "text/plain": [".txt"],
-  "text/csv": [".csv"],
-};
-
+    "application/pdf": [".pdf"],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+      ".docx",
+    ],
+    "application/msword": [".doc"],
+    "text/plain": [".txt"],
+    "text/csv": [".csv"],
+  };
 
   const {
     getRootProps,
@@ -137,15 +138,11 @@ const TenderFolderForm = () => {
     const orgId = authState.user.organisation_id;
 
     try {
-      // Étape 1 : Initialisation
       updateProgress(5, "Initialisation...");
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      // Étape 2 : Validation des données
       updateProgress(15, "Validation des données...");
       await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Étape 3 : Préparation des fichiers
       updateProgress(25, "Préparation des fichiers...");
 
       const formDataToSend = new FormData();
@@ -167,7 +164,6 @@ const TenderFolderForm = () => {
 
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Étape 4 : Envoi au serveur (avec progression d'upload)
       updateProgress(35, "Envoi des données...");
 
       const response = await api.post(
@@ -177,11 +173,10 @@ const TenderFolderForm = () => {
           headers: { "Content-Type": "multipart/form-data" },
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
-              // Progression de l'upload : de 35% à 85%
               const uploadPercent = Math.round(
                 (progressEvent.loaded * 100) / progressEvent.total
               );
-              const totalPercent = 35 + Math.round((uploadPercent * 50) / 100); // 35% + 50% max pour l'upload
+              const totalPercent = 35 + Math.round((uploadPercent * 50) / 100);
               updateProgress(
                 totalPercent,
                 `Upload en cours... ${uploadPercent}%`
@@ -191,11 +186,8 @@ const TenderFolderForm = () => {
         }
       );
 
-      // Étape 5 : Finalisation
       updateProgress(95, "Traitement final...");
       await new Promise((resolve) => setTimeout(resolve, 400));
-
-      // Étape 6 : Terminé
       updateProgress(100, "Dossier créé avec succès !");
 
       setSuccessMessage("Dossier créé avec succès !");
@@ -206,8 +198,6 @@ const TenderFolderForm = () => {
         client_name: "",
       });
       setDocuments([]);
-
-      // Reset de la barre de progression après un délai
       setTimeout(() => {
         setProgressPercent(0);
         setProgressStep("");
@@ -241,7 +231,6 @@ const TenderFolderForm = () => {
           </p>
         </div>
 
-        {/* Overlay de progression */}
         {isSubmitting && (
           <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
@@ -278,14 +267,14 @@ const TenderFolderForm = () => {
                   </div>
                 </div>
               </div>
-                {progressStep && (
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
-                      <span className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2 inline-block"></span>
-                      {progressStep}
-                    </p>
-                  </div>
-                )}
+              {progressStep && (
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
+                    <span className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full mr-2 inline-block"></span>
+                    {progressStep}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -412,7 +401,8 @@ const TenderFolderForm = () => {
                     sélectionner
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    📁 Formats acceptés : tous types de fichiers (PDF, Word, CSV et TXT)
+                    📁 Formats acceptés : tous types de fichiers (PDF, Word, CSV
+                    et TXT)
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500">
                     Maximum 10 fichiers • 10MB par fichier
