@@ -16,9 +16,6 @@ async def send_message(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Envoie un message et reçoit une réponse du chatbot avec historique
-    """
     try:
         use_rag = request.mode != "llm"
         
@@ -56,9 +53,6 @@ async def get_chat_history(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Récupère l'historique complet de la conversation pour un dossier
-    """
     try:
         messages = await chat_service.get_conversation_history(
             user_id=current_user.id,
@@ -88,9 +82,6 @@ async def clear_chat_session(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Supprime la session de chat (pour "Nouvelle conversation")
-    """
     try:
         deleted = await chat_service.clear_session(
             user_id=current_user.id,

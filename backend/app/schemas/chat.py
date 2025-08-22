@@ -1,6 +1,13 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Optional, Dict, Any
 from datetime import datetime
+from uuid import UUID
+
+
+class ChatRequest(BaseModel):
+    question: str
+    mode: str = "rag"
+    dossier_id: Optional[UUID] = None
 
 class ChatMessageSchema(BaseModel):
     id: str
