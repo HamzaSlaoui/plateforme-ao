@@ -201,11 +201,6 @@ export default function MarcheTable({ marches }) {
                   {marches.length} marchés au total
                 </span>
               </div>
-              <div className="bg-green-50 dark:bg-green-900/30 px-3 py-2 rounded-lg border border-green-200 dark:border-green-800">
-                <span className="text-green-700 dark:text-green-300 font-medium">
-                  {filteredAndSortedMarches.length} après filtrage
-                </span>
-              </div>
             </div>
 
             {/* Sélecteur de nombre d'éléments par page */}
