@@ -6,7 +6,7 @@ from typing import List, Dict
 
 import openai
 import docx
-import fitz  # PyMuPDF
+import fitz
 import pdfplumber
 import pytesseract
 import tiktoken
@@ -104,9 +104,6 @@ class RAGService:
             ftype = (file_type or "").lower()
             ocr_langs = os.getenv("RAG_LANGS", "fra+eng")
 
-            # ---------------------------
-            # 1) PDF
-            # ---------------------------
             if ftype == "pdf":
                 path = "native"
                 try:
@@ -143,18 +140,12 @@ class RAGService:
                     print(f"[EXTRACT] OCR fallback, chars={len(text)}")
                     return _clean_text(text)
 
-            # ---------------------------
-            # 2) DOCX / DOC
-            # ---------------------------
             if ftype in {"docx", "doc"}:
                 d = docx.Document(BytesIO(file_content))
                 text = "\n".join(p.text for p in d.paragraphs)
                 print(f"[EXTRACT] DOCX/DOC chars={len(text)}")
                 return _clean_text(text)
 
-            # ---------------------------
-            # 3) TXT / CSV 
-            # ---------------------------
             if ftype in {"txt", "csv"}:
                 text = ""
                 for enc in ["utf-8", "latin-1", "cp1252", "iso-8859-1"]:
@@ -168,9 +159,6 @@ class RAGService:
                 print(f"[EXTRACT] {ftype.upper()} chars={len(text)}")
                 return _clean_text(text)
 
-            # ---------------------------
-            # 4) Formats non supportés
-            # ---------------------------
             print(f"[EXTRACT] Format non supporté: {ftype}")
             return ""
 

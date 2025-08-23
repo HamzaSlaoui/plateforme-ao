@@ -14,7 +14,6 @@ const ChatbotPage = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
 
-  // États principaux
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +24,6 @@ const ChatbotPage = () => {
   const [isPanelVisible, setIsPanelVisible] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  // Chargement des données du dossier
   useEffect(() => {
     const fetchFolderInfo = async () => {
       try {
@@ -41,7 +39,6 @@ const ChatbotPage = () => {
     }
   }, [dossierId, api]);
 
-  // Chargement de l'historique de conversation
   useEffect(() => {
     const fetchChatHistory = async () => {
       if (!dossierId) return;
@@ -51,17 +48,15 @@ const ChatbotPage = () => {
         const response = await api.get(`/chat/${dossierId}/history`);
 
         if (response.data.messages && response.data.messages.length > 0) {
-          // Convertir les messages du format API vers le format frontend
           const formattedMessages = response.data.messages.map((msg) => ({
             id: msg.id,
             message: msg.content,
             isUser: msg.role === "user",
             timestamp: msg.created_at,
-            sources: msg.sources || [], // Si disponible depuis l'API
+            sources: msg.sources || [],
           }));
           setMessages(formattedMessages);
         } else {
-          // Si pas d'historique, afficher le message de bienvenue
           setMessages([
             {
               id: "welcome",
@@ -74,7 +69,6 @@ const ChatbotPage = () => {
         }
       } catch (err) {
         console.error("Erreur lors du chargement de l'historique:", err);
-        // Afficher le message de bienvenue en cas d'erreur
         setMessages([
           {
             id: "welcome",
@@ -92,7 +86,6 @@ const ChatbotPage = () => {
     fetchChatHistory();
   }, [dossierId, api]);
 
-  // Auto-scroll vers le bas
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -101,7 +94,6 @@ const ChatbotPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Envoi de message avec nouvel endpoint
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
 
@@ -123,7 +115,6 @@ const ChatbotPage = () => {
         mode,
       });
 
-      // Remplacer le message temporaire par les vrais messages de l'API
       setMessages((prev) => {
         const withoutTemp = prev.filter((msg) => !msg.id.startsWith("temp-"));
         return [
@@ -146,8 +137,6 @@ const ChatbotPage = () => {
       });
     } catch (err) {
       console.error("Erreur lors de l'envoi du message:", err);
-
-      // Supprimer le message temporaire et ajouter un message d'erreur
       setMessages((prev) => {
         const withoutTemp = prev.filter((msg) => !msg.id.startsWith("temp-"));
         return [
@@ -166,14 +155,11 @@ const ChatbotPage = () => {
     }
   };
 
-  // Nouvelle conversation (supprime l'historique)
   const handleNewConversation = async () => {
     if (isLoading) return;
 
     try {
       await api.delete(`/chat/${dossierId}/session`);
-
-      // Réinitialiser avec le message de bienvenue
       setMessages([
         {
           id: "welcome-new",
@@ -188,7 +174,6 @@ const ChatbotPage = () => {
     }
   };
 
-  // Gestion des touches
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -196,12 +181,10 @@ const ChatbotPage = () => {
     }
   };
 
-  // Sélection de document
   const handleDocumentSelect = (doc) => {
     setSelectedDoc(doc);
   };
 
-  // Affichage d'erreur
   if (error) {
     return (
       <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
@@ -236,7 +219,6 @@ const ChatbotPage = () => {
           isPanelVisible ? "mr-80" : "mr-0"
         }`}
       >
-        {/* Header */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -257,9 +239,7 @@ const ChatbotPage = () => {
               </div>
             </div>
 
-            {/* Controls */}
             <div className="flex items-center space-x-4">
-              {/* Bouton Nouvelle conversation */}
               <button
                 onClick={handleNewConversation}
                 disabled={isLoading}
@@ -270,7 +250,6 @@ const ChatbotPage = () => {
                 <span className="hidden sm:inline">Nouveau</span>
               </button>
 
-              {/* Mode Selector */}
               <div className="flex items-center space-x-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   Mode :
@@ -288,7 +267,6 @@ const ChatbotPage = () => {
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-8">
@@ -303,7 +281,6 @@ const ChatbotPage = () => {
             ))
           )}
 
-          {/* Loading indicator */}
           {isLoading && (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
@@ -325,7 +302,6 @@ const ChatbotPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Chat Input */}
         <ChatInput
           inputMessage={inputMessage}
           setInputMessage={setInputMessage}
@@ -335,7 +311,6 @@ const ChatbotPage = () => {
         />
       </div>
 
-      {/* Document Viewer Panel */}
       <DocumentViewerPanel
         documents={folderInfo?.documents || []}
         onSelect={handleDocumentSelect}
@@ -343,7 +318,6 @@ const ChatbotPage = () => {
         onToggle={() => setIsPanelVisible(!isPanelVisible)}
       />
 
-      {/* Document Preview Modal */}
       {selectedDoc && (
         <DocumentPreview
           doc={selectedDoc}

@@ -1,4 +1,3 @@
-# services/tender_folder_service.py
 from typing import List
 from uuid import UUID
 
@@ -51,7 +50,7 @@ class TenderFolderService:
                 await self.doc_repo.add(doc)
                 await self.db.flush() 
 
-                await self.rag_service.process_document(  # Utilise self.rag_service
+                await self.rag_service.process_document(
                     db=self.db,
                     tender_folder_id=folder.id,
                     document_id=doc.id,
@@ -101,10 +100,6 @@ class TenderFolderService:
         uploader_id: UUID,
         files: List[UploadFile],
     ) -> list[Document]:
-        """
-        Ajoute des documents à un dossier existant après vérification d'appartenance à l'organisation.
-        """
-        # Vérifier que le dossier existe et appartient à l'orga
         folder = await self.repo.get_with_docs(folder_id, org_id)
         if not folder:
             raise FileNotFoundError()
@@ -129,7 +124,7 @@ class TenderFolderService:
             await self.db.flush()
             created_docs.append(doc)
 
-            await self.rag_service.process_document(  # Utilise self.rag_service
+            await self.rag_service.process_document(
                 db=self.db,
                 tender_folder_id=folder.id,
                 document_id=doc.id,

@@ -51,7 +51,6 @@ async def send_verification_email(email: str, verification_token: str) -> bool:
         f"{Config.FRONTEND_URL}/verify-email?token={verification_token}"
     )
 
-    # Appel à la nouvelle signature (template + contexte)
     return await send_email(
         to=email,
         subject="Vérifiez votre adresse e-mail",

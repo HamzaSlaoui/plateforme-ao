@@ -27,7 +27,6 @@ async def create_folder(
     return {"message": "Dossier créé avec succès", "id": str(folder.id)}
 
 
-
 @router.get("/", response_model=FolderListResponse)
 async def list_folders_optimized(
     current_user: User = Depends(get_current_verified_user),
@@ -50,7 +49,7 @@ async def list_folders_optimized(
                 organisation_id=f.organisation_id,
                 created_by=f.created_by,
                 created_at=f.created_at,
-                document_count=getattr(f, 'document_count', 0),  # Document count from SQL
+                document_count=getattr(f, 'document_count', 0),
             )
             for f in data["folders"]
         ],
@@ -114,9 +113,6 @@ async def add_documents_to_folder(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
-    """
-    Ajoute un ou plusieurs documents à un dossier existant (du même org que l'utilisateur).
-    """
     if not files or len(files) == 0:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Aucun fichier fourni")
 

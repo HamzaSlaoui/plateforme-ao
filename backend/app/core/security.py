@@ -38,7 +38,7 @@ def create_refresh_token(user_id: str) -> str:
 def create_verification_token(user_id: str, purpose: str = "email_verification") -> str:
     payload = {
         "sub": user_id,
-        "purpose": purpose,  # "email_verification" ou "password_reset"
+        "purpose": purpose,
         "exp": datetime.now(timezone.utc) + timedelta(hours=Config.VERIFICATION_TOKEN_EXPIRE_HOURS)
     }
     return jwt.encode(payload, Config.SECRET_KEY, algorithm=Config.ALGORITHM)
@@ -51,7 +51,6 @@ def verify_refresh_token(refresh_token: str) -> Optional[str]:
             algorithms=[Config.ALGORITHM]
         )
         
-        # Vérifier que c'est bien un refresh token
         token_type = payload.get("type")
         if token_type != "refresh":
             logging.warning("Tentative d'utiliser un access token comme refresh token")
@@ -120,7 +119,6 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    # D'abord, charger juste l'utilisateur sans l'organisation
     result = await db.execute(
         select(User).where(User.id == UUID(user_id))
     )
