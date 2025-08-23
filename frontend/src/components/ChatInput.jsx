@@ -1,13 +1,12 @@
-// components/ChatInput.jsx
 import React from "react";
 import { Send, Loader2 } from "lucide-react";
 
-const ChatInput = ({ 
-  inputMessage, 
-  setInputMessage, 
-  onSendMessage, 
-  onKeyPress, 
-  isLoading 
+const ChatInput = ({
+  inputMessage,
+  setInputMessage,
+  onSendMessage,
+  onKeyPress,
+  isLoading,
 }) => {
   const suggestions = [
     "Quels sont les critères d'évaluation ?",
@@ -19,7 +18,6 @@ const ChatInput = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6">
-      {/* Input Area */}
       <div className="flex space-x-4">
         <input
           type="text"
@@ -45,8 +43,6 @@ const ChatInput = ({
           </span>
         </button>
       </div>
-
-      {/* Quick Suggestions */}
       <div className="mt-4 flex flex-wrap gap-2">
         {suggestions.map((suggestion, idx) => (
           <button

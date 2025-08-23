@@ -34,9 +34,9 @@ const Sidebar = () => {
             path: "/members",
             hasNotification: hasPendingRequests,
           },
+          { icon: Settings, label: "Paramètres", path: "/settings" },
         ]
       : []),
-    { icon: Settings, label: "Paramètres", path: "/settings" },
   ];
 
   const handleLogout = () => {

@@ -49,7 +49,6 @@ const DossierCard = ({ dossier, onViewClick, onChatClick, onCardClick }) => {
           </div>
         </div>
 
-        {/* Boutons toujours en bas */}
         <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
           <button
             onClick={(e) => onViewClick(e, dossier.id)}

@@ -8,7 +8,7 @@ function Navbar() {
 
   const navItems = [
     { name: "Accueil", path: "/" },
-    { name: "Fonctionnalités", path: "/features" },
+    { name: "Fonctionnalités", path: "#features" },
   ];
 
   return (
@@ -22,19 +22,25 @@ function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`text-sm font-medium transition-colors ${
-                  location.pathname === item.path
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              item.path.startsWith("#") ? (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  className="text-sm font-medium text-gray-300 hover:text-blue-600"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="text-sm font-medium text-gray-300 hover:text-blue-600"
+                >
+                  {item.name}
+                </Link>
+              )
+            )}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">

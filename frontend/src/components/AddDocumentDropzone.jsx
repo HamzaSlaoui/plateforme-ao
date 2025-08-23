@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { AlertCircle, PlusCircle, Upload, X, Check, FileText } from "lucide-react";
-
+import {
+  AlertCircle,
+  PlusCircle,
+  Upload,
+  X,
+  Check,
+  FileText,
+} from "lucide-react";
 
 function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
   const [uploading, setUploading] = useState(false);
@@ -11,21 +17,20 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
   const onDrop = (acceptedFiles) => {
     setError("");
     if (!acceptedFiles?.length) return;
-    
-    // Ajouter les nouveaux fichiers à la liste existante
+
     const newFiles = acceptedFiles.map((file, index) => ({
-      id: Date.now() + index, // ID unique pour pouvoir supprimer
+      id: Date.now() + index,
       file,
       name: file.name,
-      size: file.size
+      size: file.size,
     }));
-    
-    setSelectedFiles(prev => [...prev, ...newFiles]);
+
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
   };
 
   const removeFile = (fileId) => {
-    setSelectedFiles(prev => prev.filter(f => f.id !== fileId));
-    setError(""); // Clear any error when files are modified
+    setSelectedFiles((prev) => prev.filter((f) => f.id !== fileId));
+    setError("");
   };
 
   const clearAllFiles = () => {
@@ -35,19 +40,18 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
 
   const confirmUpload = async () => {
     if (!selectedFiles.length) return;
-    
+
     const formData = new FormData();
     selectedFiles.forEach(({ file }) => formData.append("files", file));
 
     try {
       setUploading(true);
       setError("");
-      
+
       await api.post(`/tender-folders/${dossierId}/documents`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      
-      // Reset state on success
+
       setSelectedFiles([]);
       onUploaded?.();
     } catch (e) {
@@ -65,7 +69,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
     onDrop,
     multiple: true,
     noClick: true,
-    disabled: uploading
+    disabled: uploading,
   });
 
   const formatFileSize = (bytes) => {
@@ -76,41 +80,46 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
 
   return (
     <div className={`mt-6 ${className}`}>
-      {/* Zone de dépôt */}
       <div
         {...getRootProps()}
         className={`relative border-2 border-dashed rounded-lg p-4 transition-all duration-200 ${
-          isDragActive 
-            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/10 scale-[1.02]" 
+          isDragActive
+            ? "border-blue-500 bg-blue-50 dark:bg-blue-900/10 scale-[1.02]"
             : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500"
         } ${uploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         <input {...getInputProps()} />
-        
+
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg transition-colors ${
-              isDragActive 
-                ? "bg-blue-100 dark:bg-blue-900/20" 
-                : "bg-gray-100 dark:bg-gray-700"
-            }`}>
-              <Upload className={`w-5 h-5 ${
-                isDragActive 
-                  ? "text-blue-600 dark:text-blue-400" 
-                  : "text-gray-600 dark:text-gray-400"
-              }`} />
+            <div
+              className={`p-2 rounded-lg transition-colors ${
+                isDragActive
+                  ? "bg-blue-100 dark:bg-blue-900/20"
+                  : "bg-gray-100 dark:bg-gray-700"
+              }`}
+            >
+              <Upload
+                className={`w-5 h-5 ${
+                  isDragActive
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-600 dark:text-gray-400"
+                }`}
+              />
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {isDragActive ? "Déposez vos fichiers ici" : "Ajouter des documents"}
+                {isDragActive
+                  ? "Déposez vos fichiers ici"
+                  : "Ajouter des documents"}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Glissez-déposez ou cliquez pour sélectionner
               </p>
             </div>
           </div>
-          
+
           <button
             type="button"
             onClick={open}
@@ -128,7 +137,6 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
           </button>
         </div>
 
-        {/* Indicateur visuel pendant le drag */}
         {isDragActive && (
           <div className="absolute inset-0 rounded-lg border-2 border-blue-500 bg-blue-50/50 dark:bg-blue-900/10 flex items-center justify-center">
             <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">
@@ -138,7 +146,6 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
         )}
       </div>
 
-      {/* Liste des fichiers sélectionnés */}
       {selectedFiles.length > 0 && (
         <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
@@ -154,7 +161,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
               Tout supprimer
             </button>
           </div>
-          
+
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {selectedFiles.map((fileItem) => (
               <div
@@ -172,7 +179,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
                     </p>
                   </div>
                 </div>
-                
+
                 <button
                   type="button"
                   onClick={() => removeFile(fileItem.id)}
@@ -185,8 +192,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
               </div>
             ))}
           </div>
-          
-          {/* Boutons d'action */}
+
           <div className="flex items-center justify-end space-x-3 mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
             <button
               type="button"
@@ -196,7 +202,7 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
             >
               Annuler
             </button>
-            
+
             <button
               type="button"
               onClick={confirmUpload}
@@ -223,7 +229,6 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
         </div>
       )}
 
-      {/* Message d'erreur */}
       {error && (
         <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <div className="flex items-center space-x-2">
@@ -233,7 +238,6 @@ function AddDocumentDropzone({ dossierId, api, onUploaded, className = "" }) {
         </div>
       )}
 
-      {/* Info formats */}
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
         Formats acceptés : PDF, Word, CSV et TXT.
       </p>

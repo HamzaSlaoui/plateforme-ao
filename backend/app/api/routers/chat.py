@@ -16,11 +16,8 @@ async def send_message(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Envoie un message et reçoit une réponse du chatbot avec historique
-    """
     try:
-        use_rag = request.mode != "llm"  # Par défaut RAG, sauf si mode="llm"
+        use_rag = request.mode != "llm"
         
         user_message, assistant_message, metadata = await chat_service.send_message(
             user_id=current_user.id,
@@ -56,9 +53,6 @@ async def get_chat_history(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Récupère l'historique complet de la conversation pour un dossier
-    """
     try:
         messages = await chat_service.get_conversation_history(
             user_id=current_user.id,
@@ -88,9 +82,6 @@ async def clear_chat_session(
     current_user: User = Depends(get_current_verified_user),
     chat_service: ChatService = Depends(get_chat_service)
 ):
-    """
-    Supprime la session de chat (pour "Nouvelle conversation")
-    """
     try:
         deleted = await chat_service.clear_session(
             user_id=current_user.id,
@@ -104,39 +95,3 @@ async def clear_chat_session(
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la suppression: {str(e)}")
-
-
-# ENDPOINT DE COMPATIBILITÉ AVEC VOTRE ANCIEN SYSTÈME
-# @router.post("/legacy", response_model=ChatResponse)
-# async def chat_legacy(
-#     request: ChatRequest,
-#     current_user: User = Depends(get_current_verified_user),
-#     chat_service: ChatService = Depends(get_chat_service)
-# ):
-#     """
-#     Endpoint de compatibilité avec l'ancien système (sans historique persistant)
-#     """
-#     try:
-#         use_rag = request.mode != "llm"
-        
-#         # Utilise directement le rag_service comme avant
-#         if use_rag:
-#             rag_response = await chat_service.rag_service.generate_rag_response(
-#                 db=chat_service.db,
-#                 tender_folder_id=request.dossier_id,
-#                 question=request.question
-#             )
-#         else:
-#             rag_response = await chat_service.rag_service.generate_llm_response(
-#                 db=chat_service.db,
-#                 tender_folder_id=request.dossier_id,
-#                 question=request.question
-#             )
-
-#         return ChatResponse(
-#             reponse=rag_response["reponse"],
-#             sources=rag_response["sources"],
-#         )
-        
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Erreur lors du traitement: {str(e)}")

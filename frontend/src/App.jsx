@@ -1,14 +1,9 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
 import PrivateRoute from "./components/PrivateRoute";
 import ChatbotPage from "./pages/ChatbotPage.jsx";
-// import Home from "./pages/Home";
+import Home from "./pages/Home";
 import Login from "./pages/LoginForm";
 import Signup from "./pages/SignupForm";
 import Dashboard from "./pages/Dashboard";
@@ -30,8 +25,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* <Route path="/" element={<Home />} /> */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
 

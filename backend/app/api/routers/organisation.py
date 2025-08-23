@@ -30,9 +30,6 @@ async def create_organisation(
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
-
-
 @router.post("/join", status_code=status.HTTP_202_ACCEPTED)
 async def join_organisation(
     payload: JoinOrgRequest,

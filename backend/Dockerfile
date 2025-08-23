@@ -1,6 +1,5 @@
 FROM python:3.11-slim
 
-# Dépendances système de base
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
@@ -31,7 +30,7 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
-# 🔽 Ajout OCR (append-only)
+
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-fra \
@@ -40,19 +39,15 @@ RUN apt-get update && apt-get install -y \
 
 ENV TESSERACT_CMD=/usr/bin/tesseract
 ENV RAG_LANGS=fra+eng
-# 🔼 Fin ajout OCR
 
-# Définir le binaire chromium utilisé par Selenium
+
 ENV CHROME_BIN=/usr/bin/chromium
 ENV PATH=$CHROME_BIN:$PATH
 
-# Dépendances Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copie du code
 COPY . /app
 WORKDIR /app
 
-# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
