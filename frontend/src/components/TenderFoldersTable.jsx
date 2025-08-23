@@ -11,12 +11,16 @@ import {
   CheckCircle,
   AlertCircle,
   FileText,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const TenderFoldersTable = ({ folders }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Vous pouvez rendre cela configurable
 
   const getStatusInfo = (status) => {
     const statusConfig = {
@@ -101,6 +105,7 @@ const TenderFoldersTable = ({ folders }) => {
     });
   };
 
+  // Tri des dossiers
   const sortedFolders = [...folders].sort((a, b) => {
     const dateA = new Date(a.submission_deadline || 0);
     const dateB = new Date(b.submission_deadline || 0);
@@ -108,16 +113,130 @@ const TenderFoldersTable = ({ folders }) => {
     return sortOrder === "asc" ? comparison : -comparison;
   });
 
+  // Calculs de pagination
+  const totalItems = sortedFolders.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentFolders = sortedFolders.slice(startIndex, endIndex);
+
   const handleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    setCurrentPage(1); // Reset à la première page après tri
   };
 
   const handleViewClick = (folderId) => {
-    navigate(`/tender-folders/${folderId}`);
+    // navigate(`/tender-folders/${folderId}`);
+    console.log('Voir dossier:', folderId);
   };
 
   const handleChatClick = (folderId) => {
-    navigate(`/chat/${folderId}`);
+    // navigate(`/chat/${folderId}`);
+    console.log('Chat dossier:', folderId);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // Composant de pagination intégré
+  const Pagination = () => {
+    if (totalPages <= 1) return null;
+
+    const getVisiblePages = () => {
+      const delta = 2;
+      const range = [];
+      const rangeWithDots = [];
+
+      for (
+        let i = Math.max(2, currentPage - delta);
+        i <= Math.min(totalPages - 1, currentPage + delta);
+        i++
+      ) {
+        range.push(i);
+      }
+
+      if (currentPage - delta > 2) {
+        rangeWithDots.push(1, "...");
+      } else {
+        rangeWithDots.push(1);
+      }
+
+      rangeWithDots.push(...range);
+
+      if (currentPage + delta < totalPages - 1) {
+        rangeWithDots.push("...", totalPages);
+      } else if (totalPages > 1) {
+        rangeWithDots.push(totalPages);
+      }
+
+      return rangeWithDots;
+    };
+
+    const visiblePages = getVisiblePages();
+
+    return (
+      <div className="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+        <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+          <span>
+            Affichage de {Math.min(startIndex + 1, totalItems)} à{" "}
+            {Math.min(endIndex, totalItems)} sur {totalItems} résultats
+          </span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {/* Bouton Précédent */}
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="ml-1">Précédent</span>
+          </button>
+
+          {/* Numéros de page */}
+          <div className="flex items-center space-x-1">
+            {visiblePages.map((page, index) => {
+              if (page === "...") {
+                return (
+                  <span
+                    key={`dots-${index}`}
+                    className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400"
+                  >
+                    ...
+                  </span>
+                );
+              }
+
+              return (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white border border-blue-600"
+                      : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Bouton Suivant */}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="mr-1">Suivant</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const SortButton = ({ children }) => (
@@ -212,7 +331,7 @@ const TenderFoldersTable = ({ folders }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {sortedFolders.map((folder) => {
+            {currentFolders.map((folder) => {
               const statusInfo = getStatusInfo(folder.status);
               const urgencyInfo = getUrgencyInfo(folder.submission_deadline);
               const StatusIcon = statusInfo.icon;
@@ -306,6 +425,9 @@ const TenderFoldersTable = ({ folders }) => {
           </tbody>
         </table>
       </div>
+      
+      {/* Pagination */}
+      <Pagination />
     </div>
   );
 };
