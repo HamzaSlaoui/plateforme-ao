@@ -14,13 +14,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const TenderFoldersTable = ({ folders }) => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // Vous pouvez rendre cela configurable
+  const [itemsPerPage] = useState(1); 
 
   const getStatusInfo = (status) => {
     const statusConfig = {
@@ -126,13 +126,11 @@ const TenderFoldersTable = ({ folders }) => {
   };
 
   const handleViewClick = (folderId) => {
-    // navigate(`/tender-folders/${folderId}`);
-    console.log('Voir dossier:', folderId);
+    navigate(`/tender-folders/${folderId}`);
   };
 
   const handleChatClick = (folderId) => {
-    // navigate(`/chat/${folderId}`);
-    console.log('Chat dossier:', folderId);
+    navigate(`/chat/${folderId}`);
   };
 
   const handlePageChange = (page) => {
