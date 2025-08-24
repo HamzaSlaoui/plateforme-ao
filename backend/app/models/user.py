@@ -19,14 +19,14 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     is_verified = Column(Boolean, default=False)
     is_owner = Column(Boolean, default=False)
-    organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id", ondelete="SET NULL"), nullable=True)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relations
-    organisation = relationship("Organisation", back_populates="users", lazy="noload", passive_deletes=True)
+    organization = relationship("Organization", back_populates="users", lazy="noload", passive_deletes=True)
     created_folders = relationship("TenderFolder", foreign_keys="TenderFolder.created_by", back_populates="creator", lazy="noload")
     uploaded_documents = relationship("Document", foreign_keys="Document.uploaded_by", back_populates="uploader", lazy="noload")
-    join_requests = relationship("OrganisationJoinRequest", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
+    join_requests = relationship("OrganizationJoinRequest", back_populates="user", cascade="all, delete-orphan", passive_deletes=True)
     chat_sessions = relationship("ChatSession", back_populates="user", lazy="noload")
 
     def set_password(self, password: str):

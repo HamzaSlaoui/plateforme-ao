@@ -2,40 +2,40 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from typing import List
 from uuid import UUID
 from api.deps import get_join_service, get_org_member_service, get_org_service
-from services.organisation_member_service import OrganisationMemberService
-from services.organisation_join_service import OrganisationJoinService
-from services.organisation_service import OrganisationService
+from services.organization_member_service import OrganizationMemberService
+from services.organization_join_service import OrganizationJoinService
+from services.organization_service import OrganizationService
 from core.security import get_current_verified_user
 from schemas.user import UserResponse
-from schemas.organisation import OrganisationCreate, OrganisationCreateResponse, OrganisationResponse
-from schemas.organisation_join_request import JoinOrgRequest, JoinRequestResponse
+from schemas.organization import OrganizationCreate, OrganizationCreateResponse, OrganizationResponse
+from schemas.organization_join_request import JoinOrgRequest, JoinRequestResponse
 from models.user import User
 
 
-router = APIRouter(prefix="/organisations", tags=["organisations"])
+router = APIRouter(prefix="/organizations", tags=["organizations"])
 
 
-@router.post("/create", response_model=OrganisationCreateResponse, status_code=status.HTTP_201_CREATED)
-async def create_organisation(
-    org_data: OrganisationCreate,
+@router.post("/create", response_model=OrganizationCreateResponse, status_code=status.HTTP_201_CREATED)
+async def create_organization(
+    org_data: OrganizationCreate,
     current_user = Depends(get_current_verified_user),
-    org_srv: OrganisationService = Depends(get_org_service),
+    org_srv: OrganizationService = Depends(get_org_service),
 ):
     try:
         org, updated_user = await org_srv.create(org_data.name, current_user.id)
-        return OrganisationCreateResponse(
-            organisation=OrganisationResponse.model_validate(org),
+        return OrganizationCreateResponse(
+            organization=OrganizationResponse.model_validate(org),
             user=UserResponse.model_validate(updated_user),
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.post("/join", status_code=status.HTTP_202_ACCEPTED)
-async def join_organisation(
+async def join_organization(
     payload: JoinOrgRequest,
     bg: BackgroundTasks,
     current_user=Depends(get_current_verified_user),
-    svc: OrganisationJoinService = Depends(get_join_service),
+    svc: OrganizationJoinService = Depends(get_join_service),
 ):
     await svc.request_join(current_user.id, payload.code.strip().upper(), bg)
     return {"message": "Votre demande a bien été envoyée"}
@@ -48,11 +48,11 @@ async def join_organisation(
 )
 async def list_join_requests(
     current_user=Depends(get_current_verified_user),
-    svc: OrganisationJoinService = Depends(get_join_service),
+    svc: OrganizationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
-    raw = await svc.list_pending(current_user.organisation_id)
+    raw = await svc.list_pending(current_user.organization_id)
     print(raw)
     return [
         JoinRequestResponse(
@@ -67,12 +67,12 @@ async def list_join_requests(
 @router.get("/join-requests/pending-count", status_code=status.HTTP_200_OK)
 async def get_pending_requests_count(
     current_user=Depends(get_current_verified_user),
-    svc: OrganisationJoinService = Depends(get_join_service),
+    svc: OrganizationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
-    
-    count = await svc.count_pending(current_user.organisation_id)
+
+    count = await svc.count_pending(current_user.organization_id)
     return {"count": count}
 
 
@@ -81,7 +81,7 @@ async def accept_join_request(
     request_id: UUID,
     bg: BackgroundTasks,
     current_user=Depends(get_current_verified_user),
-    svc: OrganisationJoinService = Depends(get_join_service),
+    svc: OrganizationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
@@ -94,7 +94,7 @@ async def reject_join_request(
     request_id: UUID,
     bg: BackgroundTasks,
     current_user=Depends(get_current_verified_user),
-    svc: OrganisationJoinService = Depends(get_join_service),
+    svc: OrganizationJoinService = Depends(get_join_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")
@@ -105,7 +105,7 @@ async def reject_join_request(
 @router.get("/members", response_model=List[UserResponse])
 async def list_members(
     current_user: User = Depends(get_current_verified_user),
-    svc: OrganisationMemberService = Depends(get_org_member_service),
+    svc: OrganizationMemberService = Depends(get_org_member_service),
 ):
     members = await svc.list_members(current_user)
     return [UserResponse.model_validate(m) for m in members]
@@ -114,7 +114,7 @@ async def list_members(
 async def remove_member(
     member_id: UUID,
     current_user: User = Depends(get_current_verified_user),
-    svc: OrganisationMemberService = Depends(get_org_member_service),
+    svc: OrganizationMemberService = Depends(get_org_member_service),
 ):
     if not current_user.is_owner:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Accès refusé")

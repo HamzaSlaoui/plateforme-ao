@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 
 function VerifyEmail() {
-  const { verifyEmail, authState, hasOrganisation } = useAuth();
+  const { verifyEmail, authState, hasOrganization } = useAuth();
   const [status, setStatus] = useState({
     loading: true,
     success: false,
@@ -34,8 +34,8 @@ function VerifyEmail() {
       navigate("/");
       return;
     }
-    if (!hasOrganisation()) {
-      navigate("/organisation-choice");
+    if (!hasOrganization()) {
+      navigate("/organization-choice");
     } else {
       navigate("/dashboard");
     }

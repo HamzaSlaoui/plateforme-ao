@@ -8,32 +8,32 @@ const SettingsPage = () => {
     authState: { user },
     api,
   } = useAuth();
-  const [organisation, setOrganisation] = useState(null);
+  const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const fetchOrganisation = async () => {
-      if (!user?.organisation_id) {
+    const fetchOrganization = async () => {
+      if (!user?.organization_id) {
         setLoading(false);
         return;
       }
 
       try {
-        const response = await api.get("/auth/me/organisation");
-        setOrganisation(response.data);
+        const response = await api.get("/auth/me/organization");
+        setOrganization(response.data);
       } catch (error) {
-        setOrganisation(null);
+        setOrganization(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrganisation();
+    fetchOrganization();
   }, [user]);
 
   const handleCopy = () => {
-    const code = organisation?.code;
+    const code = organization?.code;
     if (!code) return;
     navigator.clipboard.writeText(code);
     setCopied(true);
@@ -58,10 +58,10 @@ const SettingsPage = () => {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Chargement du code…
                 </p>
-              ) : organisation ? (
+              ) : organization ? (
                 <>
                   <code className="font-mono text-xl text-gray-900 dark:text-white">
-                    {organisation.code}
+                    {organization.code}
                   </code>
                   <button
                     onClick={handleCopy}

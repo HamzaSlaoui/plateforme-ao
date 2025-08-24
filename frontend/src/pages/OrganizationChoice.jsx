@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Building2, Users, ArrowRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
-const OrganisationChoice = () => {
+const OrganizationChoice = () => {
   const navigate = useNavigate();
-  const { authState, hasOrganisation } = useAuth();
+  const { authState, hasOrganization } = useAuth();
 
   useEffect(() => {
-    if (hasOrganisation()) {
+    if (hasOrganization()) {
       navigate("/dashboard");
     }
   }, [authState.user, navigate]);
@@ -27,7 +27,7 @@ const OrganisationChoice = () => {
 
         <div className="grid md:grid-cols-2 gap-6">
           <div
-            onClick={() => navigate("/create-organisation")}
+            onClick={() => navigate("/create-organization")}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 cursor-pointer transition-all hover:shadow-xl hover:scale-105 group"
           >
             <div className="flex justify-center mb-6">
@@ -52,7 +52,7 @@ const OrganisationChoice = () => {
           </div>
 
           <div
-            onClick={() => navigate("/join-organisation")}
+            onClick={() => navigate("/join-organization")}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 cursor-pointer transition-all hover:shadow-xl hover:scale-105 group"
           >
             <div className="flex justify-center mb-6">
@@ -81,4 +81,4 @@ const OrganisationChoice = () => {
   );
 };
 
-export default OrganisationChoice;
+export default OrganizationChoice;

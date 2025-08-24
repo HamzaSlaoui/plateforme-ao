@@ -4,21 +4,21 @@ from uuid import UUID
 from schemas.user import UserResponse
 
 
-class OrganisationInfo(BaseModel):
+class OrganizationInfo(BaseModel):
     id: UUID
     name: str
     code: str
 
-    
-class OrganisationBase(BaseModel):
+
+class OrganizationBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
 
 
-class OrganisationCreate(OrganisationBase):
+class OrganizationCreate(OrganizationBase):
     pass
 
 
-class OrganisationResponse(OrganisationBase):
+class OrganizationResponse(OrganizationBase):
     id: UUID
     name: str
     created_at: datetime
@@ -26,6 +26,6 @@ class OrganisationResponse(OrganisationBase):
     
     model_config = ConfigDict(from_attributes=True)
 
-class OrganisationCreateResponse(BaseModel):
-    organisation: OrganisationResponse
-    user: UserResponse  
+class OrganizationCreateResponse(BaseModel):
+    organization: OrganizationResponse
+    user: UserResponse

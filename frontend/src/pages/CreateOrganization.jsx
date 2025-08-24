@@ -1,26 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
+import { Building2, ArrowLeft, AlertCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
-const JoinOrganisation = () => {
+const CreateOrganization = () => {
   const navigate = useNavigate();
-  const { api } = useAuth();
+  const { api, setAuthState, authState } = useAuth();
 
   const [formData, setFormData] = useState({
-    code: "",
+    name: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.code.trim()) {
-      newErrors.code = "Le code est requis";
-    } else if (formData.code.trim().length !== 8) {
-      newErrors.code = "Le code doit contenir 8 caractères";
+    if (!formData.name.trim()) {
+      newErrors.name = "Le nom de l'organisation est requis";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Le nom doit contenir au moins 2 caractères";
+    } else if (formData.name.length > 255) {
+      newErrors.name = "Le nom ne peut pas dépasser 255 caractères";
     }
 
     return newErrors;
@@ -39,49 +40,25 @@ const JoinOrganisation = () => {
     setIsLoading(true);
 
     try {
-      await api.post("/organisations/join", {
-        code: formData.code.trim().toUpperCase(),
+      const { data } = await api.post("/organizations/create", {
+        name: formData.name.trim(),
       });
-      setSuccess(true);
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setAuthState((prev) => ({ ...prev, user: data.user }));
     } catch (error) {
-      setErrors({
-        general:
-          error.response?.data?.detail ||
-          "Une erreur s'est produite lors de l'envoi de la demande",
-      });
+      setErrors({ general: "Une erreur s'est produite lors de la création" });
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-          <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-            <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
-          </div>
-
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Demande envoyée !
-          </h2>
-
-          <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm">
-            Votre demande d'adhésion a bien été transmise au propriétaire de
-            l'organisation. Vous recevrez un e-mail dès qu'elle sera acceptée ou
-            refusée.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         <div className="mb-8">
           <button
-            onClick={() => navigate("/organisation-choice")}
+            onClick={() => navigate("/organization-choice")}
             className="flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -91,14 +68,14 @@ const JoinOrganisation = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <div className="text-center mb-8">
-            <div className="bg-green-100 dark:bg-green-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-              <Users className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <div className="bg-blue-100 dark:bg-blue-900/20 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <Building2 className="h-10 w-10 text-blue-600 dark:text-blue-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Rejoindre une organisation
+              Créer une organisation
             </h2>
             <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Entrez le code unique de l'organisation
+              Donnez un nom à votre organisation
             </p>
           </div>
 
@@ -116,29 +93,29 @@ const JoinOrganisation = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
-                htmlFor="code"
+                htmlFor="name"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Code de l'organisation
+                Nom de l'organisation
               </label>
               <input
-                id="code"
+                id="name"
                 type="text"
-                value={formData.code}
+                value={formData.name}
                 onChange={(e) =>
-                  setFormData({ ...formData, code: e.target.value })
+                  setFormData({ ...formData, name: e.target.value })
                 }
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-colors ${
-                  errors.code
+                  errors.name
                     ? "border-red-300 dark:border-red-600"
                     : "border-gray-300 dark:border-gray-600"
                 }`}
-                placeholder="Ex: A1B2C3D4"
+                placeholder="Ex: Mon Entreprise"
                 disabled={isLoading}
               />
-              {errors.code && (
+              {errors.name && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.code}
+                  {errors.name}
                 </p>
               )}
             </div>
@@ -146,7 +123,7 @@ const JoinOrganisation = () => {
             <div className="flex gap-4">
               <button
                 type="button"
-                onClick={() => navigate("/organisation-choice")}
+                onClick={() => navigate("/organization-choice")}
                 className="flex-1 py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 disabled={isLoading}
               >
@@ -165,18 +142,24 @@ const JoinOrganisation = () => {
                 {isLoading ? (
                   <span className="flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Envoi...
+                    Création...
                   </span>
                 ) : (
-                  "Rejoindre"
+                  "Créer"
                 )}
               </button>
             </div>
           </form>
+
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Un code unique sera généré pour inviter des membres
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default JoinOrganisation;
+export default CreateOrganization;

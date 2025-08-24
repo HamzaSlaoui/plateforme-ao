@@ -6,8 +6,8 @@ from uuid import uuid4
 from sqlalchemy.orm import relationship
 from db.base import Base
 
-class Organisation(Base):
-    __tablename__ = "organisations"
+class Organization(Base):
+    __tablename__ = "organizations"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     name = Column(String(50), nullable=False)
@@ -15,6 +15,6 @@ class Organisation(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relations
-    users = relationship("User", back_populates="organisation", lazy="noload")
-    tender_folders = relationship("TenderFolder", back_populates="organisation", cascade="all, delete-orphan", lazy="noload")
-    join_requests = relationship("OrganisationJoinRequest", back_populates="organisation", cascade="all, delete-orphan", passive_deletes=True)
+    users = relationship("User", back_populates="organization", lazy="noload")
+    tender_folders = relationship("TenderFolder", back_populates="organization", cascade="all, delete-orphan", lazy="noload")
+    join_requests = relationship("OrganizationJoinRequest", back_populates="organization", cascade="all, delete-orphan", passive_deletes=True)

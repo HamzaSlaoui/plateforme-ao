@@ -2,16 +2,16 @@ import secrets, string
 from sqlalchemy import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from repositories.organisation_join_request_repo import OrganisationJoinRequestRepo
-from models.organisation import Organisation
-from repositories.organisation_repo import OrganisationRepo
+from repositories.organization_join_request_repo import OrganizationJoinRequestRepo
+from models.organization import Organization
+from repositories.organization_repo import OrganizationRepo
 from repositories.user_repo import UserRepo
 
-class OrganisationService:
+class OrganizationService:
     def __init__(self, db: AsyncSession):
-        self.org_repo = OrganisationRepo(db)
+        self.org_repo = OrganizationRepo(db)
         self.user_repo = UserRepo(db)
-        self.join_repo = OrganisationJoinRequestRepo(db)
+        self.join_repo = OrganizationJoinRequestRepo(db)
         self.db = db
 
     async def _generate_unique_code(self, length=8) -> str:
@@ -21,21 +21,21 @@ class OrganisationService:
             if not await self.org_repo.exists_code(code):
                 return code
 
-    async def create(self, name: str, owner_id: UUID) -> Organisation:
+    async def create(self, name: str, owner_id: UUID) -> Organization:
         owner = await self.user_repo.by_id(owner_id)
         if not owner:
             raise ValueError("Utilisateur introuvable.")
-        if owner.organisation_id:
+        if owner.organization_id:
             raise ValueError("L'utilisateur appartient déjà à une organisation.")
 
         await self.join_repo.cancel_pending_by_user(owner_id)
         code = await self._generate_unique_code()
-        org = Organisation(name=name.strip(), code=code)
+        org = Organization(name=name.strip(), code=code)
         await self.org_repo.add(org)
 
         await self.db.flush()
 
-        owner.organisation_id = org.id
+        owner.organization_id = org.id
         owner.is_owner = True
 
         try:
@@ -47,5 +47,5 @@ class OrganisationService:
             await self.db.rollback()
             raise
 
-    async def get_organisation_by_id(self, org_id: UUID, db: AsyncSession) -> Organisation:
+    async def get_organization_by_id(self, org_id: UUID, db: AsyncSession) -> Organization:
         return await self.org_repo.by_id(org_id)

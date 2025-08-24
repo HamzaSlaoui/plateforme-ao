@@ -41,8 +41,8 @@ function LoginForm() {
       if (result.success) {
         if (!result.isVerified) {
           navigate("/verify-email-prompt");
-        } else if (!result.hasOrganisation) {
-          navigate("/organisation-choice");
+        } else if (!result.hasOrganization) {
+          navigate("/organization-choice");
         } else {
           navigate("/dashboard");
         }

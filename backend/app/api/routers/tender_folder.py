@@ -32,11 +32,11 @@ async def list_folders_optimized(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
-    if not current_user.organisation_id:
+    if not current_user.organization_id:
         raise HTTPException(403, "Vous n'appartenez à aucune organisation")
 
-    data = await svc.list_folders_with_stats(current_user.organisation_id)
-    
+    data = await svc.list_folders_with_stats(current_user.organization_id)
+            
     return FolderListResponse(
         folders=[
             TenderFolderResponse(
@@ -46,7 +46,7 @@ async def list_folders_optimized(
                 status=f.status,
                 submission_deadline=f.submission_deadline,
                 client_name=f.client_name,
-                organisation_id=f.organisation_id,
+                organization_id=f.organization_id,
                 created_by=f.created_by,
                 created_at=f.created_at,
                 document_count=getattr(f, 'document_count', 0),
@@ -62,7 +62,7 @@ async def folder_detail(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
-    folder = await svc.one_with_docs(folder_id, current_user.organisation_id)
+    folder = await svc.one_with_docs(folder_id, current_user.organization_id)
     if not folder:
         raise HTTPException(404, "Dossier non trouvé")
 
@@ -76,7 +76,7 @@ async def folder_detail(
         status=folder.status,
         submission_deadline=folder.submission_deadline,
         client_name=folder.client_name,
-        organisation_id=folder.organisation_id,
+        organization_id=folder.organization_id,
         created_by=folder.created_by,
         created_at=folder.created_at,
         document_count=len(docs),
@@ -90,7 +90,7 @@ async def update_folder_status(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
-    updated = await svc.update_status(folder_id, current_user.organisation_id, payload.status)
+    updated = await svc.update_status(folder_id, current_user.organization_id, payload.status)
     if not updated:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
 
@@ -101,7 +101,7 @@ async def delete_folder(
     current_user: User = Depends(get_current_verified_user),
     svc: TenderFolderService = Depends(get_tf_service),
 ):
-    deleted = await svc.delete(folder_id, current_user.organisation_id)
+    deleted = await svc.delete(folder_id, current_user.organization_id)
     if not deleted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
     
@@ -119,7 +119,7 @@ async def add_documents_to_folder(
     try:
         created_docs = await svc.add_documents(
             folder_id=folder_id,
-            org_id=current_user.organisation_id,
+            org_id=current_user.organization_id,
             uploader_id=current_user.id,
             files=files,
         )

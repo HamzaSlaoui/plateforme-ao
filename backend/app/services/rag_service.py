@@ -264,10 +264,12 @@ class RAGService:
         context = "\n\n".join([f"Source: {c['source']}\n{c['text']}" for c in relevant])
         messages = [
             {"role": "system", "content": (
-                "Tu es un assistant spécialisé dans l'analyse d'appels d'offres. "
-                "Réponds précisément aux questions en te basant UNIQUEMENT sur les extraits fournis. "
-                "Cite toujours tes sources. Si l'information n'est pas dans les documents, dis-le clairement."
-                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d’informations absentes ou incertaines."
+                "Tu es un assistant expert en rédaction de documents administratifs et techniques pour les appels d'offres publics.\n\n"
+                "Ta mission :\n- Répondre de manière claire, utile et professionnelle aux questions de l'utilisateur.\n"
+                "- Utiliser exclusivement les informations trouvées dans les documents SI elles sont présentes.\n"
+                "- Si une information n'est pas trouvée explicitement, tu peux proposer une réponse générique structurée, en précisant que certains éléments doivent être complétés.\n"
+                "- Toujours répondre en français et rester factuel."
+                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d'informations absentes ou incertaines."
             )},
             {"role": "user", "content": f"Question: {question}\n\nContexte des documents:\n{context}\n\nRéponds en français de manière claire et structurée."}
         ]
@@ -304,7 +306,7 @@ class RAGService:
                 "- Utiliser exclusivement les informations trouvées dans les documents SI elles sont présentes.\n"
                 "- Si une information n'est pas trouvée explicitement, tu peux proposer une réponse générique structurée, en précisant que certains éléments doivent être complétés.\n"
                 "- Toujours répondre en français et rester factuel."
-                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d’informations absentes ou incertaines."
+                "- À la fin de chaque réponse, suggérer une question pertinente et naturelle qui prolonge la discussion, en lien direct avec la réponse donnée, sans supposer d'informations absentes ou incertaines."
             )},
             {"role": "user", "content": f"Voici les documents à ta disposition :\n{full_text}\n\nQuestion posée :\n{question}\n\nRéponds maintenant de manière professionnelle, en te basant sur ces documents.\nS'ils ne suffisent pas, propose un exemple type ou un guide clair pour aider l'utilisateur à avancer."}
         ]

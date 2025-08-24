@@ -16,7 +16,7 @@ class TenderFolderRepo:
             delete(TenderFolder)
             .where(
                 TenderFolder.id == folder_id,
-                TenderFolder.organisation_id == org_id,
+                TenderFolder.organization_id == org_id,
             )
         )
         result = await self.db.execute(stmt)
@@ -39,7 +39,7 @@ class TenderFolderRepo:
                 func.coalesce(doc_count_sq.c.document_count, 0).label("document_count"),
             )
             .outerjoin(doc_count_sq, TenderFolder.id == doc_count_sq.c.folder_id)
-            .where(TenderFolder.organisation_id == org_id)
+            .where(TenderFolder.organization_id == org_id)
         )
 
         result = await self.db.execute(stmt)
@@ -63,7 +63,7 @@ class TenderFolderRepo:
             .options(selectinload(TenderFolder.documents))
             .where(
                 TenderFolder.id == folder_id,
-                TenderFolder.organisation_id == org_id,
+                TenderFolder.organization_id == org_id,
             )
         )
         return (await self.db.execute(stmt)).scalar_one_or_none()
@@ -71,7 +71,7 @@ class TenderFolderRepo:
     async def status_stats(self, org_id):
         stmt = (
             select(TenderFolder.status, func.count())
-            .where(TenderFolder.organisation_id == org_id)
+            .where(TenderFolder.organization_id == org_id)
             .group_by(TenderFolder.status)
         )
         return dict((await self.db.execute(stmt)).all())
@@ -81,7 +81,7 @@ class TenderFolderRepo:
             update(TenderFolder)
             .where(
                 TenderFolder.id == folder_id,
-                TenderFolder.organisation_id == org_id,
+                TenderFolder.organization_id == org_id,
             )
             .values(status=status)
         )

@@ -9,10 +9,10 @@ import Signup from "./pages/SignupForm";
 import Dashboard from "./pages/Dashboard";
 import VerifyEmailPrompt from "./pages/VerifyEmailPrompt";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
-import OrganisationChoice from "./pages/OrganisationChoice.jsx";
-import CreateOrganisation from "./pages/CreateOrganisation";
+import OrganizationChoice from "./pages/OrganizationChoice.jsx";
+import CreateOrganization from "./pages/CreateOrganization";
 import TenderFolderForm from "./pages/TenderFolderForm";
-import JoinOrganisation from "./pages/JoinOrganisation";
+import JoinOrganization from "./pages/JoinOrganization";
 import MembersPage from "./pages/MembersPage";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
@@ -33,7 +33,7 @@ function App() {
           <Route
             path="/verify-email-prompt"
             element={
-              <PrivateRoute requireVerified={false} requireOrganisation={false}>
+              <PrivateRoute requireVerified={false} requireOrganization={false}>
                 <VerifyEmailPrompt />
               </PrivateRoute>
             }
@@ -41,28 +41,28 @@ function App() {
 
           {/* Routes pour la gestion des organisations */}
           <Route
-            path="/organisation-choice"
+            path="/organization-choice"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={false}>
-                <OrganisationChoice />
+              <PrivateRoute requireVerified={true} requireOrganization={false}>
+                <OrganizationChoice />
               </PrivateRoute>
             }
           />
 
           <Route
-            path="/create-organisation"
+            path="/create-organization"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={false}>
-                <CreateOrganisation />
+              <PrivateRoute requireVerified={true} requireOrganization={false}>
+                <CreateOrganization />
               </PrivateRoute>
             }
           />
 
           <Route
-            path="/join-organisation"
+            path="/join-organization"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={false}>
-                <JoinOrganisation />
+              <PrivateRoute requireVerified={true} requireOrganization={false}>
+                <JoinOrganization />
               </PrivateRoute>
             }
           />
@@ -71,7 +71,7 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <Dashboard />
               </PrivateRoute>
             }
@@ -80,7 +80,7 @@ function App() {
           <Route
             path="/tender-folder-form"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <TenderFolderForm />
               </PrivateRoute>
             }
@@ -88,7 +88,7 @@ function App() {
           <Route
             path="/settings"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <SettingsPage />
               </PrivateRoute>
             }
@@ -99,7 +99,7 @@ function App() {
             element={
               <PrivateRoute
                 requireVerified={true}
-                requireOrganisation={true}
+                requireOrganization={true}
                 requireOwner={true}
               >
                 <MembersPage />
@@ -111,7 +111,7 @@ function App() {
             <Route
               path="/tender-folders/:dossierId"
               element={
-                <PrivateRoute requireVerified={true} requireOrganisation={true}>
+                <PrivateRoute requireVerified={true} requireOrganization={true}>
                   <TenderFolderDetail />
                 </PrivateRoute>
               }
@@ -121,7 +121,7 @@ function App() {
           <Route
             path="/chat/:dossierId"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <ChatbotPage />
               </PrivateRoute>
             }
@@ -130,7 +130,7 @@ function App() {
           <Route
             path="/folders"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <TenderFolders />
               </PrivateRoute>
             }
@@ -139,7 +139,7 @@ function App() {
           <Route
             path="/marches"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <Marches />
               </PrivateRoute>
             }
@@ -148,7 +148,7 @@ function App() {
           {/* <Route
             path="/tender-folders"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={true}>
+              <PrivateRoute requireVerified={true} requireOrganization={true}>
                 <TenderFolders />
               </PrivateRoute>
             }
@@ -157,7 +157,7 @@ function App() {
           <Route
             path="/profile"
             element={
-              <PrivateRoute requireVerified={true} requireOrganisation={false}>
+              <PrivateRoute requireVerified={true} requireOrganization={false}>
                 <Profile />
               </PrivateRoute>
             }

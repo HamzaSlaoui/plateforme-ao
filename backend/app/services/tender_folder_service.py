@@ -29,7 +29,7 @@ class TenderFolderService:
             description=data.description,
             submission_deadline=data.submission_deadline,
             client_name=data.client_name,
-            organisation_id=data.organisation_id,
+            organization_id=data.organization_id,
             created_by=creator_id,
         )
         await self.repo.add(folder)

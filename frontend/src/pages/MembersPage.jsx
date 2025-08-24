@@ -13,7 +13,7 @@ const MembersPage = () => {
 
   const fetchRequests = async () => {
     try {
-      const res = await api.get("/organisations/join-requests");
+      const res = await api.get("/organizations/join-requests");
       setRequests(res.data);
     } catch {
       setError("Impossible de charger les demandes.");
@@ -22,7 +22,7 @@ const MembersPage = () => {
 
   const fetchMembers = async () => {
     try {
-      const res = await api.get("/organisations/members");
+      const res = await api.get("/organizations/members");
       setMembers(res.data);
     } catch {
       setError("Impossible de récupérer la liste des membres.");
@@ -37,7 +37,7 @@ const MembersPage = () => {
   const handleAction = async (id, action) => {
     setLoadingIds((prev) => ({ ...prev, [id]: true }));
     try {
-      await api.post(`/organisations/join-requests/${id}/${action}`);
+      await api.post(`/organizations/join-requests/${id}/${action}`);
       setRequests((prev) => prev.filter((r) => r.id !== id));
       if (action === "accept") {
         fetchMembers();
@@ -52,7 +52,7 @@ const MembersPage = () => {
   const handleRemove = async (id) => {
     setLoadingIds((prev) => ({ ...prev, [id]: true }));
     try {
-      await api.delete(`/organisations/members/${id}`);
+      await api.delete(`/organizations/members/${id}`);
       setMembers((prev) => prev.filter((m) => m.id !== id));
     } catch {
       setError("Impossible de retirer le membre.");

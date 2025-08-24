@@ -19,7 +19,7 @@ class TenderFolderCreate(BaseModel):
     description: str | None
     submission_deadline: date | None
     client_name: str | None
-    organisation_id: UUID
+    organization_id: UUID
 
     @classmethod
     def as_form(cls,            
@@ -27,14 +27,14 @@ class TenderFolderCreate(BaseModel):
                 description: Optional[str] = Form(None),
                 submission_deadline: Optional[date] = Form(None),
                 client_name: Optional[str] = Form(None),
-                organisation_id: UUID = Form(...),
+                organization_id: UUID = Form(...),
     ):
         return cls(
             name=name,
             description=description,
             submission_deadline=submission_deadline,
             client_name=client_name,
-            organisation_id=organisation_id,
+            organization_id=organization_id,
         )
 
 class UpdateStatusPayload(BaseModel):
@@ -48,7 +48,7 @@ class TenderFolderResponse(BaseModel):
     status: str
     submission_deadline: Optional[date]
     client_name: Optional[str]
-    organisation_id: UUID
+    organization_id: UUID
     created_by: UUID
     created_at: datetime
     document_count: int = 0

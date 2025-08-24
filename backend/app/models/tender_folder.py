@@ -22,12 +22,12 @@ class TenderFolder(Base):
     status = Column(String(50), default=TenderStatus.EN_COURS.value)
     submission_deadline = Column(Date, nullable=True)
     client_name = Column(String(50), nullable=True)
-    organisation_id = Column(UUID(as_uuid=True), ForeignKey("organisations.id"), nullable=False)
+    organization_id = Column(UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relations
-    organisation = relationship("Organisation", back_populates="tender_folders", lazy="noload")
+    organization = relationship("Organization", back_populates="tender_folders", lazy="noload")
     creator = relationship("User", foreign_keys=[created_by], back_populates="created_folders", lazy="noload")
     documents = relationship("Document", back_populates="tender_folder", cascade="all, delete-orphan", lazy="noload")
     embeddings = relationship("Embedding", back_populates="tender_folder", lazy="noload")

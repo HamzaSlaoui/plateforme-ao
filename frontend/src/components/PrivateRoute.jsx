@@ -5,10 +5,10 @@ import { useAuth } from "../hooks/useAuth";
 const PrivateRoute = ({
   children,
   requireVerified = true,
-  requireOrganisation = false,
+  requireOrganization = false,
   requireOwner = false,
 }) => {
-  const { authState, isUserVerified, hasOrganisation, isOwner } = useAuth();
+  const { authState, isUserVerified, hasOrganization, isOwner } = useAuth();
 
   if (authState.isLoading) {
     return (
@@ -26,14 +26,14 @@ const PrivateRoute = ({
     return <Navigate to="/verify-email-prompt" replace />;
   }
 
-  if (!requireOrganisation && hasOrganisation()) {
+  if (!requireOrganization && hasOrganization()) {
     console.error(authState);
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (requireOrganisation && !hasOrganisation()) {
+  if (requireOrganization && !hasOrganization()) {
     console.error(authState);
-    return <Navigate to="/organisation-choice" replace />;
+    return <Navigate to="/organization-choice" replace />;
   }
 
   if (requireOwner && !isOwner()) {

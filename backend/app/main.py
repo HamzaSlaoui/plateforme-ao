@@ -6,7 +6,7 @@ import uvicorn
 from core.config import Config
 from db.session import create_tables #, drop_tables
 from api.routers.auth import router as auth_router
-from api.routers.organisation import router as organisations_routes
+from api.routers.organization import router as organizations_routes
 from api.routers.tender_folder import router as tender_folders_routes
 from api.routers.chat import router as chatbot_routes
 from api.routers.marche import router as marche_routes
@@ -37,7 +37,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
-app.include_router(organisations_routes)
+app.include_router(organizations_routes)
 app.include_router(tender_folders_routes)
 app.include_router(chatbot_routes)
 app.include_router(marche_routes)

@@ -10,7 +10,7 @@ export const usePendingRequests = (api, user) => {
     const fetchPendingRequests = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/organisations/join-requests/pending-count");
+        const res = await api.get("/organizations/join-requests/pending-count");
         setHasPendingRequests((res.data.count || 0) > 0);
       } catch (err) {
         console.error("Erreur lors de la récupération des demandes:", err);

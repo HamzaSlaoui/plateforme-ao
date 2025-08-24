@@ -1,9 +1,9 @@
 from .user import User
-from .organisation import Organisation
-from .organisation_join_request import OrganisationJoinRequest
+from .organization import Organization
+from .organization_join_request import OrganizationJoinRequest
 from .tender_folder import TenderFolder
 from .document import Document  
 from .embedding import Embedding
 
 
-__all__ = ["User", "Organisation", "OrganisationJoinRequest", "TenderFolder", "Document", "Embedding"]
+__all__ = ["User", "Organization", "OrganizationJoinRequest", "TenderFolder", "Document", "Embedding"]

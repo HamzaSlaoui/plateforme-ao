@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       return {
         success: true,
         isVerified: user.is_verified,
-        hasOrganisation: Boolean(user.organisation_id),
+        hasOrganization: Boolean(user.organization_id),
       };
     } catch (error) {
       return {
@@ -180,7 +180,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isUserVerified = () => Boolean(authState.user?.is_verified);
-  const hasOrganisation = () => Boolean(authState.user?.organisation_id);
+  const hasOrganization = () => Boolean(authState.user?.organization_id);
   const isOwner = () => Boolean(authState.user?.is_owner);
 
   const refreshUser = async () => {
@@ -205,7 +205,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         verifyEmail,
         isUserVerified,
-        hasOrganisation,
+        hasOrganization,
         isOwner,
         refreshUser,
         api,

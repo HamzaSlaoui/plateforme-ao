@@ -20,17 +20,17 @@ class UserRepo:
     async def add(self, user: User) -> None:
         self.db.add(user)
 
-    async def find_owner(self, organisation_id: UUID) -> Optional[User]:
+    async def find_owner(self, organization_id: UUID) -> Optional[User]:
         stmt = select(User).where(
-            User.organisation_id == organisation_id,
+            User.organization_id == organization_id,
             User.is_owner.is_(True),
         ).limit(1)
         return (await self.db.execute(stmt)).scalar_one_or_none()
-    
-    async def list_by_organisation(self, organisation_id: UUID) -> List[User]:
-        stmt = select(User).where(User.organisation_id == organisation_id)
+
+    async def list_by_organization(self, organization_id: UUID) -> List[User]:
+        stmt = select(User).where(User.organization_id == organization_id)
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def dissociate_from_organisation(self, user: User) -> None:
-        user.organisation_id = None
+    async def dissociate_from_organization(self, user: User) -> None:
+        user.organization_id = None

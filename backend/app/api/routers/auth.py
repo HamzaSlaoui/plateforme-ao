@@ -1,9 +1,9 @@
 from fastapi import APIRouter, BackgroundTasks, Cookie, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession 
 from api.deps import get_auth_service, get_org_service
-from services.organisation_service import OrganisationService
+from services.organization_service import OrganizationService
 from services.auth_service import AuthService
-from schemas.organisation import OrganisationResponse
+from schemas.organization import OrganizationResponse
 from core.security import get_current_user, get_current_verified_user
 from db.session import get_db
 from models.user import User
@@ -30,7 +30,7 @@ async def register(
                 "firstname": user.firstname,
                 "lastname": user.lastname,
                 "is_verified": user.is_verified,
-                "organisation_id": user.organisation_id
+                "organization_id": user.organization_id
             }
         }
     except ValueError as e:
@@ -109,22 +109,22 @@ async def read_current_user(
     return current_user
 
 
-@router.get("/me/organisation", response_model=OrganisationResponse)
-async def get_my_organisation(
+@router.get("/me/organization", response_model=OrganizationResponse)
+async def get_my_organization(
     current_user: User = Depends(get_current_verified_user),
-    svc: OrganisationService = Depends(get_org_service),
+    svc: OrganizationService = Depends(get_org_service),
     db: AsyncSession = Depends(get_db)
 ):
-    if not current_user.organisation_id:
+    if not current_user.organization_id:
         raise HTTPException(status_code=404, detail="Pas d'organisation")
     
     try:
-        organisation = await svc.get_organisation_by_id(current_user.organisation_id, db)
-        return OrganisationResponse(
-            id=organisation.id,
-            name=organisation.name,
-            code=organisation.code,
-            created_at=organisation.created_at,
+        organization = await svc.get_organization_by_id(current_user.organization_id, db)
+        return OrganizationResponse(
+            id=organization.id,
+            name=organization.name,
+            code=organization.code,
+            created_at=organization.created_at,
         )
     except ValueError as e:
         raise HTTPException(400, detail=str(e))

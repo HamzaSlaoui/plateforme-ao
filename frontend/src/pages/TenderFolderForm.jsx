@@ -135,7 +135,7 @@ const TenderFolderForm = () => {
     setProgressPercent(0);
     setProgressStep("");
 
-    const orgId = authState.user.organisation_id;
+    const orgId = authState.user.organization_id;
 
     try {
       updateProgress(5, "Initialisation...");
@@ -156,7 +156,7 @@ const TenderFolderForm = () => {
             : formData.submission_deadline;
         formDataToSend.append("submission_deadline", dateStr);
       }
-      formDataToSend.append("organisation_id", orgId);
+      formDataToSend.append("organization_id", orgId);
 
       documents
         .filter((doc) => doc.status === "accepted")
